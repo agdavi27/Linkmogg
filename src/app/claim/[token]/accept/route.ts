@@ -4,20 +4,8 @@ import { db, links, pages, prospects, socialLinks } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { prospectByToken } from "@/lib/outreach/prospect-page";
 import { advance, logEvent } from "@/lib/outreach/core";
-import { normalizeUsername, usernameProblem } from "@/lib/reserved";
+import { freeUsername } from "@/lib/usernames";
 import { getPageForUser } from "@/lib/pages";
-
-async function freeUsername(base: string) {
-  let u = normalizeUsername(base).replace(/[^a-z0-9._]/g, "").slice(0, 26);
-  if (usernameProblem(u)) u = `${u || "page"}_mogg`.slice(0, 30);
-  for (let i = 0; i < 20; i++) {
-    const candidate = i === 0 ? u : `${u}${i + 1}`;
-    if (usernameProblem(candidate)) continue;
-    const [taken] = await db.select({ id: pages.id }).from(pages).where(eq(pages.username, candidate)).limit(1);
-    if (!taken) return candidate;
-  }
-  return `${u}${Date.now() % 100000}`;
-}
 
 /** Turns a preview into a real page for the signed-in user. Handle ownership checks are not enforced yet. */
 export async function GET(req: NextRequest, { params }: RouteContext<"/claim/[token]/accept">) {

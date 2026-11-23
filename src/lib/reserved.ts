@@ -4,7 +4,7 @@ export const RESERVED = new Set([
   "onboarding", "pricing", "settings", "signup", "support", "themes", "unsubscribe", "about", "terms",
   "privacy", "static", "assets", "public", "www", "mail", "linkmogg", "favicon.ico", "robots.txt",
   "sitemap.xml", "_next", "go", "r", "u", "me", "new", "root", "account", "legal", "remove", "preview",
-  "opengraph-image", "twitter-image", "icon",
+  "opengraph-image", "twitter-image", "icon", "convert", "import", "preview-theme",
 ]);
 
 export const USERNAME_RE = /^[a-z0-9](?:[a-z0-9._]{1,28}[a-z0-9])?$/;

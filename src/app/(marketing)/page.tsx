@@ -22,6 +22,7 @@ export default function Home() {
             </p>
             <div className="lm-enter mt-8" style={{ animationDelay: "180ms" }}><ClaimInput host={host} /></div>
             <p className="lm-enter mt-3 text-sm text-ink-3" style={{ animationDelay: "240ms" }}>Free for {TRIAL_DAYS} days with every theme. No card needed.</p>
+            <p className="lm-enter mt-2 text-sm" style={{ animationDelay: "280ms" }}><Link href="/convert" className="font-medium text-ink underline underline-offset-2">Already on Linktree? Convert your page →</Link></p>
           </div>
           <div className="lm-enter" style={{ animationDelay: "120ms" }}><DemoPhone /></div>
         </div>
