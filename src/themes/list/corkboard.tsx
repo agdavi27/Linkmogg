@@ -20,6 +20,8 @@ export default function Corkboard({ data, mode }: ThemeProps) {
   const [offsets, setOffsets] = useState<Record<string, Offset>>({});
   const [lifted, setLifted] = useState<string | null>(null);
   const [toss, setToss] = useState(0);
+  const n = data.links.length;
+  const cols = n <= 6 ? 2 : n <= 12 ? 3 : 4;
   const drag = useRef<{ id: string; sx: number; sy: number; ox: number; oy: number; moved: boolean } | null>(null);
   const suppress = useRef(false);
 
@@ -46,17 +48,18 @@ export default function Corkboard({ data, mode }: ThemeProps) {
         })}
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-[480px] flex-1 flex-col px-4 pt-14">
-        <div className="lm-note lm-ck-in relative mx-auto flex w-[90%] -rotate-1 items-center gap-3 p-4">
+      <div className="relative mx-auto flex min-h-0 w-full max-w-[640px] flex-1 flex-col px-4 pt-[clamp(36px,7cqh,64px)]">
+        <div className="lm-note lm-ck-in relative mx-auto flex w-[min(90%,420px)] shrink-0 -rotate-1 items-center gap-3 p-[clamp(10px,2cqh,16px)]">
           <span aria-hidden className="lm-ck-tape absolute -top-3 left-1/2 h-6 w-24 -translate-x-1/2 rotate-2" />
           <Avatar data={data} size={58} className="border-2 border-white bg-[#f3e3a0]! shadow-[0_2px_4px_rgba(0,0,0,.25)]" />
           <div className="min-w-0">
             <h1 className="font-hand truncate text-3xl leading-none">{data.displayName || `@${data.username}`}</h1>
-            {data.bio ? <p className="font-hand mt-1 line-clamp-3 text-lg leading-tight text-[#4a3b28]">{data.bio}</p> : null}
+            {data.bio ? <p className="font-hand mt-1 line-clamp-2 text-lg leading-tight text-[#4a3b28]">{data.bio}</p> : null}
           </div>
         </div>
 
-        <ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-7" aria-label="Links">
+        <ul className="mt-[clamp(14px,3.5cqh,32px)] grid min-h-0 flex-1 gap-x-3 gap-y-[clamp(10px,2.5cqh,22px)]" aria-label="Links"
+          style={{ gridTemplateColumns: `repeat(${cols}, minmax(0,1fr))`, gridAutoRows: "minmax(0, 1fr)" }}>
           {data.links.map((l, i) => {
             const h = hash(l.id + l.url);
             const rot = ((h % 9) - 4) * 1.3;
@@ -65,7 +68,7 @@ export default function Corkboard({ data, mode }: ThemeProps) {
             const o = offsets[l.id] ?? { x: 0, y: 0 };
             const up = lifted === l.id;
             return (
-              <li key={l.id} className="flex justify-center" style={{ zIndex: up ? 20 : 1 }}>
+              <li key={l.id} className="flex min-h-0 justify-center" style={{ zIndex: up ? 20 : 1 }}>
                 <a href={l.url} {...linkTarget(mode, l.url)}
                   onPointerDown={(e) => {
                     if (e.pointerType !== "mouse" || e.button !== 0) return;
@@ -87,30 +90,32 @@ export default function Corkboard({ data, mode }: ThemeProps) {
                   }}
                   onClick={(e) => { if (suppress.current) { e.preventDefault(); suppress.current = false; } }}
                   onDragStart={(e) => e.preventDefault()}
-                  className={`lm-polaroid lm-ck-drop group relative block w-full max-w-[190px] bg-[#fdfbf6] p-2.5 pb-3 outline-none focus-visible:ring-2 focus-visible:ring-[#2f6fd6] ${up ? "lm-ck-lifted" : ""}`}
+                  className={`lm-polaroid lm-ck-drop group relative flex aspect-[0.8] h-full max-h-[300px] max-w-full flex-col bg-[#fdfbf6] p-[6%] pb-[4%] outline-none focus-visible:ring-2 focus-visible:ring-[#2f6fd6] ${up ? "lm-ck-lifted" : ""}`}
                   style={{ ["--rot" as string]: `${rot}deg`, translate: `${o.x}px ${o.y}px`, animationDelay: `${200 + i * 110}ms` } as CSSProperties}>
                   <span aria-hidden className="lm-pin absolute -top-2 left-1/2 z-10 size-4 -translate-x-1/2 rounded-full" style={{ background: PINS[(h >> 3) % PINS.length] }} />
-                  <span className="lm-ck-photo relative grid aspect-square place-items-center overflow-hidden text-white"
+                  <span className="lm-ck-photo relative grid min-h-0 flex-1 place-items-center overflow-hidden text-white"
                     style={{ background: `linear-gradient(135deg, ${c1}, ${c2})`, animationDelay: `${500 + i * 160}ms` }}>
                     <span aria-hidden className="lm-ck-glare" />
                     {p !== "website" && p !== "email"
-                      ? <SocialIcon platform={p} size={44} color="#fff" className="relative opacity-95 drop-shadow-[0_2px_3px_rgba(0,0,0,.25)]" />
-                      : <span className="relative font-display text-5xl font-bold opacity-95">{l.title.trim()[0]?.toUpperCase()}</span>}
+                      ? <SocialIcon platform={p} size={36} color="#fff" className="relative opacity-95 drop-shadow-[0_2px_3px_rgba(0,0,0,.25)]" />
+                      : <span className="relative font-display text-4xl font-bold opacity-95">{l.title.trim()[0]?.toUpperCase()}</span>}
                   </span>
-                  <span className="font-hand mt-2 block truncate text-center text-xl leading-tight">{l.title}</span>
-                  <span className="block truncate text-center text-[10px] text-[#8a7a62]">{hostOf(l.url)}</span>
+                  <span className="font-hand mt-1.5 block shrink-0 truncate text-center text-[clamp(15px,4.4cqw,21px)] leading-tight">{l.title}</span>
+                  {n <= 9 ? <span className="block shrink-0 truncate text-center text-[10px] text-[#8a7a62]">{hostOf(l.url)}</span> : null}
                 </a>
               </li>
             );
           })}
         </ul>
         {data.links.length === 0 ? <p className="font-hand mt-8 text-center text-2xl text-[#fdf6e6]">Nothing pinned yet.</p> : null}
+        <div className="flex shrink-0 items-center justify-center gap-3 pb-1 pt-[clamp(8px,2cqh,18px)]">
         {data.links.length > 1 ? (
-          <button type="button" onClick={shuffle} className="font-hand mx-auto mt-6 -rotate-2 rounded-[3px] bg-[#fdfbf6] px-4 py-1.5 text-xl shadow-[0_6px_12px_-6px_rgba(0,0,0,.6)] transition-transform duration-150 hover:rotate-0 active:scale-95">
+          <button type="button" onClick={shuffle} className="font-hand -rotate-2 rounded-[3px] bg-[#fdfbf6] px-4 py-1.5 text-xl shadow-[0_6px_12px_-6px_rgba(0,0,0,.6)] transition-transform duration-150 hover:rotate-0 active:scale-95">
             shuffle the board
           </button>
         ) : null}
-        <SocialRow socials={data.socials} mode={mode} className="mx-auto mb-16 mt-5 rounded-full bg-[#fdfbf6]/90 px-2 py-1 shadow-md" iconClass="text-[#2a1f14] hover:bg-black/5" />
+        <SocialRow socials={data.socials} mode={mode} className="flex-nowrap! rounded-full bg-[#fdfbf6]/90 px-1 py-0.5 shadow-md" iconClass="size-9! text-[#2a1f14] hover:bg-black/5" size={19} />
+        </div>
       </div>
     </ThemeRoot>
   );

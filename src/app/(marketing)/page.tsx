@@ -18,7 +18,7 @@ export default function Home() {
               A link in bio people actually <HeroWord />
             </h1>
             <p className="lm-enter mt-6 max-w-[46ch] text-lg leading-relaxed text-ink-2 text-pretty" style={{ animationDelay: "90ms" }}>
-              Put every link you have on one page, then make it a click wheel, a sunflower, a bookshelf or a vending machine. Visitors stay longer because there&apos;s something to touch.
+              Put every link you have on one page, then make it a click wheel, a sunflower, a bookshelf or a satellite orbit. Visitors stay longer because there&apos;s something to touch.
             </p>
             <div className="lm-enter mt-8" style={{ animationDelay: "180ms" }}><ClaimInput host={host} /></div>
             <p className="lm-enter mt-3 text-sm text-ink-3" style={{ animationDelay: "240ms" }}>Free for {TRIAL_DAYS} days with every theme. No card needed.</p>

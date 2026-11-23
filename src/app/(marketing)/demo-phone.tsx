@@ -6,7 +6,7 @@ import { ThemeRenderer } from "@/themes/render";
 import { DEMO } from "@/themes/demo";
 import { useParallax } from "@/themes/motion";
 
-const FEATURED = ["gloss", "pocket", "sunflower", "vending", "bookshelf", "radio", "mixtape", "corkboard"];
+const FEATURED = ["gloss", "pocket", "orbit", "sunflower", "bookshelf", "prism", "signal", "field"];
 const CYCLE_MS = 5200;
 
 /** Little hand-built objects from the themes, floating around the phone at different depths. */
@@ -56,7 +56,7 @@ export function DemoPhone() {
         <Floaters />
         <div className="lm-hero-phone relative w-[min(330px,82vw)] rounded-[46px] bg-ink p-[10px] shadow-[0_50px_90px_-40px_rgba(30,20,0,.75),0_0_0_1px_rgba(0,0,0,.2)]">
           <div className="relative h-[620px] overflow-hidden rounded-[36px] [transform:translateZ(0)]">
-            <div key={id} className="lm-swap absolute inset-0 overflow-y-auto overscroll-contain [scrollbar-width:none]">
+            <div key={id} className="lm-swap absolute inset-0 flex flex-col overflow-hidden">
               <ThemeRenderer themeId={id} data={DEMO} mode="preview" />
             </div>
           </div>

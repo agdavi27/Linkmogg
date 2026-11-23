@@ -121,14 +121,14 @@ export function ThemeRoot({
   badgeTone?: "dark" | "light"; label: string;
 }) {
   return (
-    <div className={`lm-theme @container relative flex min-h-full w-full flex-1 flex-col ${className}`} style={style}
+    <div className={`lm-theme relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden ${className}`} style={style}
       data-mode={mode}>
       <SrLinkList data={data} mode={mode} />
-      <div className="flex flex-1 flex-col" role="region" aria-label={`${label} layout`}>
+      <div className="relative flex min-h-0 flex-1 flex-col" role="region" aria-label={`${label} layout`}>
         {children}
       </div>
       {data.showBadge ? (
-        <div className="flex justify-center pb-5 pt-2">
+        <div className="relative z-40 flex shrink-0 justify-center pb-3 pt-1.5">
           <Badge data={data} tone={badgeTone} />
         </div>
       ) : null}

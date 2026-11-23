@@ -30,8 +30,8 @@ export default async function ClaimPreview({ params, searchParams }: PageProps<"
   const theme = getTheme(p.themeId);
   const claimed = ["claimed", "trial", "paid"].includes(p.status);
   return (
-    <div className="flex min-h-dvh flex-col">
-      <div role="banner" className="sticky top-0 z-50 border-b border-black/10 bg-paper/95 backdrop-blur">
+    <div className="flex h-dvh flex-col overflow-hidden">
+      <div role="banner" className="relative z-50 shrink-0 border-b border-black/10 bg-paper/95 backdrop-blur">
         <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
           <p className="min-w-0 flex-1 text-sm leading-snug">
             {claimed
@@ -47,7 +47,7 @@ export default async function ClaimPreview({ params, searchParams }: PageProps<"
         </div>
         {!claimed ? <p className="mx-auto max-w-3xl px-4 pb-3 text-xs text-ink-2">Theme: {theme.name}. Free for 14 days, then $10/month if you want to keep editing or switching themes. Nothing goes live until you claim it.</p> : null}
       </div>
-      <main className="flex flex-1 flex-col">
+      <main className="flex min-h-0 flex-1 flex-col">
         <ThemeRenderer themeId={theme.id} data={prospectPageData(p)} mode="preview" />
       </main>
     </div>

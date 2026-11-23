@@ -8,16 +8,15 @@ import { buzz, tick, useParallax } from "../motion";
 import type { ThemeProps } from "../types";
 
 const STEP_DEG = 24;
-const ROW = 24; // px per list row
 const ART = [["#ff6b6b", "#ffd93d"], ["#6bcBef", "#4d5bf5"], ["#7cf29a", "#1f8a70"], ["#f7a1d8", "#7b2ff7"], ["#ffb36b", "#d1495b"], ["#9be7ff", "#00a6a6"]];
 
 export default function PocketPlayer({ data, mode }: ThemeProps) {
-  const [sel, setSel] = useState(0);
+  const [sel, setSel] = useState(() => Math.max(0, Math.floor((data.links.length - 1) / 2)));
   const [view, setView] = useState<"list" | "about" | "playing">("list");
   const [pressed, setPressed] = useState<string | null>(null);
   const [touch, setTouch] = useState<number | null>(null);
   const openRef = useRef<HTMLAnchorElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
+  const swipe = useRef<number | null>(null);
   const wheelRef = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const drag = useRef<{ angle: number; acc: number } | null>(null);
@@ -26,8 +25,6 @@ export default function PocketPlayer({ data, mode }: ThemeProps) {
   const n = data.links.length;
   const idx = Math.min(sel, Math.max(0, n - 1));
   const current = data.links[idx];
-  const visibleRows = 7;
-  const offset = Math.max(0, Math.min(idx - 3, n - visibleRows));
 
   useEffect(() => {
     const onShow = () => setView("list");
@@ -92,15 +89,14 @@ export default function PocketPlayer({ data, mode }: ThemeProps) {
     else if (e.key === "Escape") setView((v) => (v === "about" ? "list" : "about"));
   };
 
-  const platform = current ? detectPlatform(current.url)?.platform ?? "website" : "website";
   const art = ART[current ? hash(current.id) % ART.length : 0];
 
   return (
     <ThemeRoot data={data} mode={mode} label="Pocket Player" className="lm-pk-bg overflow-hidden text-[#1b1b1b]">
-      <div ref={stage} className="relative flex flex-1 flex-col items-center justify-center px-4 py-8">
+      <div ref={stage} className="relative flex min-h-0 flex-1 flex-col items-center justify-center px-4 py-3">
         <div aria-hidden className="lm-pk-glow" />
         <div className="lm-pk-float">
-          <div className="lm-pocket-body relative w-[min(318px,88vw)] rounded-[36px] p-[18px] pb-7">
+          <div className="lm-pocket-body relative rounded-[36px] p-[18px] pb-7" style={{ width: "min(360px, 88cqw, calc((100cqh - 210px) / 1.63))" }}>
             <div aria-hidden className="lm-pk-sheen" />
             {/* Screen */}
             <div className="lm-pocket-screen relative overflow-hidden rounded-[9px]">
@@ -109,37 +105,47 @@ export default function PocketPlayer({ data, mode }: ThemeProps) {
                 <span className="truncate">{view === "about" ? "About" : view === "playing" ? "Now Playing" : data.displayName || `@${data.username}`}</span>
                 <span aria-hidden className="lm-pocket-battery" />
               </div>
-              <div className="lm-pk-lcd relative h-[172px] overflow-hidden">
-                {/* list + cover split */}
-                <div className={`absolute inset-0 flex transition-[transform,opacity] duration-300 ${view === "list" ? "" : "pointer-events-none -translate-x-[30%] opacity-0"}`}
+              <div className="lm-pk-lcd relative aspect-[1.32] overflow-hidden">
+                {/* cover view: one album cover per link */}
+                <div className={`absolute inset-0 flex flex-col transition-[transform,opacity] duration-300 ${view === "list" ? "" : "pointer-events-none -translate-x-[30%] opacity-0"}`}
                   style={{ transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)" }}>
-                  <div ref={listRef} role="listbox" tabIndex={0} aria-label="Links. Use arrow keys, Enter to open."
+                  <div role="listbox" tabIndex={0} aria-label="Links. Use arrow keys, Enter to open."
                     aria-activedescendant={n ? `pk-${idx}` : undefined} onKeyDown={onKey}
-                    className="relative w-[58%] overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#2a7de1]">
-                    <div className="relative transition-transform duration-200" style={{ transform: `translateY(${-offset * ROW}px)`, transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)" }}>
-                      <span aria-hidden className="lm-pk-bar absolute inset-x-0 transition-transform duration-150" style={{ height: ROW, transform: `translateY(${idx * ROW}px)`, transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)" }} />
-                      {data.links.map((l, i) => (
-                        <div key={l.id} id={`pk-${i}`} role="option" aria-selected={i === idx}
-                          onClick={() => (i === idx ? play() : setSel(i))}
-                          className={`relative flex cursor-pointer items-center justify-between px-2 text-[12.5px] font-semibold transition-colors duration-100 ${i === idx ? "text-white" : ""}`}
-                          style={{ height: ROW }}>
-                          <span className="truncate">{l.title}</span>
-                          <span aria-hidden className="pl-1 text-[11px]">›</span>
+                    onPointerDown={(e) => { swipe.current = e.clientX; }}
+                    onPointerUp={(e) => { if (swipe.current === null) return; const dx = e.clientX - swipe.current; swipe.current = null; if (Math.abs(dx) > 24) step(dx < 0 ? 1 : -1); }}
+                    className="lm-pk-flow relative min-h-0 flex-1 touch-pan-y outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#2a7de1]">
+                    {data.links.map((l, i) => {
+                      const d = i - idx;
+                      const ad = Math.abs(d);
+                      if (ad > 4) return null;
+                      const [a, b] = ART[hash(l.id) % ART.length];
+                      const plat = detectPlatform(l.url)?.platform ?? "website";
+                      const transform = d === 0
+                        ? "translate(-50%, -50%) translateZ(30px)"
+                        : `translate(-50%, -50%) translateX(${Math.sign(d) * (58 + (ad - 1) * 22)}%) translateZ(-40px) rotateY(${-Math.sign(d) * 62}deg)`;
+                      return (
+                        <div key={l.id} id={`pk-${i}`} role="option" aria-selected={d === 0} aria-label={l.title}
+                          onClick={() => (d === 0 ? play() : (setSel(i), tick(2200, 0.008, 0.05)))}
+                          className="lm-pk-cov absolute left-1/2 top-[47%] aspect-square w-[46%] cursor-pointer"
+                          style={{ transform, zIndex: 20 - ad, ["--a" as string]: a, ["--b" as string]: b, ["--g" as string]: `${(hash(l.title) % 70) + 20}%` } as CSSProperties}>
+                          <span aria-hidden className={`lm-pk-cov-art absolute inset-0 grid place-items-center overflow-hidden rounded-[3px] ${d === 0 ? "" : "brightness-[.78]"}`}>
+                            <span className="lm-pk-cov-rings" />
+                            {plat !== "website" && plat !== "email"
+                              ? <SocialIcon platform={plat} size={30} color="#fff" className="relative drop-shadow-[0_2px_4px_rgba(0,0,0,.3)]" />
+                              : <span className="relative text-[30px] font-black leading-none text-white drop-shadow-[0_2px_4px_rgba(0,0,0,.3)]">{l.title.trim()[0]?.toUpperCase()}</span>}
+                            <span className="absolute inset-x-1.5 bottom-1 truncate text-left text-[7.5px] font-black uppercase tracking-[0.08em] text-white/90">{l.title}</span>
+                          </span>
                         </div>
-                      ))}
-                      {n === 0 ? <p className="p-2 text-xs">No links yet.</p> : null}
+                      );
+                    })}
+                    {n === 0 ? <p className="p-3 text-center text-xs">No links yet.</p> : null}
+                  </div>
+                  {current ? (
+                    <div key={current.id} className="lm-pk-cap shrink-0 px-2 pb-1.5 text-center">
+                      <p className="truncate text-[12.5px] font-bold leading-tight">{current.title}</p>
+                      <p className="truncate text-[10.5px] text-black/55">{hostOf(current.url)} · {idx + 1} of {n}</p>
                     </div>
-                  </div>
-                  <div aria-hidden className="relative w-[42%] overflow-hidden border-l border-black/10">
-                    {current ? (
-                      <div key={current.id} className="lm-pk-art absolute inset-0 grid place-items-center" style={{ ["--a" as string]: art[0], ["--b" as string]: art[1] } as CSSProperties}>
-                        <span className="lm-pk-artwave" />
-                        {platform !== "website" && platform !== "email"
-                          ? <SocialIcon platform={platform} size={40} color="#fff" className="relative drop-shadow-[0_2px_4px_rgba(0,0,0,.3)]" />
-                          : <span className="relative text-4xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,.3)]">{current.title.trim()[0]?.toUpperCase()}</span>}
-                      </div>
-                    ) : null}
-                  </div>
+                  ) : null}
                 </div>
 
                 {/* about */}
@@ -180,7 +186,7 @@ export default function PocketPlayer({ data, mode }: ThemeProps) {
             {/* Click wheel */}
             <div ref={wheelRef} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
               onWheel={(e) => step(e.deltaY > 0 ? 1 : -1)}
-              className="lm-pocket-wheel relative mx-auto mt-6 aspect-square w-[80%] touch-none select-none rounded-full">
+              className="lm-pocket-wheel relative mx-auto mt-[9%] aspect-square w-[76%] touch-none select-none rounded-full">
               {touch !== null ? <span aria-hidden className="lm-pk-touch" style={{ transform: `rotate(${touch + 90}deg)` }} /> : null}
               <button type="button" onClick={() => { flash("menu"); tick(1600, 0.01); setView((v) => (v === "about" ? "list" : "about")); }} aria-label="Menu: about"
                 className={`absolute left-1/2 top-[6%] -translate-x-1/2 px-2 py-1 text-[11px] font-bold tracking-[0.14em] text-[#a4a9ae] transition-transform duration-100 ${pressed === "menu" ? "scale-90" : ""}`}>MENU</button>
@@ -202,8 +208,8 @@ export default function PocketPlayer({ data, mode }: ThemeProps) {
           </div>
           <div aria-hidden className="lm-pk-shadow" />
         </div>
-        <p className="mt-5 text-center text-xs text-black/50">Spin the wheel. Press the center to open.</p>
-        <SocialRow socials={data.socials} mode={mode} className="mt-2" iconClass="text-[#2b2b2b] hover:bg-black/5" />
+        <p className="mt-3 text-center text-xs text-black/50">Spin the wheel or swipe the covers. Press the center to open.</p>
+        <SocialRow socials={data.socials} mode={mode} className="mt-1" iconClass="text-[#2b2b2b] hover:bg-black/5" />
       </div>
     </ThemeRoot>
   );

@@ -33,7 +33,7 @@ export default async function PublicPage({ params }: PageProps<"/[username]">) {
   const p = await load(username);
   if (!p) notFound();
   return (
-    <main className="flex min-h-dvh flex-col">
+    <main className="flex h-dvh flex-col overflow-hidden">
       <ThemeRenderer themeId={p.themeId} data={p.data} mode="live" />
     </main>
   );

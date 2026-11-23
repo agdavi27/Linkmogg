@@ -152,3 +152,49 @@ export function Particles({ className = "", ...o }: ParticleOpts & { className?:
   }, []);
   return <canvas ref={ref} aria-hidden className={`pointer-events-none absolute inset-0 h-full w-full ${className}`} />;
 }
+
+export type DrawFn = (g: CanvasRenderingContext2D, w: number, h: number, t: number, dt: number) => void;
+
+/**
+ * A full-size canvas that calls draw() every frame while it's on screen. Under reduced motion it
+ * draws one still frame (and redraws on resize) instead of animating.
+ */
+export function LiveCanvas({ draw, className = "" }: { draw: RefObject<DrawFn>; className?: string }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const c = ref.current;
+    const g = c?.getContext("2d");
+    if (!c || !g) return;
+    const still = reduced();
+    let w = 0, h = 0, raf = 0, visible = true;
+    const start = performance.now();
+    let last = start;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const paint = (now: number) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      g.clearRect(0, 0, w, h);
+      draw.current(g, w, h, (now - start) / 1000, dt);
+    };
+    const frame = (now: number) => { paint(now); if (visible) raf = requestAnimationFrame(frame); };
+    const resize = () => {
+      w = c.clientWidth; h = c.clientHeight;
+      c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (still) paint(performance.now());
+    };
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(c);
+    if (still) return () => ro.disconnect();
+    raf = requestAnimationFrame(frame);
+    const io = new IntersectionObserver(([e]) => {
+      const v = e.isIntersecting && !document.hidden;
+      if (v && !visible) { visible = true; last = performance.now(); raf = requestAnimationFrame(frame); }
+      visible = v;
+    });
+    io.observe(c);
+    return () => { cancelAnimationFrame(raf); io.disconnect(); ro.disconnect(); };
+  }, [draw]);
+  return <canvas ref={ref} aria-hidden className={`pointer-events-none absolute inset-0 h-full w-full ${className}`} />;
+}

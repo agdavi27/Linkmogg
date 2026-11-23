@@ -35,7 +35,7 @@ export function Gallery({ initial }: { initial: string }) {
       </div>
       <div className="flex flex-col items-center">
         <div className="w-full max-w-[400px] overflow-hidden rounded-[44px] border-[10px] border-ink bg-ink shadow-[0_40px_80px_-40px_rgba(30,20,0,.7)]">
-          <div key={id} className="relative h-[min(760px,calc(100dvh-140px))] min-h-[560px] overflow-y-auto overscroll-contain rounded-[34px] [transform:translateZ(0)]">
+          <div key={id} className="relative h-[min(760px,calc(100dvh-140px))] min-h-[560px] overflow-hidden rounded-[34px] [transform:translateZ(0)]">
             <ThemeRenderer themeId={id} data={data} mode="preview" />
           </div>
         </div>

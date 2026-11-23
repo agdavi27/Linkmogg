@@ -230,7 +230,7 @@ export function Editor(props: Props) {
         <aside className={`${tab === "edit" ? "hidden lg:block" : ""}`} aria-label="Live preview">
           <div className="lg:sticky lg:top-20">
             <div className="mx-auto w-full max-w-[380px] overflow-hidden rounded-[40px] border-[10px] border-ink bg-ink shadow-[0_30px_60px_-30px_rgba(0,0,0,.6)]">
-              <div className="relative h-[min(720px,calc(100dvh-180px))] overflow-y-auto overscroll-contain rounded-[30px] bg-white [transform:translateZ(0)]">
+              <div className="relative h-[min(720px,calc(100dvh-180px))] overflow-hidden rounded-[30px] bg-white [transform:translateZ(0)]">
                 <ThemeRenderer themeId={previewTheme} data={data} mode="preview" />
               </div>
             </div>

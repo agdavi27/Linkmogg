@@ -17,9 +17,11 @@ export default function Sunflower({ data, mode }: ThemeProps) {
   const [active, setActive] = useState<number | null>(null);
   const openRef = useRef<HTMLAnchorElement>(null);
   const n = data.links.length;
-  const total = Math.max(n, 12); // keep the flower full with decorative petals
-  const petalLen = n > 16 ? 33 : 37; // % of flower size
-  const petalW = n > 16 ? 10 : 13;
+  const total = Math.max(n, 5); // one petal per link, topped up so tiny pages still look like a flower
+  const backTotal = Math.max(total, 12);
+  const petalLen = n > 14 ? 35 : 38; // % of flower size
+  const petalW = Math.min(21, 190 / total); // fewer links, wider petals
+  const backW = Math.min(16, 170 / backTotal);
   const current = active !== null ? data.links[active] : null;
 
   const pick = (i: number) => {
@@ -39,16 +41,16 @@ export default function Sunflower({ data, mode }: ThemeProps) {
       </div>
       <Particles count={26} color={["#fff3b0", "#ffd75e", "#ffffff"]} size={[0.8, 2.2]} speed={[6, 18]} angle={-Math.PI / 2.4} wobble={1.2} twinkle glow />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[460px] flex-1 flex-col items-center px-4 pt-8">
+      <div className="relative z-10 mx-auto flex min-h-0 w-full max-w-[520px] flex-1 flex-col items-center px-4 pt-[clamp(10px,3cqh,32px)]">
         <h1 className="lm-sf-in text-center font-display text-[26px] font-semibold tracking-[-0.02em]">{data.displayName || `@${data.username}`}</h1>
         {data.bio ? <p className="lm-sf-in mt-1 max-w-[34ch] text-center text-sm text-[#4f4a26] text-pretty" style={{ animationDelay: "80ms" }}>{data.bio}</p> : null}
 
-        <div className="lm-sf-sway relative mt-5 w-[min(350px,100%)]">
+        <div className="lm-sf-sway relative mt-[clamp(4px,2cqh,20px)]" style={{ width: "min(440px, 100%, calc(100cqh - 290px))" }}>
           <div className="relative aspect-square w-full" onMouseLeave={() => setActive(null)}>
             {/* back ring: decorative */}
-            {Array.from({ length: total }).map((_, i) => (
+            {Array.from({ length: backTotal }).map((_, i) => (
               <span key={`b${i}`} aria-hidden className="absolute left-1/2 top-1/2 origin-bottom"
-                style={{ transform: `rotate(${(360 / total) * (i + 0.5)}deg) translateY(-24%)`, height: `${petalLen * 0.92}%`, width: `${petalW}%`, marginLeft: `-${petalW / 2}%`, marginTop: `-${petalLen * 0.92}%` }}>
+                style={{ transform: `rotate(${(360 / backTotal) * (i + 0.5)}deg) translateY(-24%)`, height: `${petalLen * 0.9}%`, width: `${backW}%`, marginLeft: `-${backW / 2}%`, marginTop: `-${petalLen * 0.9}%` }}>
                 <span className="lm-petal lm-petal-back lm-sf-unfurl block h-full w-full" style={{ animationDelay: `${120 + i * 25}ms` }} />
               </span>
             ))}
@@ -61,9 +63,16 @@ export default function Sunflower({ data, mode }: ThemeProps) {
                 transform: `rotate(${angle}deg) translateY(-26%) scale(${on ? 1.2 : active !== null ? 0.94 : 1})`,
                 height: `${petalLen}%`, width: `${petalW}%`, marginLeft: `-${petalW / 2}%`, marginTop: `-${petalLen}%`,
               };
+              // Names read outward from the middle; on the left half they're flipped so nothing is upside down.
+              const flip = angle > 180;
               const inner = (
-                <span className={`lm-petal lm-sf-unfurl block h-full w-full ${on ? "lm-petal-on" : ""}`} style={{ animationDelay: `${300 + i * 45}ms` }}>
-                  <span className="lm-petal-flutter block h-full w-full" style={{ animationDelay: `${-i * 0.43}s` }} />
+                <span className={`lm-petal lm-sf-unfurl relative block h-full w-full ${on ? "lm-petal-on" : ""}`} style={{ animationDelay: `${300 + i * 45}ms` }}>
+                  <span className="lm-petal-flutter absolute inset-0" style={{ animationDelay: `${-i * 0.43}s` }} />
+                  {link ? (
+                    <span aria-hidden className={`lm-petal-label ${flip ? "is-flip" : ""}`}>
+                      <span className="truncate">{link.title}</span>
+                    </span>
+                  ) : null}
                 </span>
               );
               const cls = "lm-petal-slot absolute left-1/2 top-1/2 origin-bottom";
@@ -87,7 +96,7 @@ export default function Sunflower({ data, mode }: ThemeProps) {
               </div>
             </div>
           </div>
-          <div aria-hidden className="relative mx-auto -mt-[6%] h-24 w-3">
+          <div aria-hidden className="relative mx-auto -mt-[6%] h-[clamp(24px,7cqh,80px)] w-3">
             <span className="lm-stem absolute inset-0 rounded-full" />
             <span className="lm-sf-leaf absolute left-full top-[38%]" />
             <span className="lm-sf-leaf lm-sf-leaf-l absolute right-full top-[58%]" />
@@ -100,7 +109,7 @@ export default function Sunflower({ data, mode }: ThemeProps) {
           </svg>
         </div>
 
-        <div className="relative z-10 mt-1 min-h-[86px] w-full max-w-[340px]" aria-live="polite">
+        <div className="relative z-10 mt-1 h-[74px] w-full max-w-[360px] shrink-0" aria-live="polite">
           {current ? (
             <div key={current.id} className="lm-pop flex items-center gap-3 rounded-2xl bg-white/85 p-3 shadow-[0_14px_30px_-18px_rgba(60,50,0,.7)] backdrop-blur">
               <div className="min-w-0 flex-1">
@@ -113,10 +122,10 @@ export default function Sunflower({ data, mode }: ThemeProps) {
               </a>
             </div>
           ) : (
-            <p className="pt-4 text-center text-sm font-medium text-[#4f4a26]">{n ? "Tap a petal to bloom it" : "No links yet."}</p>
+            <p className="pt-4 text-center text-sm font-medium text-[#4f4a26]">{n ? "Tap a petal to open it" : "No links yet."}</p>
           )}
         </div>
-        <SocialRow socials={data.socials} mode={mode} className="relative z-10 mb-16 mt-1" iconClass="text-[#2f2a12] hover:bg-white/50" />
+        <SocialRow socials={data.socials} mode={mode} className="relative z-10 mt-auto shrink-0 pb-1" iconClass="text-[#2f2a12] hover:bg-white/50" />
       </div>
 
       <div aria-hidden className="lm-sf-meadow pointer-events-none absolute inset-x-0 bottom-0 h-28">
