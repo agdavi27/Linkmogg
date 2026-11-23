@@ -12,10 +12,7 @@ const COMPONENTS: Record<string, ComponentType<ThemeProps>> = {
   sunflower: dynamic(() => import("./list/sunflower")),
   bookshelf: dynamic(() => import("./list/bookshelf")),
   gloss: dynamic(() => import("./list/gloss")),
-  orbit: dynamic(() => import("./list/orbit")),
-  signal: dynamic(() => import("./list/signal")),
   corkboard: dynamic(() => import("./list/corkboard")),
-  prism: dynamic(() => import("./list/prism")),
   desktop: dynamic(() => import("./list/desktop")),
   wheel: dynamic(() => import("./list/wheel")),
   halo: dynamic(() => import("./list/halo")),
@@ -24,7 +21,6 @@ const COMPONENTS: Record<string, ComponentType<ThemeProps>> = {
   museum: dynamic(() => import("./list/museum")),
   folders: dynamic(() => import("./list/folders")),
   spindle: dynamic(() => import("./list/spindle")),
-  field: dynamic(() => import("./list/field")),
 };
 
 export function ThemeRenderer({ themeId, ...props }: ThemeProps & { themeId: string }) {

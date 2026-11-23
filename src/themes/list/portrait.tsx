@@ -44,8 +44,8 @@ export default function Portrait({ data, mode }: ThemeProps) {
 
         <header className="lm-pt-in relative z-10 flex shrink-0 items-start justify-between gap-3 px-5 pt-[clamp(14px,3.5cqh,32px)]">
           <div className="min-w-0">
-            <h1 className="text-[clamp(18px,5cqw,26px)] font-semibold uppercase tracking-[0.06em] text-white [text-shadow:0_1px_12px_rgba(0,0,0,.35)]">{name}</h1>
-            {data.bio ? <p className="mt-1 line-clamp-2 max-w-[40ch] text-[12.5px] leading-snug text-white/85 [text-shadow:0_1px_8px_rgba(0,0,0,.4)]">{data.bio}</p> : null}
+            <h1 className="text-[clamp(18px,5cqw,26px)] font-semibold uppercase tracking-[0.06em] text-[#111]">{name}</h1>
+            {data.bio ? <p className="mt-1 line-clamp-2 max-w-[40ch] text-[12.5px] leading-snug text-[#111]/65">{data.bio}</p> : null}
           </div>
         </header>
 
@@ -64,7 +64,7 @@ export default function Portrait({ data, mode }: ThemeProps) {
               </li>
             );
           })}
-          {n === 0 ? <Empty className="absolute inset-x-0 top-1/2 text-white" /> : null}
+          {n === 0 ? <Empty className="absolute inset-x-0 top-1/2 text-[#111]" /> : null}
         </ul>
 
         {data.socials.length ? (
@@ -73,7 +73,7 @@ export default function Portrait({ data, mode }: ThemeProps) {
               {data.socials.map((s, i) => (
                 <li key={i}>
                   <a href={s.url} {...linkTarget(mode, s.url)} aria-label={platformLabel(s.platform)}
-                    className="lm-pt-dockicon grid size-11 place-items-center rounded-[12px] bg-white text-[#111] outline-none focus-visible:ring-2 focus-visible:ring-white">
+                    className="lm-pt-dockicon grid size-11 place-items-center rounded-[12px] bg-white text-[#111] outline-none focus-visible:ring-2 focus-visible:ring-[#111]">
                     <SocialIcon platform={s.platform} size={22} />
                   </a>
                 </li>

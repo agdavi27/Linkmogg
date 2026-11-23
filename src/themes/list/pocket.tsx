@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import Image from "next/image";
 import { detectPlatform } from "@/lib/socials/detect";
 import { SocialIcon } from "@/lib/socials/icons";
 import { Avatar, SocialRow, ThemeRoot, hash, hostOf, linkTarget } from "../shared";
 import { buzz, tick, useParallax } from "../motion";
+import { photoOf } from "../art";
+import { photoUrl } from "../photos";
 import type { ThemeProps } from "../types";
 
 const STEP_DEG = 24;
@@ -129,6 +132,7 @@ export default function PocketPlayer({ data, mode }: ThemeProps) {
                           className="lm-pk-cov absolute left-1/2 top-[47%] aspect-square w-[46%] cursor-pointer"
                           style={{ transform, zIndex: 20 - ad, ["--a" as string]: a, ["--b" as string]: b, ["--g" as string]: `${(hash(l.title) % 70) + 20}%` } as CSSProperties}>
                           <span aria-hidden className={`lm-pk-cov-art absolute inset-0 grid place-items-center overflow-hidden rounded-[3px] ${d === 0 ? "" : "brightness-[.78]"}`}>
+                            <Image src={photoUrl(photoOf(l))} alt="" fill sizes="160px" draggable={false} className="scale-110 object-cover opacity-90 mix-blend-luminosity blur-[2.5px]" />
                             <span className="lm-pk-cov-rings" />
                             {plat !== "website" && plat !== "email"
                               ? <SocialIcon platform={plat} size={30} color="#fff" className="relative drop-shadow-[0_2px_4px_rgba(0,0,0,.3)]" />

@@ -6,7 +6,7 @@ import { ThemeRenderer } from "@/themes/render";
 import { DEMO } from "@/themes/demo";
 import { useParallax } from "@/themes/motion";
 
-const FEATURED = ["gloss", "wheel", "pocket", "halo", "portrait", "sunflower", "folders", "museum", "bookshelf", "orbit"];
+const FEATURED = ["gloss", "wheel", "pocket", "halo", "portrait", "sunflower", "folders", "museum", "bookshelf", "spindle"];
 const CYCLE_MS = 5200;
 
 /** Little hand-built objects from the themes, floating around the phone at different depths. */

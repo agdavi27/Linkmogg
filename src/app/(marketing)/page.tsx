@@ -18,7 +18,7 @@ export default function Home() {
               A link in bio people actually <HeroWord />
             </h1>
             <p className="lm-enter mt-6 max-w-[46ch] text-lg leading-relaxed text-ink-2 text-pretty" style={{ animationDelay: "90ms" }}>
-              Put every link you have on one page, then make it a click wheel, a sunflower, a bookshelf or a satellite orbit. Visitors stay longer because there&apos;s something to touch.
+              Put every link you have on one page, then make it a click wheel, a sunflower, a bookshelf or a stack of spinning discs. Visitors stay longer because there&apos;s something to touch.
             </p>
             <div className="lm-enter mt-8" style={{ animationDelay: "180ms" }}><ClaimInput host={host} /></div>
             <p className="lm-enter mt-3 text-sm text-ink-3" style={{ animationDelay: "240ms" }}>Free for {TRIAL_DAYS} days with every theme. No card needed.</p>
@@ -30,7 +30,7 @@ export default function Home() {
       <section className="border-y border-line bg-paper-2/60 py-20">
         <div className="lm-reveal mx-auto max-w-6xl px-5">
           <div className="flex flex-wrap items-end justify-between gap-4">
-            <h2 className="max-w-[18ch] font-display text-4xl font-semibold leading-tight tracking-[-0.03em] text-balance">Eighteen themes, all with the same links inside</h2>
+            <h2 className="max-w-[18ch] font-display text-4xl font-semibold leading-tight tracking-[-0.03em] text-balance">Fourteen themes, all with the same links inside</h2>
             <Link href="/themes" className="btn btn-ghost">Try them all live</Link>
           </div>
           <p className="mt-4 max-w-[60ch] text-ink-2">Switch themes whenever you like. Your links, icons and bio stay put, and every theme works with touch, a keyboard and a screen reader.</p>

@@ -1,54 +1,30 @@
 "use client";
 
 import { useRef, useState, type CSSProperties } from "react";
+import Image from "next/image";
 import { detectPlatform } from "@/lib/socials/detect";
 import { SocialIcon } from "@/lib/socials/icons";
 import { Avatar, SocialRow, ThemeRoot, hash, hostOf, linkTarget } from "../shared";
 import { buzz, tick } from "../motion";
+import { photoOf } from "../art";
+import { photoUrl } from "../photos";
 import type { ThemeProps } from "../types";
 
-const PHOTO = [
-  ["#f6a57a", "#e2573b"], ["#8fd3c1", "#2f7f6f"], ["#f9dc7a", "#e09b2d"],
-  ["#a9c4f5", "#3e64b8"], ["#f3b4c8", "#c2457a"], ["#c9e59a", "#5e8c2a"],
-];
 const PINS = ["#e2453b", "#2f6fd6", "#f2b632", "#2fa36b", "#f2f2f2"];
-const BULBS = ["#ffd36e", "#ff8a8a", "#8fe3ff", "#b8ff9a", "#ffd36e", "#ffb0ec"];
 
 type Offset = { x: number; y: number };
 
 export default function Corkboard({ data, mode }: ThemeProps) {
   const [offsets, setOffsets] = useState<Record<string, Offset>>({});
   const [lifted, setLifted] = useState<string | null>(null);
-  const [toss, setToss] = useState(0);
   const n = data.links.length;
   const cols = n <= 6 ? 2 : n <= 12 ? 3 : 4;
   const drag = useRef<{ id: string; sx: number; sy: number; ox: number; oy: number; moved: boolean } | null>(null);
   const suppress = useRef(false);
 
-  const shuffle = () => {
-    const next: Record<string, Offset> = {};
-    data.links.forEach((l, i) => {
-      const h = hash(l.id + toss + i);
-      next[l.id] = { x: ((h % 41) - 20), y: (((h >> 6) % 31) - 15) };
-    });
-    setOffsets(next);
-    setToss((t) => t + 1);
-    tick(500, 0.05, 0.04);
-    buzz(10);
-  };
-
   return (
     <ThemeRoot data={data} mode={mode} label="Corkboard" badgeTone="light" className="lm-cork relative overflow-hidden text-[#2a1f14]">
-      <div aria-hidden className="lm-ck-lights">
-        <svg className="absolute inset-x-0 top-0 h-16 w-full" viewBox="0 0 400 60" preserveAspectRatio="none"><path d="M0 8 Q 100 52 200 14 T 400 10" fill="none" stroke="#2a2018" strokeWidth="1.5" /></svg>
-        {BULBS.concat(BULBS).map((c, i) => {
-          const x = (i + 0.5) / 12;
-          const y = 8 + Math.sin(x * Math.PI * 2.2) * -10 + (x < 0.5 ? x * 36 : (1 - x) * 26);
-          return <span key={i} className="lm-ck-bulb" style={{ left: `${x * 100}%`, top: y, ["--c" as string]: c, animationDelay: `${-i * 0.37}s` } as CSSProperties} />;
-        })}
-      </div>
-
-      <div className="relative mx-auto flex min-h-0 w-full max-w-[640px] flex-1 flex-col px-4 pt-[clamp(36px,7cqh,64px)]">
+      <div className="relative mx-auto flex min-h-0 w-full max-w-[640px] flex-1 flex-col px-4 pt-[clamp(22px,5cqh,48px)]">
         <div className="lm-note lm-ck-in relative mx-auto flex w-[min(90%,420px)] shrink-0 -rotate-1 items-center gap-3 p-[clamp(10px,2cqh,16px)]">
           <span aria-hidden className="lm-ck-tape absolute -top-3 left-1/2 h-6 w-24 -translate-x-1/2 rotate-2" />
           <Avatar data={data} size={58} className="border-2 border-white bg-[#f3e3a0]! shadow-[0_2px_4px_rgba(0,0,0,.25)]" />
@@ -64,7 +40,6 @@ export default function Corkboard({ data, mode }: ThemeProps) {
             const h = hash(l.id + l.url);
             const rot = ((h % 9) - 4) * 1.3;
             const p = detectPlatform(l.url)?.platform ?? "website";
-            const [c1, c2] = PHOTO[h % PHOTO.length];
             const o = offsets[l.id] ?? { x: 0, y: 0 };
             const up = lifted === l.id;
             return (
@@ -93,12 +68,14 @@ export default function Corkboard({ data, mode }: ThemeProps) {
                   className={`lm-polaroid lm-ck-drop group relative flex aspect-[0.8] h-full max-h-[300px] max-w-full flex-col bg-[#fdfbf6] p-[6%] pb-[4%] outline-none focus-visible:ring-2 focus-visible:ring-[#2f6fd6] ${up ? "lm-ck-lifted" : ""}`}
                   style={{ ["--rot" as string]: `${rot}deg`, translate: `${o.x}px ${o.y}px`, animationDelay: `${200 + i * 110}ms` } as CSSProperties}>
                   <span aria-hidden className="lm-pin absolute -top-2 left-1/2 z-10 size-4 -translate-x-1/2 rounded-full" style={{ background: PINS[(h >> 3) % PINS.length] }} />
-                  <span className="lm-ck-photo relative grid min-h-0 flex-1 place-items-center overflow-hidden text-white"
-                    style={{ background: `linear-gradient(135deg, ${c1}, ${c2})`, animationDelay: `${500 + i * 160}ms` }}>
+                  <span className="lm-ck-photo relative block min-h-0 flex-1 overflow-hidden bg-[#2a2520]" style={{ animationDelay: `${500 + i * 160}ms` }}>
+                    <Image src={photoUrl(photoOf(l))} alt="" fill sizes="(max-width: 640px) 45vw, 220px" draggable={false} className="object-cover" />
                     <span aria-hidden className="lm-ck-glare" />
-                    {p !== "website" && p !== "email"
-                      ? <SocialIcon platform={p} size={36} color="#fff" className="relative opacity-95 drop-shadow-[0_2px_3px_rgba(0,0,0,.25)]" />
-                      : <span className="relative font-display text-4xl font-bold opacity-95">{l.title.trim()[0]?.toUpperCase()}</span>}
+                    <span aria-hidden className="absolute bottom-1.5 right-1.5 grid size-7 place-items-center rounded-full bg-black/45 text-white backdrop-blur-sm">
+                      {p !== "website" && p !== "email"
+                        ? <SocialIcon platform={p} size={14} color="#fff" />
+                        : <span className="text-[12px] font-bold leading-none">{l.title.trim()[0]?.toUpperCase()}</span>}
+                    </span>
                   </span>
                   <span className="font-hand mt-1.5 block shrink-0 truncate text-center text-[clamp(15px,4.4cqw,21px)] leading-tight">{l.title}</span>
                   {n <= 9 ? <span className="block shrink-0 truncate text-center text-[10px] text-[#8a7a62]">{hostOf(l.url)}</span> : null}
@@ -109,11 +86,6 @@ export default function Corkboard({ data, mode }: ThemeProps) {
         </ul>
         {data.links.length === 0 ? <p className="font-hand mt-8 text-center text-2xl text-[#fdf6e6]">Nothing pinned yet.</p> : null}
         <div className="flex shrink-0 items-center justify-center gap-3 pb-1 pt-[clamp(8px,2cqh,18px)]">
-        {data.links.length > 1 ? (
-          <button type="button" onClick={shuffle} className="font-hand -rotate-2 rounded-[3px] bg-[#fdfbf6] px-4 py-1.5 text-xl shadow-[0_6px_12px_-6px_rgba(0,0,0,.6)] transition-transform duration-150 hover:rotate-0 active:scale-95">
-            shuffle the board
-          </button>
-        ) : null}
         <SocialRow socials={data.socials} mode={mode} className="flex-nowrap! rounded-full bg-[#fdfbf6]/90 px-1 py-0.5 shadow-md" iconClass="size-9! text-[#2a1f14] hover:bg-black/5" size={19} />
         </div>
       </div>

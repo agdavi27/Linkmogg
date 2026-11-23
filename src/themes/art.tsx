@@ -1,9 +1,11 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import Image from "next/image";
 import { detectPlatform } from "@/lib/socials/detect";
 import { SocialIcon } from "@/lib/socials/icons";
 import { hash } from "./shared";
+import { PHOTO_IDS, photoUrl } from "./photos";
 import type { ThemeLink } from "./types";
 
 /** Hand-picked palettes for generated cover art: background, mid, accent. */
@@ -32,16 +34,23 @@ export function paletteOf(link: ThemeLink) {
   return PALETTES[mix(`${link.title}|${link.url}`) % PALETTES.length];
 }
 
+export function photoOf(link: ThemeLink, salt = "") {
+  return PHOTO_IDS[mix(`${salt}${link.url}|${link.title}`) % PHOTO_IDS.length];
+}
+
 export function platformOf(link: ThemeLink) {
   const p = detectPlatform(link.url)?.platform ?? "website";
   return p === "website" || p === "email" ? null : p;
 }
 
 /**
- * Generated artwork for a link: a palette, one of a few abstract compositions, and the platform
- * icon (or the title's first letter). Deterministic, so server and client render the same thing.
+ * Cover art for a link: a softly blurred photo with the platform icon (or the title's first letter)
+ * on top. The palette gradient underneath shows while the photo loads, or if it never does.
+ * Deterministic, so server and client render the same thing.
  */
-export function LinkArt({ link, className = "", icon = 34, mark = true, style }: { link: ThemeLink; className?: string; icon?: number; mark?: boolean; style?: CSSProperties }) {
+export function LinkArt({ link, className = "", icon = 34, mark = true, photo = true, blur, style }: {
+  link: ThemeLink; className?: string; icon?: number; mark?: boolean; photo?: boolean; blur?: number; style?: CSSProperties;
+}) {
   const h = mix(link.title + link.id);
   const [bg, mid, acc] = paletteOf(link);
   const kind = h % 4;
@@ -55,11 +64,20 @@ export function LinkArt({ link, className = "", icon = 34, mark = true, style }:
     kind === 3 ? `conic-gradient(from ${(h >> 4) % 360}deg at ${x}% ${y}%, ${bg}, ${mid}, ${acc}88, ${bg})` : "",
     `linear-gradient(160deg, ${bg}, ${mid})`,
   ].filter(Boolean).join(", ");
+  const b = blur ?? Math.max(2, Math.min(9, icon * 0.16));
+  const ink = photo ? "#fff" : acc;
   return (
     <span aria-hidden className={`${/\b(absolute|fixed)\b/.test(className) ? "" : "relative "}grid place-items-center overflow-hidden ${className}`} style={{ background: layers, ...style }}>
+      {photo ? (
+        <>
+          <Image src={photoUrl(photoOf(link))} alt="" fill sizes="256px" draggable={false}
+            className="lm-art-photo object-cover" style={{ filter: `blur(${b.toFixed(1)}px) saturate(1.15)`, transform: "scale(1.15)" }} />
+          <span className="absolute inset-0" style={{ background: `linear-gradient(160deg, ${bg}55, ${mid}22 55%, rgba(0,0,0,.28))` }} />
+        </>
+      ) : null}
       {mark ? (p
-        ? <SocialIcon platform={p} size={icon} color={acc} className="relative drop-shadow-[0_2px_6px_rgba(0,0,0,.25)]" />
-        : <span className="relative font-display font-bold leading-none drop-shadow-[0_2px_6px_rgba(0,0,0,.2)]" style={{ color: acc, fontSize: icon * 1.1 }}>{link.title.trim()[0]?.toUpperCase()}</span>) : null}
+        ? <SocialIcon platform={p} size={icon} color={ink} className="relative drop-shadow-[0_2px_8px_rgba(0,0,0,.35)]" />
+        : <span className="relative font-display font-bold leading-none drop-shadow-[0_2px_8px_rgba(0,0,0,.3)]" style={{ color: ink, fontSize: icon * 1.1 }}>{link.title.trim()[0]?.toUpperCase()}</span>) : null}
     </span>
   );
 }
