@@ -6,7 +6,7 @@ import { encodeDraft, handleFrom, parsePasted } from "@/lib/convert";
 import { detectPlatform, normalizeUrl } from "@/lib/socials/detect";
 import { platformLabel } from "@/lib/socials/platforms";
 import { THEMES, getTheme } from "@/themes/registry";
-import { ThemeRenderer } from "@/themes/render";
+import { PhonePlate, PlateDot } from "@/components/phone-plate";
 import type { PageData } from "@/themes/types";
 
 const SAMPLE = `Shop the new mugs - junopark.shop/mugs
@@ -59,11 +59,11 @@ export function Converter({ host }: { host: string }) {
   const ready = !!handle && count > 0;
 
   return (
-    <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-5 pb-20 pt-4 lg:grid-cols-[minmax(0,1fr)_420px]">
+    <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-5 pb-20 pt-4 sm:px-8 lg:grid-cols-[minmax(0,1fr)_420px]">
       <div className="min-w-0">
-        <h1 className="font-display text-[clamp(2.2rem,5vw,3.6rem)] font-semibold leading-[1] tracking-[-0.04em] text-balance">Convert your Linktree</h1>
+        <h1 className="type-plate text-[clamp(3rem,7vw,4.8rem)]">Bring your Linktree over</h1>
         <p className="mt-4 max-w-[52ch] text-lg text-ink-2 text-pretty">
-          Bring your links over, see them in any theme right here, and keep the page when you like it. Free for 14 days, no card needed.
+          Paste your links, see them in any theme right here, and keep the page when you like it. Free for 14 days, no card needed.
         </p>
 
         <ol className="mt-8 flex flex-col gap-7">
@@ -127,8 +127,8 @@ export function Converter({ host }: { host: string }) {
                 const t = getTheme(id);
                 return (
                   <button key={id} type="button" role="radio" aria-checked={themeId === id} onClick={() => setThemeId(id)}
-                    className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${themeId === id ? "border-ink bg-ink text-paper" : "border-line bg-white hover:border-ink"}`}>
-                    <span aria-hidden className="size-4 rounded-full ring-1 ring-black/10" style={{ background: `linear-gradient(135deg, ${t.swatch[0]} 55%, ${t.swatch[1]} 55%)` }} />{t.name}
+                    className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${themeId === id ? "border-ink bg-ink text-white" : "border-line bg-white hover:border-ink"}`}>
+                    <PlateDot themeId={id} />{t.name}
                   </button>
                 );
               })}
@@ -149,13 +149,9 @@ export function Converter({ host }: { host: string }) {
         </div>
       </div>
 
-      <div className="flex flex-col items-center lg:sticky lg:top-6 lg:self-start">
-        <div className="w-full max-w-[380px] overflow-hidden rounded-[44px] border-[10px] border-ink bg-ink shadow-[0_40px_80px_-40px_rgba(30,20,0,.7)]">
-          <div key={themeId} className="relative h-[min(720px,calc(100dvh-120px))] min-h-[540px] overflow-hidden rounded-[34px] [transform:translateZ(0)]">
-            <ThemeRenderer themeId={themeId} data={data} mode="preview" />
-          </div>
-        </div>
-        <p className="mt-3 text-center text-sm text-ink-3">Live preview · {getTheme(themeId).name}</p>
+      <div className="lg:sticky lg:top-4 lg:self-start">
+        <PhonePlate themeId={themeId} data={data}
+          caption={<span className="text-sm font-semibold">Live preview · {getTheme(themeId).name}</span>} />
       </div>
     </div>
   );

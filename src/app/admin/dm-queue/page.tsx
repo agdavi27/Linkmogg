@@ -24,7 +24,7 @@ export default async function DmQueue({ searchParams }: PageProps<"/admin/dm-que
       <Flash msg={sp.msg} />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-semibold tracking-[-0.03em]">DM queue</h1>
+          <h1 className="font-site text-3xl font-semibold tracking-[-0.03em]">DM queue</h1>
           <p className="mt-2 max-w-[64ch] text-ink-2">DMs are never sent automatically. Copy the message, the profile opens in a new tab, you send it yourself, then mark it sent here.</p>
         </div>
         <div className="text-right">

@@ -31,7 +31,7 @@ export default async function RemovePage({ params }: PageProps<"/claim/[token]/r
     <main className="grid min-h-dvh place-items-center px-4">
       <div className="w-full max-w-md text-center">
         <Logo />
-        <h1 className="mt-8 font-display text-3xl font-semibold tracking-[-0.03em]">Remove the preview for @{p.handle}?</h1>
+        <h1 className="mt-8 font-site text-3xl font-semibold tracking-[-0.03em]">Remove the preview for @{p.handle}?</h1>
         <p className="mt-3 text-ink-2">We&apos;ll delete the preview and everything we saved about you, and we won&apos;t contact you again.</p>
         <form action={remove} className="mt-6">
           <input type="hidden" name="token" value={token} />

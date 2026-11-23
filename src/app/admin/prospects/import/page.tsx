@@ -8,14 +8,14 @@ export default async function ImportPage({ searchParams }: PageProps<"/admin/pro
   return (
     <main>
       <Flash msg={sp.msg} />
-      <h1 className="font-display text-3xl font-semibold tracking-[-0.03em]">Import & add</h1>
+      <h1 className="font-site text-3xl font-semibold tracking-[-0.03em]">Import & add</h1>
       <p className="mt-2 max-w-[70ch] text-ink-2">
         Add creators you found yourself. For each one we read the public link-in-bio page you give us, build a preview right away, and pull a contact email only if they list one publicly. Pages whose robots.txt asks bots to stay out are skipped and flagged so you can add them by hand.
       </p>
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <section className="card p-5" aria-labelledby="imp-h">
-          <h2 id="imp-h" className="font-display text-lg font-semibold">Paste or upload a list</h2>
+          <h2 id="imp-h" className="font-site text-lg font-semibold">Paste or upload a list</h2>
           <form action={importAction} className="mt-4 flex flex-col gap-3">
             <div>
               <label className="label" htmlFor="platform">Platform for these handles</label>
@@ -35,7 +35,7 @@ export default async function ImportPage({ searchParams }: PageProps<"/admin/pro
         </section>
 
         <section className="card p-5" aria-labelledby="man-h">
-          <h2 id="man-h" className="font-display text-lg font-semibold">Add one by hand</h2>
+          <h2 id="man-h" className="font-site text-lg font-semibold">Add one by hand</h2>
           <form action={manualAddAction} className="mt-4 grid grid-cols-2 gap-3">
             <div><label className="label" htmlFor="m-handle">Handle</label><input id="m-handle" name="handle" required className="field" placeholder="@samrivera" /></div>
             <div><label className="label" htmlFor="m-platform">Platform</label><select id="m-platform" name="platform" className="field">{PLATFORMS.map((p) => <option key={p}>{p}</option>)}</select></div>

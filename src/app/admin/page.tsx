@@ -10,7 +10,7 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
   return (
     <div className="card p-4">
       <p className="text-sm text-ink-2">{label}</p>
-      <p className="mt-1 font-display text-3xl font-semibold tabular tracking-[-0.02em]">{value}</p>
+      <p className="mt-1 font-site text-3xl font-semibold tabular tracking-[-0.02em]">{value}</p>
       {sub ? <p className="mt-0.5 text-xs text-ink-3">{sub}</p> : null}
     </div>
   );
@@ -23,7 +23,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
     <main>
       <Flash msg={sp.msg} />
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="font-display text-3xl font-semibold tracking-[-0.03em]">Outreach</h1>
+        <h1 className="font-site text-3xl font-semibold tracking-[-0.03em]">Outreach</h1>
         <div className="flex items-center gap-3">
           <span className="text-sm text-ink-2 tabular">{emailsToday}/{settings.dailyEmailCap} emails · {dmsToday}/{settings.dailyDmCap} DMs today</span>
           <form action={sendBatchAction}><button className="btn btn-primary btn-sm" disabled={settings.paused}>{settings.paused ? "Paused" : "Send next batch"}</button></form>
@@ -40,7 +40,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
       </div>
 
       <section className="card mt-6 p-5" aria-labelledby="pipe-h">
-        <h2 id="pipe-h" className="font-display text-lg font-semibold">Pipeline</h2>
+        <h2 id="pipe-h" className="font-site text-lg font-semibold">Pipeline</h2>
         <p className="mt-1 text-sm text-ink-2">How many prospects reached each stage. The second number is how many are sitting there now.</p>
         <ol className="mt-5 flex flex-col gap-2.5">
           {m.funnel.map((f) => (

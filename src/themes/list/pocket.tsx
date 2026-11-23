@@ -134,7 +134,7 @@ export default function PocketPlayer({ data, mode }: ThemeProps) {
                         </div>
                       );
                     })}
-                    {n === 0 ? <p className="p-3 text-center text-xs">No links yet.</p> : null}
+                    {n === 0 ? <p className="p-3 text-center text-xs text-white/70">No links yet.</p> : null}
                   </div>
                 </div>
 

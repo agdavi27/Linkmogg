@@ -14,8 +14,8 @@ import { Logo } from "@/components/logo";
 import { SocialIcon } from "@/lib/socials/icons";
 import { platformLabel } from "@/lib/socials/platforms";
 import { detectPlatform } from "@/lib/socials/detect";
-import { CATEGORIES, getTheme, themesIn } from "@/themes/registry";
-import { ThemeRenderer } from "@/themes/render";
+import { CATEGORIES, getTheme, plateOf, themesIn } from "@/themes/registry";
+import { PhonePlate } from "@/components/phone-plate";
 import { BACKDROPS, DEFAULT_BACKDROP, isPresetBackdrop } from "@/themes/backdrops";
 import type { PageData } from "@/themes/types";
 import * as A from "./actions";
@@ -157,7 +157,7 @@ export function Editor(props: Props) {
 
           <section className="card p-5" aria-labelledby="links-h">
             <div className="flex items-center justify-between">
-              <h2 id="links-h" className="font-display text-lg font-semibold">Links</h2>
+              <h2 id="links-h" className="type-title text-xl">Links</h2>
               <span className="text-xs text-ink-3">Drag to reorder</span>
             </div>
             <AddLink onAdd={async (title, url) => {
@@ -185,7 +185,7 @@ export function Editor(props: Props) {
           </section>
 
           <section className="card p-5" aria-labelledby="soc-h">
-            <h2 id="soc-h" className="font-display text-lg font-semibold">Social icons</h2>
+            <h2 id="soc-h" className="type-title text-xl">Social icons</h2>
             <p className="mt-1 text-sm text-ink-2">Paste a profile link. We&apos;ll figure out which platform it is.</p>
             <AddSocial onAdd={async (url) => {
               const r = await run(A.addSocial(url));
@@ -205,7 +205,7 @@ export function Editor(props: Props) {
 
           <section className="card p-5" aria-labelledby="theme-h">
             <div className="flex items-baseline justify-between gap-3">
-              <h2 id="theme-h" className="font-display text-lg font-semibold">Theme</h2>
+              <h2 id="theme-h" className="type-title text-xl">Theme</h2>
               <Link href="/themes" className="text-sm text-ink-2 underline-offset-4 hover:underline">See them all</Link>
             </div>
             {CATEGORIES.map((c) => (
@@ -219,9 +219,8 @@ export function Editor(props: Props) {
                   <li key={t.id}>
                     <button type="button" onClick={() => pickTheme(t.id)} aria-pressed={selected}
                       className={`group w-full rounded-2xl border p-2 text-left transition-[border-color,box-shadow,transform] duration-150 ease-out active:scale-[.98] ${selected ? "border-ink shadow-[0_0_0_1px_var(--ink)]" : "border-line hover:border-ink/30"}`}>
-                      <span className="relative block h-16 overflow-hidden rounded-xl" style={{ background: t.swatch[0] }}>
-                        <span className="absolute bottom-2 right-2 size-6 rounded-full" style={{ background: t.swatch[1] }} />
-                        {savedTheme === t.id ? <span className="absolute left-2 top-2 rounded-full bg-white/90 px-1.5 py-0.5 text-[10px] font-bold text-ink">LIVE</span> : null}
+                      <span className="relative block h-16 overflow-hidden rounded-xl" style={{ background: plateOf(t.id).bg }}>
+                        {savedTheme === t.id ? <span className="absolute left-2 top-2 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-forest">Live</span> : null}
                         {locked ? <Lock size={14} className="absolute right-2 top-2 text-white mix-blend-difference" aria-label="Pro" /> : null}
                       </span>
                       <span className="mt-2 block px-1 text-sm font-semibold">{t.name}</span>
@@ -241,13 +240,10 @@ export function Editor(props: Props) {
 
         <aside className={`${tab === "edit" ? "hidden lg:block" : ""}`} aria-label="Live preview">
           <div className="lg:sticky lg:top-20">
-            <div className="mx-auto w-full max-w-[380px] overflow-hidden rounded-[40px] border-[10px] border-ink bg-ink shadow-[0_30px_60px_-30px_rgba(0,0,0,.6)]">
-              <div className="relative h-[min(720px,calc(100dvh-180px))] overflow-hidden rounded-[30px] bg-white [transform:translateZ(0)]">
-                <ThemeRenderer themeId={previewTheme} data={data} mode="preview" />
-              </div>
-            </div>
+            <PhonePlate themeId={previewTheme} data={data} height="h-[min(680px,calc(100dvh-230px))] min-h-[480px]"
+              caption={<span className="text-sm font-semibold">{getTheme(previewTheme).name}{savedTheme === previewTheme ? " · live on your page" : " · preview"}</span>} />
             {previewLocked ? (
-              <div className="lm-pop mx-auto mt-3 flex max-w-[380px] items-center gap-3 rounded-2xl bg-ink p-3 text-sm text-paper">
+              <div className="lm-pop mx-auto mt-3 flex max-w-[380px] items-center gap-3 rounded-2xl bg-ink p-3 text-sm text-white">
                 <Lock size={16} className="shrink-0" />
                 <span className="flex-1">Your trial has ended. You&apos;re previewing {getTheme(previewTheme).name}.</span>
                 <Link href="/settings/billing" className="btn btn-accent btn-sm">Upgrade</Link>
@@ -261,7 +257,7 @@ export function Editor(props: Props) {
         <div role="tablist" className="flex rounded-full bg-ink p-1 shadow-xl">
           {(["edit", "preview"] as const).map((k) => (
             <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
-              className={`rounded-full px-5 py-2 text-sm font-semibold capitalize transition-colors ${tab === k ? "bg-paper text-ink" : "text-paper/80"}`}>{k}</button>
+              className={`rounded-full px-5 py-2 text-sm font-semibold capitalize transition-colors ${tab === k ? "bg-white text-ink" : "text-white/80"}`}>{k}</button>
           ))}
         </div>
       </div>
@@ -278,13 +274,13 @@ function ProfileCard({ profile, setProfile, run }: {
   const [pending, start] = useTransition();
   return (
     <section className="card p-5" aria-labelledby="prof-h">
-      <h2 id="prof-h" className="font-display text-lg font-semibold">Profile</h2>
+      <h2 id="prof-h" className="type-title text-xl">Profile</h2>
       <div className="mt-4 flex items-start gap-4">
         <div className="flex flex-col items-center gap-2">
           {profile.avatarUrl
             // eslint-disable-next-line @next/next/no-img-element
             ? <img src={profile.avatarUrl} alt="" className="size-20 shrink-0 rounded-full object-cover ring-1 ring-line" />
-            : <div className="grid size-20 shrink-0 place-items-center rounded-full bg-paper-2 font-display text-2xl font-semibold text-ink-2">{(profile.displayName || "?")[0]?.toUpperCase()}</div>}
+            : <div className="grid size-20 shrink-0 place-items-center rounded-full bg-paper-2 font-site text-2xl font-semibold text-ink-2">{(profile.displayName || "?")[0]?.toUpperCase()}</div>}
           <input ref={fileRef} type="file" accept="image/*" className="sr-only" onChange={(e) => {
             const f = e.target.files?.[0];
             if (!f) return;

@@ -8,7 +8,7 @@ export function LoginForm({ next }: { next?: string }) {
   if (state.ok) {
     return (
       <div className="lm-pop text-center">
-        <p className="font-display text-xl font-semibold">Check your inbox</p>
+        <p className="font-site text-xl font-semibold">Check your inbox</p>
         <p className="mt-2 text-ink-2">We sent a sign-in link to <strong className="text-ink">{state.email}</strong>. It expires in 20 minutes.</p>
         {state.devLink ? (
           <p className="mt-5 rounded-xl bg-paper-2 p-3 text-left text-sm">

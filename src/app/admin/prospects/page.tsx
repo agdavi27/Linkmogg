@@ -39,7 +39,7 @@ export default async function Prospects({ searchParams }: PageProps<"/admin/pros
     <main>
       <Flash msg={sp.msg} />
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h1 className="font-display text-3xl font-semibold tracking-[-0.03em]">Prospects <span className="text-ink-3 tabular">{total}</span></h1>
+        <h1 className="font-site text-3xl font-semibold tracking-[-0.03em]">Prospects <span className="text-ink-3 tabular">{total}</span></h1>
         <div className="flex gap-2">
           {waiting ? <form action={buildPendingAction}><button className="btn btn-ghost btn-sm">Build {Math.min(10, waiting)} waiting {waiting === 1 ? "preview" : "previews"}</button></form> : null}
           <Link href="/admin/prospects/import" className="btn btn-primary btn-sm">Import or add</Link>

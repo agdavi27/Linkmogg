@@ -22,7 +22,7 @@ export const DEFAULT_THEME = "classic";
 
 export const THEMES: ThemeDef[] = [
   // Most popular
-  { id: "pocket", name: "Pocket Player", blurb: "Flip through album covers with a click wheel.", pro: true, swatch: ["#e9e4dc", "#2a6fd0"], category: "popular" },
+  { id: "pocket", name: "Pocket Player", blurb: "Flip through album covers with a click wheel.", pro: true, swatch: ["#ff5a1f", "#c9ccd0"], category: "popular" },
   { id: "museum", name: "Gallery", blurb: "A little art museum. Every painting is a link, and visitors wander by.", pro: true, swatch: ["#ece6dc", "#b8913f"], category: "popular" },
   { id: "bookshelf", name: "Bookshelf", blurb: "A row of spines. Pick one and it turns to show its cover.", pro: true, swatch: ["#050505", "#b8643f"], category: "popular" },
   { id: "corkboard", name: "Corkboard", blurb: "Polaroids pinned to cork. Lift one to open it.", pro: true, swatch: ["#b98a55", "#fdfbf6"], category: "popular" },
@@ -49,6 +49,20 @@ export const THEMES: ThemeDef[] = [
   { id: "garden", name: "Garden", blurb: "A poster on a hillside. Every link is a pixel flower.", pro: true, swatch: ["#3b7be0", "#e3231b"], category: "cozy" },
   { id: "sunflower", name: "Sunflower", blurb: "Every link is a named petal. Tap one to bloom it.", pro: true, swatch: ["#bfe3f2", "#f2b632"], category: "cozy" },
 ];
+
+/** Each theme's color plate: the saturated field it sits on across the site, and the text color that reads on it. */
+const PLATES: Record<string, [string, string]> = {
+  pocket: ["#ff5a1f", "#ffffff"], museum: ["#c99a2e", "#141414"], bookshelf: ["#8a3b1f", "#ffffff"], corkboard: ["#b5793f", "#ffffff"],
+  classic: ["#1c1c1c", "#ffffff"], poster: ["#d93a2b", "#ffffff"], halo: ["#0b0d14", "#ffffff"], strata: ["#2a46ff", "#ffffff"],
+  billboard: ["#2f6fd6", "#ffffff"], panorama: ["#9a9a96", "#141414"], window: ["#1f5b66", "#ffffff"], world: ["#e6d3a8", "#141414"],
+  stack: ["#e94a2b", "#ffffff"], cases: ["#bdbdbd", "#141414"], meadow: ["#3f8f2e", "#ffffff"], glow: ["#1736c9", "#ffffff"],
+  scatter: ["#d9d9de", "#141414"], folders: ["#3f7be0", "#ffffff"], discs: ["#141414", "#ffffff"], id: ["#5fa8a0", "#141414"],
+  garden: ["#3b7be0", "#ffffff"], sunflower: ["#f2b632", "#141414"],
+};
+export function plateOf(id: string): { bg: string; ink: string } {
+  const [bg, ink] = PLATES[getTheme(id).id] ?? ["#1c1c1c", "#ffffff"];
+  return { bg, ink };
+}
 
 export function themesIn(category: CategoryId) {
   return THEMES.filter((t) => t.category === category);

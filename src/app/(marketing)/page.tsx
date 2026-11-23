@@ -1,56 +1,69 @@
 import Link from "next/link";
-import { Check } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { hostLabel, PRICE_LABEL, TRIAL_DAYS } from "@/lib/config";
+import { THEMES } from "@/themes/registry";
 import { ClaimInput } from "./claim-input";
-import { DemoPhone } from "./demo-phone";
-import { HeroWord } from "./hero-word";
+import { HeroPlate } from "./demo-phone";
 import { ThemeReel } from "./theme-reel";
+
+const COUNT = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen", "Twenty", "Twenty-one", "Twenty-two", "Twenty-three", "Twenty-four", "Twenty-five"];
 
 export default function Home() {
   const host = hostLabel();
+  const count = COUNT[THEMES.length] ?? String(THEMES.length);
   return (
     <main>
-      <section className="relative">
-        <div aria-hidden className="lm-hero-glow pointer-events-none absolute inset-0 overflow-hidden"><span /><span /></div>
-        <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-5 pb-20 pt-8 lg:grid-cols-[1.1fr_1fr] lg:pt-14">
+      <HeroPlate>
+        <h1 className="type-plate text-[clamp(3.4rem,10vw,7.2rem)]">Your links, made into things people touch.</h1>
+        <p className="mt-6 max-w-[44ch] text-lg leading-relaxed opacity-85 text-pretty">
+          One page for everything you post, set inside a click wheel, a desktop in the grass, a row of CD cases or an old ID card. Visitors stay because there&apos;s something to play with.
+        </p>
+        <div className="mt-8"><ClaimInput host={host} /></div>
+        <p className="mt-3 text-sm opacity-75">Every theme free for {TRIAL_DAYS} days. No card needed.</p>
+        <p className="mt-1.5 text-sm">
+          <Link href="/convert" className="font-semibold underline">Already on Linktree? Bring your page over</Link>
+        </p>
+      </HeroPlate>
+
+      <section className="pb-6 pt-20 sm:pt-28">
+        <div className="mx-auto max-w-6xl px-5 sm:px-8">
+          <div className="flex flex-wrap items-end justify-between gap-5">
+            <h2 className="type-plate max-w-[14ch] text-[clamp(2.6rem,6vw,4.6rem)]">{count} themes. Same links inside each.</h2>
+            <Link href="/themes" className="btn btn-primary">Try them live <ArrowRight size={16} /></Link>
+          </div>
+          <p className="mt-5 max-w-[60ch] text-ink-2">Switch whenever you like. Your links, icons and bio stay put, and every theme works with touch, a keyboard and a screen reader.</p>
+        </div>
+        <div className="mt-12"><ThemeReel /></div>
+      </section>
+
+      <section className="px-2 py-14 sm:px-3">
+        <div className="plate grid gap-8 rounded-[28px] px-6 py-12 sm:rounded-[36px] sm:px-10 sm:py-16 lg:grid-cols-[1.2fr_1fr] lg:items-end"
+          style={{ ["--plate" as string]: "var(--cobalt)" }}>
+          <h2 className="type-plate text-[clamp(2.4rem,6vw,4.4rem)]">On Linktree already? Paste it, keep what you want.</h2>
           <div>
-            <h1 className="lm-enter font-display text-[clamp(2.6rem,6.5vw,5rem)] font-semibold leading-[0.98] tracking-[-0.04em] text-balance">
-              A link in bio people actually <HeroWord />
-            </h1>
-            <p className="lm-enter mt-6 max-w-[46ch] text-lg leading-relaxed text-ink-2 text-pretty" style={{ animationDelay: "90ms" }}>
-              Put every link you have on one page, then make it a click wheel, a sunflower, a bookshelf or a stack of spinning discs. Visitors stay longer because there&apos;s something to touch.
+            <p className="max-w-[44ch] text-lg leading-relaxed opacity-85">Paste your links, pick the ones to keep, and see them in any theme before you sign up. It takes about a minute.</p>
+            <Link href="/convert" className="btn btn-light mt-6">Convert my page <ArrowRight size={16} /></Link>
+          </div>
+        </div>
+      </section>
+
+      <section id="pricing" className="px-2 pb-16 sm:px-3">
+        <div className="plate grid gap-10 rounded-[28px] px-6 py-12 sm:rounded-[36px] sm:px-10 sm:py-16 lg:grid-cols-2"
+          style={{ ["--plate" as string]: "var(--ink)" }}>
+          <div>
+            <h2 className="type-plate text-[clamp(2.4rem,6vw,4.4rem)]">One plan. Try all of it first.</h2>
+            <p className="mt-5 flex items-baseline gap-2">
+              <span className="type-plate tabular text-[clamp(3rem,7vw,5rem)] text-accent">{PRICE_LABEL.split("/")[0]}</span>
+              <span className="text-lg opacity-70">a month, after {TRIAL_DAYS} free days</span>
             </p>
-            <div className="lm-enter mt-8" style={{ animationDelay: "180ms" }}><ClaimInput host={host} /></div>
-            <p className="lm-enter mt-3 text-sm text-ink-3" style={{ animationDelay: "240ms" }}>Free for {TRIAL_DAYS} days with every theme. No card needed.</p>
-            <p className="lm-enter mt-2 text-sm" style={{ animationDelay: "280ms" }}><Link href="/convert" className="font-medium text-ink underline underline-offset-2">Already on Linktree? Convert your page →</Link></p>
           </div>
-          <div className="lm-enter" style={{ animationDelay: "120ms" }}><DemoPhone /></div>
-        </div>
-      </section>
-
-      <section className="border-y border-line bg-paper-2/60 py-20">
-        <div className="lm-reveal mx-auto max-w-6xl px-5">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <h2 className="max-w-[18ch] font-display text-4xl font-semibold leading-tight tracking-[-0.03em] text-balance">Twenty-two themes, all with the same links inside</h2>
-            <Link href="/themes" className="btn btn-ghost">Try them all live</Link>
-          </div>
-          <p className="mt-4 max-w-[60ch] text-ink-2">Switch themes whenever you like. Your links, icons and bio stay put, and every theme works with touch, a keyboard and a screen reader.</p>
-        </div>
-        <div className="mt-10"><ThemeReel /></div>
-      </section>
-
-      <section id="pricing" className="lm-reveal mx-auto max-w-6xl px-5 py-20">
-        <h2 className="font-display text-4xl font-semibold tracking-[-0.03em]">One plan. Try all of it free.</h2>
-        <div className="mt-10 max-w-xl">
-          <div className="card relative overflow-hidden bg-ink p-7 text-paper">
-            <h3 className="font-display text-xl font-semibold">Pro</h3>
-            <p className="mt-1 text-3xl font-semibold tabular">{PRICE_LABEL}</p>
-            <ul className="mt-5 flex flex-col gap-2.5 text-paper/80">
-              {[`Every theme free for ${TRIAL_DAYS} days`, "No credit card to start", "Your own page, unlimited links and socials", "No badge once you subscribe", "Cancel any time"].map((f) => (
-                <li key={f} className="flex gap-2"><Check size={18} className="mt-0.5 shrink-0 text-accent" />{f}</li>
+          <div className="flex flex-col justify-end">
+            <ul className="flex flex-col divide-y divide-white/12 border-y border-white/12 text-[15px]">
+              {[`Every theme free for ${TRIAL_DAYS} days`, "No credit card to start", "Unlimited links and socials", "No badge once you subscribe", "Cancel any time. Your page stays up in Classic."].map((f) => (
+                <li key={f} className="flex gap-3 py-3"><Check size={18} className="mt-0.5 shrink-0 text-accent" aria-hidden />{f}</li>
               ))}
             </ul>
-            <Link href="/login" className="btn btn-accent mt-7">Start free trial</Link>
+            <Link href="/login" className="btn btn-accent mt-7 self-start">Start my free trial <ArrowRight size={16} /></Link>
           </div>
         </div>
       </section>

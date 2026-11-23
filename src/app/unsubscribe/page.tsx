@@ -18,12 +18,12 @@ export default async function Unsubscribe({ searchParams }: PageProps<"/unsubscr
         <Logo />
         {valid ? (
           <>
-            <h1 className="mt-8 font-display text-3xl font-semibold tracking-[-0.03em]">You&apos;re unsubscribed</h1>
+            <h1 className="mt-8 font-site text-3xl font-semibold tracking-[-0.03em]">You&apos;re unsubscribed</h1>
             <p className="mt-3 text-ink-2">{e} won&apos;t get any more emails from us.</p>
           </>
         ) : (
           <>
-            <h1 className="mt-8 font-display text-3xl font-semibold tracking-[-0.03em]">That link didn&apos;t work</h1>
+            <h1 className="mt-8 font-site text-3xl font-semibold tracking-[-0.03em]">That link didn&apos;t work</h1>
             <p className="mt-3 text-ink-2">Reply to the email you got and we&apos;ll take you off the list by hand.</p>
           </>
         )}
