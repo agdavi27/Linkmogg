@@ -9,7 +9,7 @@ import type { ThemeProps } from "../types";
 // Folder colors, cycled through the stack.
 const FOLDER = ["#7fb2f0", "#f2c14e", "#e9e4d8", "#9bd3b0", "#f19a8e", "#b7a6f0", "#cfd5dc"];
 
-export default function Strata({ data, mode }: ThemeProps) {
+export default function StackHorizontal({ data, mode }: ThemeProps) {
   const n = data.links.length;
   const [sel, setSel] = useState(0);
   const [drag, setDrag] = useState(0);
@@ -26,7 +26,7 @@ export default function Strata({ data, mode }: ThemeProps) {
   const current = data.links[sel];
 
   return (
-    <ThemeRoot data={data} mode={mode} label="Strata" className="lm-st bg-white text-[#111]">
+    <ThemeRoot data={data} mode={mode} label="Stack" className="lm-st bg-white text-[#111]">
       <header className="relative z-20 flex shrink-0 items-start gap-1.5 px-3 pt-3 @min-[640px]:px-6 @min-[640px]:pt-5">
         <div className="lm-st-chip min-w-0 flex-1">
           <h1 className="truncate text-[11px] font-semibold uppercase tracking-[0.06em]">{data.displayName || `@${data.username}`} <span aria-hidden className="text-[#2a46ff]">®</span> Links</h1>

@@ -5,6 +5,7 @@ import { getPlan } from "@/lib/entitlements";
 import { badgeUrl } from "@/lib/config";
 import { effectiveThemeId } from "@/themes/registry";
 import type { PageData } from "@/themes/types";
+import { readThemeOptions } from "@/themes/options";
 
 export async function loadPageBundle(page: Page) {
   const [ls, ss] = await Promise.all([
@@ -27,7 +28,7 @@ export function toPageData(
     socials: ss.map(({ platform, url }) => ({ platform, url })),
     showBadge: !isPro,
     badgeUrl: badgeUrl(),
-    backdrop: typeof page.themeOptions?.backdrop === "string" ? page.themeOptions.backdrop : null,
+    ...readThemeOptions(page.themeOptions),
   };
 }
 

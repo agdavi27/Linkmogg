@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { CATEGORIES, plateOf, themesIn } from "@/themes/registry";
+import { liveCategories, plateOf, themesIn } from "@/themes/registry";
 import { ThemeRenderer } from "@/themes/render";
 import { DEMO } from "@/themes/demo";
 
@@ -33,7 +33,7 @@ function Mini({ id, scale }: { id: string; scale: number }) {
 export function ThemeReel() {
   return (
     <div className="flex flex-col gap-12">
-      {CATEGORIES.map((c) => (
+      {liveCategories().map((c) => (
         <section key={c.id} aria-labelledby={`row-${c.id}`}>
           <div className="mx-auto flex max-w-6xl items-baseline justify-between gap-4 px-5 sm:px-8">
             <h3 id={`row-${c.id}`} className="type-title text-2xl">{c.name}</h3>

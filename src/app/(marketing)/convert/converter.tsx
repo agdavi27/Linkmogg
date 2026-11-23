@@ -16,7 +16,7 @@ calendly.com/junopark/wheel
 https://instagram.com/junopark
 https://tiktok.com/@junopark`;
 
-const PICKS = ["pocket", "museum", "garden", "billboard", "bookshelf", "corkboard", "sunflower", "classic"];
+const PICKS = ["pocket", "museum", "garden", "billboard", "bookshelf", "corkboard", "reels", "folders"];
 
 export function Converter({ host }: { host: string }) {
   const [address, setAddress] = useState("");

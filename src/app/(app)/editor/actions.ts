@@ -10,6 +10,7 @@ import { getPlan } from "@/lib/entitlements";
 import { detectPlatform, normalizeUrl } from "@/lib/socials/detect";
 import { getTheme } from "@/themes/registry";
 import { isPresetBackdrop } from "@/themes/backdrops";
+import { MAX_REELS, instagramHandle, readThemeOptions } from "@/themes/options";
 
 type Result<T = undefined> = { ok: true; data?: T } | { ok: false; error: string };
 
@@ -77,6 +78,57 @@ export async function uploadBackdrop(form: FormData): Promise<Result<string>> {
   await db.update(pages).set({ themeOptions: { ...page.themeOptions, backdrop: blob.url } }).where(eq(pages.id, page.id));
   await touch(page.id, page.username);
   return { ok: true, data: blob.url };
+}
+
+export async function setLayout(value: string): Promise<Result> {
+  if (value !== "vertical" && value !== "horizontal") return { ok: false, error: "Pick up and down, or sideways." };
+  const { page } = await myPage();
+  await db.update(pages).set({ themeOptions: { ...page.themeOptions, layout: value } }).where(eq(pages.id, page.id));
+  await touch(page.id, page.username);
+  return { ok: true };
+}
+
+/** Saves the Instagram handle for the Reels theme. Nothing is fetched from Instagram. */
+export async function setInstagram(value: string): Promise<Result<string>> {
+  const v = z.string().trim().max(200).safeParse(value);
+  const handle = v.success ? instagramHandle(v.data) : null;
+  if (!handle) return { ok: false, error: "Paste your Instagram profile link, like instagram.com/yourname." };
+  const { page } = await myPage();
+  const ig = readThemeOptions(page.themeOptions).instagram;
+  await db.update(pages).set({ themeOptions: { ...page.themeOptions, instagram: { handle, reels: ig?.reels ?? [] } } }).where(eq(pages.id, page.id));
+  await touch(page.id, page.username);
+  return { ok: true, data: handle };
+}
+
+/** The folder a reel upload has to go in. */
+export async function myPageId(): Promise<string> {
+  const { page } = await myPage();
+  return page.id;
+}
+
+/** After the browser uploads a clip to Blob, record it. Only clips in this page's own folder are accepted. */
+export async function addReel(url: string): Promise<Result<string[]>> {
+  const { page } = await myPage();
+  let u: URL;
+  try { u = new URL(url); } catch { return { ok: false, error: "That upload didn't finish." }; }
+  if (u.protocol !== "https:" || !u.hostname.endsWith(".public.blob.vercel-storage.com") || !u.pathname.startsWith(`/reels/${page.id}/`)) {
+    return { ok: false, error: "That upload didn't finish." };
+  }
+  const ig = readThemeOptions(page.themeOptions).instagram;
+  const reels = [...(ig?.reels ?? []), u.toString()].slice(-MAX_REELS);
+  await db.update(pages).set({ themeOptions: { ...page.themeOptions, instagram: { handle: ig?.handle ?? "", reels } } }).where(eq(pages.id, page.id));
+  await touch(page.id, page.username);
+  return { ok: true, data: reels };
+}
+
+/** Takes a clip off the page. The file itself stays in storage. */
+export async function removeReel(url: string): Promise<Result<string[]>> {
+  const { page } = await myPage();
+  const ig = readThemeOptions(page.themeOptions).instagram;
+  const reels = (ig?.reels ?? []).filter((r) => r !== url);
+  await db.update(pages).set({ themeOptions: { ...page.themeOptions, instagram: { handle: ig?.handle ?? "", reels } } }).where(eq(pages.id, page.id));
+  await touch(page.id, page.username);
+  return { ok: true, data: reels };
 }
 
 export async function setTheme(themeId: string): Promise<Result> {

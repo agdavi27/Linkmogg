@@ -7,7 +7,7 @@ import { ThemeRenderer } from "@/themes/render";
 import { DEMO } from "@/themes/demo";
 import { useParallax } from "@/themes/motion";
 
-const FEATURED = ["pocket", "meadow", "glow", "billboard", "cases", "sunflower", "id", "stack", "garden", "museum"];
+const FEATURED = ["pocket", "reels", "bookshelf", "meadow", "museum", "folders", "garden", "billboard", "cases", "stack"];
 const CYCLE_MS = 5600;
 
 /**

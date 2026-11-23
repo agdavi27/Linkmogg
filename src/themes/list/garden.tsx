@@ -12,24 +12,28 @@ const HEADS = [
   ["p..p..p..", ".p.p.p...", "..ccc....", "ppcccpp..", "..ccc....", ".p.p.p...", "p..p..p.."],
   ["..p.p....", ".ppppp...", "ppcccpp..", ".pcccp...", "ppcccpp..", ".ppppp...", "..p.p...."],
 ].map((rows) => rows.map((r) => r.slice(0, 7)));
+// A closed bud, same footprint as a head so the stem lines up. "p" peeks out between the leaves.
+const BUD = [".......", ".......", "..ppp..", ".ppppp.", ".lpppl.", "..lll..", "...l..."];
 const STEM = ["...s...", "...s.ll", "...sll.", "ll.s...", ".lls...", "...s...", "...s...", "...s...", "...s...", "...s..."];
 const PETALS = ["#ff3b30", "#ff8ac2", "#ffd23f", "#ffffff", "#9b6bff", "#ff8a1f", "#5ad1ff"];
 const CENTERS = ["#ffd23f", "#3b2a1a", "#ff5a1f", "#ffffff"];
 
-function Flower({ link, size }: { link: ThemeLink; size: number }) {
+function Flower({ link, size, open }: { link: ThemeLink; size: number; open: boolean }) {
   const k = hash(link.id + link.title);
   const head = HEADS[k % HEADS.length];
   const petal = PETALS[(k >>> 3) % PETALS.length];
   const center = CENTERS[(k >>> 6) % CENTERS.length] === petal ? "#3b2a1a" : CENTERS[(k >>> 6) % CENTERS.length];
-  const rows = [...head, ...STEM];
+  const rows = [...(open ? head : BUD), ...STEM];
   const px = size / 7;
   return (
-    <svg aria-hidden viewBox={`0 0 7 ${rows.length}`} width={size} height={px * rows.length} shapeRendering="crispEdges" className="block">
+    <svg aria-hidden viewBox={`0 0 7 ${rows.length}`} width={size} height={px * rows.length} shapeRendering="crispEdges" className="block overflow-visible">
+      <g key={open ? "open" : "bud"} className={open ? "lm-gd-bloom" : undefined} style={{ transformOrigin: "50% 40%" }}>
       {rows.flatMap((r, y) => [...r].map((ch, x) => {
         if (ch === ".") return null;
         const fill = ch === "p" ? petal : ch === "c" ? center : ch === "s" ? "#1f7a34" : "#2fa64c";
         return <rect key={`${x}-${y}`} x={x} y={y} width="1.02" height="1.02" fill={fill} />;
       }))}
+      </g>
     </svg>
   );
 }
@@ -41,8 +45,11 @@ export default function Garden({ data, mode }: ThemeProps) {
   const openRef = useRef<HTMLAnchorElement>(null);
   const { w, h } = useSize(stage);
   const name = data.displayName || data.username;
-  const perRow = n > 8 ? Math.ceil(n / 2) : Math.max(n, 1); // a second row of flowers once there are many
-  const flowerW = Math.max(22, Math.min(84, (w * 0.9) / perRow - 8, h * (n > 8 ? 0.075 : 0.11)));
+  // wide screens plant one long row; phones plant a few short ones so the name tags stay readable
+  const perRow = w > 700 ? Math.max(1, Math.min(n, 7)) : n > 4 ? Math.ceil(n / (n > 12 ? 3 : 2)) : Math.max(n, 1);
+  const rows = Math.max(1, Math.ceil(n / perRow));
+  // a flower is 17 pixels tall for every 7 wide, plus its name tag; the rows share about 40% of the height
+  const flowerW = Math.max(22, Math.min(84, (w * 0.9) / perRow - 26, ((h * 0.4) / rows - 34) * 7 / 17));
 
   const pick = (i: number) => {
     if (sel === i) { openRef.current?.click(); return; }
@@ -85,14 +92,16 @@ export default function Garden({ data, mode }: ThemeProps) {
 
         {/* the flowers, planted on the hill */}
         <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-end">
-          <ul className="flex flex-wrap items-end justify-center gap-x-[clamp(4px,1.6cqw,18px)] gap-y-1 px-3" style={{ maxWidth: perRow * (flowerW + 18) }} aria-label="Links">
+          <ul className="flex flex-wrap items-end justify-center gap-x-[clamp(4px,1.6cqw,18px)] gap-y-1 px-3" style={{ maxWidth: perRow * (flowerW + 40) + 32 }} aria-label="Links">
             {data.links.map((l, i) => (
-              <li key={l.id}>
+              <li key={l.id} className="flex flex-col items-center">
                 <button type="button" onClick={() => pick(i)} onPointerEnter={(e) => { if (e.pointerType === "mouse") setSel(i); }}
                   aria-label={`${l.title}${sel === i ? ", selected. Press again to open" : ""}`}
                   className={`lm-gd-flower block outline-none ${sel === i ? "is-on" : ""}`} style={{ animationDelay: `${300 + i * 120}ms, ${-(hash(l.id) % 30) / 10}s` } as CSSProperties}>
-                  <Flower link={l} size={flowerW} />
+                  <Flower link={l} size={flowerW} open={sel === i} />
                 </button>
+                <span aria-hidden className={`lm-gd-tag mx-auto mt-1 line-clamp-2 block text-center leading-[1.1] ${sel === i ? "is-on" : ""}`}
+                  style={{ width: flowerW + 18, fontSize: Math.max(9.5, Math.min(13, flowerW * 0.2)) }}>{l.title}</span>
               </li>
             ))}
           </ul>
@@ -107,13 +116,13 @@ export default function Garden({ data, mode }: ThemeProps) {
               <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-[12px] font-semibold text-[#1d4f1a] transition-transform group-active:scale-95">{hostOf(current.url)} ↗</span>
             </a>
           ) : (
-            <p className="lm-gd-pick font-display text-[clamp(24px,8cqw,64px)] font-bold leading-none tracking-[-0.05em] text-white">{n ? "Pick a flower." : ""}</p>
+            <p className="lm-gd-pick font-display text-[clamp(24px,8cqw,64px)] font-bold leading-none tracking-[-0.05em] text-white">{n ? "Pick a bud." : ""}</p>
           )}
         </div>
 
         {/* bottom: a hint, then every social as a plain icon row */}
         <div className="relative z-10 shrink-0 px-5 pb-1">
-          <p className="text-center text-[12px] text-white/70">{n ? "Tap a flower to look. Tap it again to open." : ""}</p>
+          <p className="text-center text-[12px] text-white/70">{n ? "Tap a bud and it blooms. Tap the flower again to open the link." : ""}</p>
           {data.socials.length ? <SocialRow socials={data.socials} mode={mode} className="mt-0.5" iconClass="size-9! text-white/85 hover:bg-white/10" size={18} /> : null}
         </div>
       </div>

@@ -3,6 +3,7 @@ import { isAdmin, requireUser } from "@/lib/auth";
 import { getPageForUser, loadPageBundle } from "@/lib/pages";
 import { daysLeft, getPlan } from "@/lib/entitlements";
 import { appUrl, badgeUrl } from "@/lib/config";
+import { readThemeOptions } from "@/themes/options";
 import { Editor } from "./editor";
 
 export const metadata = { title: "Editor" };
@@ -15,7 +16,7 @@ export default async function EditorPage({ searchParams }: PageProps<"/editor">)
   const trialDaysLeft = daysLeft(plan.trialEndsAt);
   return (
     <Editor
-      page={{ username: page.username, displayName: page.displayName, bio: page.bio, avatarUrl: page.avatarUrl, themeId: page.themeId, backdrop: typeof page.themeOptions?.backdrop === "string" ? page.themeOptions.backdrop : null }}
+      page={{ username: page.username, displayName: page.displayName, bio: page.bio, avatarUrl: page.avatarUrl, themeId: page.themeId, ...readThemeOptions(page.themeOptions) }}
       links={links.map(({ id, title, url, enabled }) => ({ id, title, url, enabled }))}
       socials={socials.map(({ id, platform, url }) => ({ id, platform, url }))}
       plan={{ isPro: plan.isPro, reason: plan.reason, trialDaysLeft }}

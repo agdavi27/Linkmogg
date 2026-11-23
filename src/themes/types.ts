@@ -12,7 +12,13 @@ export type PageData = {
   badgeUrl: string;
   /** For themes that sit on a backdrop: a preset id or an https image URL. */
   backdrop?: string | null;
+  /** Stack: pages stacked up and down, or fanned sideways. */
+  layout?: "vertical" | "horizontal" | null;
+  /** Reels: the person's Instagram handle and the clips they uploaded. */
+  instagram?: InstagramInfo | null;
 };
+
+export type InstagramInfo = { handle: string; reels: string[] };
 
 export type ThemeMode = "live" | "preview";
 

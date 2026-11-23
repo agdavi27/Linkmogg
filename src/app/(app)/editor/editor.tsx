@@ -14,16 +14,18 @@ import { Logo } from "@/components/logo";
 import { SocialIcon } from "@/lib/socials/icons";
 import { platformLabel } from "@/lib/socials/platforms";
 import { detectPlatform } from "@/lib/socials/detect";
-import { CATEGORIES, getTheme, plateOf, themesIn } from "@/themes/registry";
+import { liveCategories, getTheme, plateOf, themesIn } from "@/themes/registry";
 import { PhonePlate } from "@/components/phone-plate";
 import { BACKDROPS, DEFAULT_BACKDROP, isPresetBackdrop } from "@/themes/backdrops";
-import type { PageData } from "@/themes/types";
+import type { InstagramInfo, PageData } from "@/themes/types";
+import { MAX_REELS } from "@/themes/options";
+import { upload } from "@vercel/blob/client";
 import * as A from "./actions";
 
 type L = { id: string; title: string; url: string; enabled: boolean };
 type S = { id: string; platform: string; url: string };
 type Props = {
-  page: { username: string; displayName: string; bio: string; avatarUrl: string | null; themeId: string; backdrop: string | null };
+  page: { username: string; displayName: string; bio: string; avatarUrl: string | null; themeId: string; backdrop: string | null; layout: "vertical" | "horizontal" | null; instagram: InstagramInfo | null };
   links: L[];
   socials: S[];
   plan: { isPro: boolean; reason: "subscription" | "trial" | "free"; trialDaysLeft: number | null };
@@ -70,6 +72,8 @@ export function Editor(props: Props) {
   const [savedTheme, setSavedTheme] = useState(props.page.themeId);
   const [previewTheme, setPreviewTheme] = useState(props.page.themeId);
   const [backdrop, setBackdropState] = useState(props.page.backdrop);
+  const [layout, setLayoutState] = useState(props.page.layout ?? "vertical");
+  const [instagram, setInstagramState] = useState<InstagramInfo | null>(props.page.instagram);
   const [tab, setTab] = useState<"edit" | "preview">("edit");
   const [copied, setCopied] = useState(false);
   const { status, run, clear } = useStatus();
@@ -94,7 +98,9 @@ export function Editor(props: Props) {
     showBadge: !props.plan.isPro,
     badgeUrl: props.badgeUrl,
     backdrop,
-  }), [profile, links, socials, props.page.username, props.plan.isPro, props.badgeUrl, backdrop]);
+    layout,
+    instagram,
+  }), [profile, links, socials, props.page.username, props.plan.isPro, props.badgeUrl, backdrop, layout, instagram]);
 
   const onLinkDrag = (e: DragEndEvent) => {
     if (!e.over || e.active.id === e.over.id) return;
@@ -208,7 +214,7 @@ export function Editor(props: Props) {
               <h2 id="theme-h" className="type-title text-xl">Theme</h2>
               <Link href="/themes" className="text-sm text-ink-2 underline-offset-4 hover:underline">See them all</Link>
             </div>
-            {CATEGORIES.map((c) => (
+            {liveCategories().map((c) => (
             <div key={c.id} className="mt-4">
             <h3 className="text-sm font-semibold">{c.name}</h3>
             <ul className="mt-2 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
@@ -235,6 +241,20 @@ export function Editor(props: Props) {
               <BackdropPicker value={backdrop} onChange={(v) => { setBackdropState(v); run(A.setBackdrop(v)); }}
                 onUploaded={(url) => setBackdropState(url)} run={run} />
             ) : null}
+            {previewTheme === "stack" ? (
+              <div className="mt-5 border-t border-line pt-4">
+                <h3 id="layout-h" className="text-sm font-semibold">Layout</h3>
+                <div role="radiogroup" aria-labelledby="layout-h" className="mt-2 inline-flex rounded-full bg-black/5 p-1">
+                  {(["vertical", "horizontal"] as const).map((v) => (
+                    <button key={v} type="button" role="radio" aria-checked={layout === v} onClick={() => { setLayoutState(v); run(A.setLayout(v)); }}
+                      className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${layout === v ? "bg-ink text-paper" : "text-ink-2 hover:text-ink"}`}>
+                      {v === "vertical" ? "Up and down" : "Sideways"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            {previewTheme === "reels" ? <ReelsPicker value={instagram} onChange={setInstagramState} run={run} /> : null}
           </section>
         </div>
 
@@ -455,6 +475,69 @@ function BackdropPicker({ value, onChange, onUploaded, run }: {
           <button type="submit" className="btn btn-ghost btn-sm">Use</button>
         </form>
       </div>
+    </div>
+  );
+}
+
+/** The Reels theme's settings: an Instagram link for the handle, and the clips that play behind the links. */
+function ReelsPicker({ value, onChange, run }: {
+  value: InstagramInfo | null; onChange: (v: InstagramInfo) => void;
+  run: ReturnType<typeof useStatus>["run"];
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [link, setLink] = useState(value?.handle ? `instagram.com/${value.handle}` : "");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const reels = value?.reels ?? [];
+
+  const addFiles = async (files: FileList) => {
+    setError(null); setBusy(true);
+    let next = reels;
+    try {
+      for (const f of Array.from(files).slice(0, MAX_REELS)) {
+        if (!f.type.startsWith("video/")) { setError(`${f.name} isn't a video.`); continue; }
+        if (f.size > 40 * 1024 * 1024) { setError(`${f.name} is over 40 MB. Trim it first.`); continue; }
+        const pageId = await A.myPageId();
+        const blob = await upload(`reels/${pageId}/${f.name.replace(/[^\w.-]/g, "_")}`, f, { access: "public", handleUploadUrl: "/api/reels/upload" });
+        const r = await run(A.addReel(blob.url));
+        if (r.ok && r.data) next = r.data;
+      }
+      onChange({ handle: value?.handle ?? "", reels: next });
+    } catch (e) {
+      setError(e instanceof Error && /set up/i.test(e.message) ? "Uploads aren't set up yet." : "That upload didn't go through. Try again.");
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div className="mt-5 border-t border-line pt-4">
+      <h3 className="text-sm font-semibold">Instagram</h3>
+      <form className="mt-2 flex gap-2" onSubmit={async (e) => {
+        e.preventDefault();
+        const r = await run(A.setInstagram(link));
+        if (r.ok && r.data) onChange({ handle: r.data, reels });
+      }}>
+        <label className="sr-only" htmlFor="ig-url">Instagram profile link</label>
+        <input id="ig-url" className="field min-w-0 flex-1 text-sm" placeholder="instagram.com/yourname" value={link} onChange={(e) => setLink(e.target.value)} inputMode="url" autoComplete="off" />
+        <button type="submit" className="btn btn-ghost btn-sm">Save</button>
+      </form>
+      <h3 className="mt-4 text-sm font-semibold">Reels</h3>
+      <p className="mt-0.5 text-xs text-ink-2">Add up to {MAX_REELS} of your own clips. They play small, soft and muted behind your links.</p>
+      {reels.length ? (
+        <ul className="mt-2 grid grid-cols-6 gap-1.5">
+          {reels.map((r) => (
+            <li key={r} className="relative aspect-[9/16] overflow-hidden rounded-lg bg-black">
+              <video src={`${r}#t=0.1`} muted playsInline preload="metadata" className="size-full object-cover" />
+              <button type="button" aria-label="Remove this clip" onClick={async () => { const x = await run(A.removeReel(r)); if (x.ok && x.data) onChange({ handle: value?.handle ?? "", reels: x.data }); }}
+                className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-black/60 text-white"><X size={12} /></button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      <input type="file" accept="video/mp4,video/quicktime,video/webm" multiple ref={fileRef} className="hidden" onChange={(e) => { if (e.target.files?.length) addFiles(e.target.files); e.target.value = ""; }} />
+      <button type="button" onClick={() => fileRef.current?.click()} className="btn btn-ghost btn-sm mt-2" disabled={busy || reels.length >= MAX_REELS}>
+        <Upload size={14} /> {busy ? "Uploading" : "Add reel clips"}
+      </button>
+      {error ? <p className="mt-1 text-xs text-[#b42318]" role="alert">{error}</p> : null}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use server";
 
+import { DEFAULT_THEME } from "@/themes/registry";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db, pages } from "@/lib/db";
@@ -25,7 +26,7 @@ export async function claimUsername(_p: ClaimState, form: FormData): Promise<Cla
   const [existing] = await db.select().from(pages).where(eq(pages.userId, user.id)).limit(1);
   if (existing) redirect("/editor");
   try {
-    await db.insert(pages).values({ userId: user.id, username: u, displayName: displayName || u });
+    await db.insert(pages).values({ userId: user.id, username: u, displayName: displayName || u, themeId: DEFAULT_THEME });
   } catch {
     return { error: "That one's taken. Try another." };
   }

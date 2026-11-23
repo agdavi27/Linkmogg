@@ -1,101 +1,110 @@
 "use client";
 
-import { useRef, useState, type CSSProperties } from "react";
-import { Avatar, Empty, SocialRow, ThemeRoot, hash, hostOf, linkTarget } from "../shared";
+import { useEffect, useRef, useState } from "react";
+import { Avatar, Empty, SocialRow, ThemeRoot, hostOf, linkTarget } from "../shared";
 import { buzz, tick } from "../motion";
 import type { ThemeProps } from "../types";
 
-// Each folder gets a material. Faces only on the felt ones.
-const MATERIALS = ["felt-blue", "leather", "marble", "canvas", "plastic", "wood", "felt-grey", "molded", "puffer"] as const;
-type Material = (typeof MATERIALS)[number];
-
-function Face({ mood }: { mood: "happy" | "meh" }) {
-  return (
-    <svg aria-hidden viewBox="0 0 60 30" className="lm-fo-face">
-      {mood === "happy" ? (
-        <>
-          <ellipse cx="22" cy="10" rx="5" ry="7" fill="#fff" stroke="#111" strokeWidth="1.5" /><circle cx="23" cy="11" r="3" fill="#111" />
-          <ellipse cx="38" cy="10" rx="5" ry="7" fill="#fff" stroke="#111" strokeWidth="1.5" /><circle cx="39" cy="11" r="3" fill="#111" />
-          <path d="M24 22 q6 6 12 0" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round" />
-        </>
-      ) : (
-        <>
-          <path d="M14 10 q6 5 12 0 z" fill="#fff" stroke="#111" strokeWidth="1.3" /><path d="M14 10 h12" stroke="#111" strokeWidth="1.8" /><circle cx="20" cy="11.4" r="1.8" fill="#111" />
-          <path d="M34 10 q6 5 12 0 z" fill="#fff" stroke="#111" strokeWidth="1.3" /><path d="M34 10 h12" stroke="#111" strokeWidth="1.8" /><circle cx="40" cy="11.4" r="1.8" fill="#111" />
-          <path d="M20 23 h20" stroke="#111" strokeWidth="1.8" strokeLinecap="round" />
-        </>
-      )}
-    </svg>
-  );
-}
-
-function Extras({ m }: { m: Material }) {
-  if (m === "felt-blue") return <Face mood="happy" />;
-  if (m === "felt-grey") return <Face mood="meh" />;
-  if (m === "marble") return (
-    <svg aria-hidden viewBox="0 0 100 70" preserveAspectRatio="none" className="absolute inset-0 size-full">
-      <path d="M58 0 L52 14 L60 24 L48 40 L55 52 L50 70 M52 14 L30 22 L18 18 M60 24 L80 30 L92 26 M48 40 L30 48 M55 52 L72 60" fill="none" stroke="url(#lmgold)" strokeWidth="1.6" strokeLinejoin="round" />
-      <defs><linearGradient id="lmgold" x1="0" x2="1"><stop offset="0" stopColor="#8a6a1c" /><stop offset=".5" stopColor="#f6d77a" /><stop offset="1" stopColor="#a07c22" /></linearGradient></defs>
-    </svg>
-  );
-  if (m === "canvas") return <><span aria-hidden className="lm-fo-tag">Sturdy<i /></span><span aria-hidden className="lm-fo-care" /></>;
-  if (m === "plastic") return <span aria-hidden className="lm-fo-board" />;
-  return null;
-}
-
+/**
+ * A grey late-90s desktop: one window in the middle of a teal screen, your links as folders inside it.
+ * Click a folder to select it, click again (or press Enter) to open it.
+ */
 export default function Folders({ data, mode }: ThemeProps) {
-  const [open, setOpen] = useState<number | null>(null);
-  const refs = useRef<(HTMLAnchorElement | null)[]>([]);
   const n = data.links.length;
-  const cols = n <= 4 ? 2 : n <= 9 ? 3 : 4;
+  const [sel, setSel] = useState<number | null>(null);
+  const [time, setTime] = useState("");
+  const refs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const name = data.displayName || data.username;
+  const current = sel !== null ? data.links[sel] : null;
+
+  // the taskbar clock, filled in after mount so server and client markup match
+  useEffect(() => {
+    const set = () => setTime(new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
+    set();
+    const t = setInterval(set, 30_000);
+    return () => clearInterval(t);
+  }, []);
 
   const pick = (i: number) => {
-    if (open === i) { refs.current[i]?.click(); return; }
-    setOpen(i);
-    tick(900, 0.025, 0.04);
-    buzz(6);
+    if (sel === i) { refs.current[i]?.click(); return; }
+    setSel(i); tick(1500, 0.01, 0.025); buzz(4);
   };
 
   return (
-    <ThemeRoot data={data} mode={mode} label="Folders" className="lm-fo-bg bg-[#e4e4e2] text-[#1a1a1a]">
-      <div className="relative mx-auto flex min-h-0 w-full max-w-[760px] flex-1 flex-col px-5 pt-[clamp(14px,4cqh,40px)]">
-        <header className="lm-fo-in flex shrink-0 items-center gap-3">
-          <Avatar data={data} size={48} className="bg-white! text-[#1a1a1a] shadow-[0_2px_8px_rgba(0,0,0,.12)]" />
-          <div className="min-w-0">
-            <h1 className="truncate text-[clamp(20px,5.6cqw,28px)] font-semibold tracking-[-0.02em]">{data.displayName || `@${data.username}`}</h1>
-            {data.bio ? <p className="line-clamp-2 text-[12.5px] leading-snug text-[#1a1a1a]/55">{data.bio}</p> : null}
+    <ThemeRoot data={data} mode={mode} label="Folders" badgeTone="light" className="lm-w9 bg-[#008080] text-black">
+      <div className="relative flex min-h-0 flex-1 items-center justify-center px-[4%] pb-3 pt-[56px]">
+        <section className="lm-w9-win lm-w9-in flex max-h-full w-full max-w-[640px] flex-col" aria-label={`${name}'s links`}>
+          <header className="lm-w9-title flex h-[22px] shrink-0 items-center gap-1.5 pl-1.5 pr-[3px]">
+            <FolderGlyph size={14} />
+            <h1 className="min-w-0 flex-1 truncate text-[12px] font-bold text-white">{name}</h1>
+            <span aria-hidden className="lm-w9-btn">_</span>
+            <span aria-hidden className="lm-w9-btn">□</span>
+            <button type="button" onClick={() => setSel(null)} aria-label="Clear selection" className="lm-w9-btn ml-0.5">×</button>
+          </header>
+          <div aria-hidden className="flex shrink-0 gap-3 px-2 py-[3px] text-[12px]"><span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>V</u>iew</span><span><u>H</u>elp</span></div>
+          <div className="mx-1 flex shrink-0 items-center gap-1.5 px-1.5 py-[2px] text-[12px]">
+            <span className="text-black/60">Address</span>
+            <span className="lm-w9-sunk min-w-0 flex-1 truncate bg-white px-1">C:\Links\{data.username}</span>
           </div>
-        </header>
 
-        <ul className="mt-[clamp(12px,3.5cqh,36px)] grid min-h-0 flex-1 content-center gap-x-[clamp(10px,4cqw,40px)] gap-y-[clamp(6px,2cqh,24px)]" aria-label="Links"
-          style={{ gridTemplateColumns: `repeat(${cols}, minmax(0,1fr))`, gridAutoRows: `minmax(0, ${Math.round(100 / Math.ceil(Math.max(1, n) / cols))}%)` }}
-          onPointerLeave={(e) => { if (e.pointerType === "mouse") setOpen(null); }}>
-          {data.links.map((l, i) => {
-            const m = MATERIALS[(i + hash(data.username)) % MATERIALS.length];
-            const on = open === i;
-            return (
-              <li key={l.id} className="lm-fo-cell flex min-h-0 flex-col items-center justify-center" style={{ animationDelay: `${i * 50}ms` }}>
-                <button type="button" onClick={() => pick(i)} onPointerEnter={(e) => { if (e.pointerType === "mouse") setOpen(i); }}
-                  aria-label={`${l.title}${on ? ", open. Press again to visit" : ""}`} aria-expanded={on}
-                  className={`lm-fo group relative aspect-[1.3] max-h-full w-full max-w-[220px] min-h-0 shrink outline-none ${on ? "is-open" : ""}`}
-                  style={{ ["--tilt" as string]: `${((hash(l.id) % 5) - 2) * 0.6}deg` } as CSSProperties}>
-                  <span aria-hidden className={`lm-fo-back mat-${m}`} />
-                  <span className="lm-fo-paper">
-                    <span className="block truncate text-[clamp(8px,2.2cqw,11px)] font-semibold text-[#1a1a1a]/70">{hostOf(l.url)}</span>
-                    <span className="mt-0.5 block text-[clamp(8px,2.2cqw,11px)] font-bold text-[#2f6fd6]">Open ↗</span>
-                  </span>
-                  <span aria-hidden className="lm-fo-paper lm-fo-paper-2" />
-                  <span aria-hidden className={`lm-fo-front mat-${m}`}><Extras m={m} /></span>
+          {/* about: the window's info panel */}
+          <div className="mx-1 mt-1 flex shrink-0 items-center gap-3 bg-white px-3 py-2.5 lm-w9-sunk">
+            <Avatar data={data} size={44} className="shrink-0 rounded-none! ring-1 ring-black/20" />
+            <div className="min-w-0">
+              <p className="truncate text-[15px] font-bold leading-tight">{name}</p>
+              {data.bio ? <p className="line-clamp-2 text-[12px] leading-snug text-black/70">{data.bio}</p> : null}
+            </div>
+          </div>
+
+          <ul className="lm-w9-sunk mx-1 mt-1 grid min-h-0 flex-1 content-center justify-items-center gap-x-2 gap-y-3 overflow-y-auto bg-white px-2 py-4"
+            style={{ gridTemplateColumns: `repeat(${n <= 4 ? Math.max(n, 1) : 3}, minmax(0, 1fr))` }} aria-label="Links">
+            {data.links.map((l, i) => (
+              <li key={l.id} className="flex w-full max-w-[120px] flex-col items-center">
+                <button type="button" onClick={() => pick(i)} onDoubleClick={() => refs.current[i]?.click()}
+                  aria-label={`${l.title}${sel === i ? ", selected. Press again to open" : ""}`}
+                  className={`lm-w9-icon flex w-full flex-col items-center gap-1 px-1 py-1 outline-none ${sel === i ? "is-on" : ""}`}>
+                  <FolderGlyph size={44} open={sel === i} />
+                  <span className="lm-w9-label line-clamp-2 max-w-full px-0.5 text-center text-[12px] leading-tight">{l.title}</span>
                 </button>
-                <span className="mt-1.5 w-full truncate text-center text-[clamp(11px,3.2cqw,14px)] font-medium">{l.title}</span>
                 <a ref={(el) => { refs.current[i] = el; }} href={l.url} {...linkTarget(mode, l.url)} tabIndex={-1} aria-hidden className="hidden">{l.title}</a>
               </li>
-            );
-          })}
-        </ul>
-        {n === 0 ? <Empty className="mt-6" /> : null}
-        <SocialRow socials={data.socials} mode={mode} className="shrink-0 py-1" iconClass="size-9! text-[#1a1a1a]/70 hover:bg-black/5" size={18} />
+            ))}
+            {n === 0 ? <li className="col-span-full"><Empty /></li> : null}
+          </ul>
+
+          {/* status bar: what's selected, and a real button to open it */}
+          <footer className="flex shrink-0 items-center gap-1 p-1 text-[12px]" aria-live="polite">
+            <span className="lm-w9-sunk min-w-0 flex-1 truncate px-1.5 py-[2px]">{current ? hostOf(current.url) : `${n} object${n === 1 ? "" : "s"}`}</span>
+            {current ? (
+              <a href={current.url} {...linkTarget(mode, current.url)} className="lm-w9-raised shrink-0 px-3 py-[3px] font-bold outline-none focus-visible:outline-1 focus-visible:outline-dotted focus-visible:-outline-offset-4">Open</a>
+            ) : null}
+          </footer>
+        </section>
+      </div>
+
+      {/* taskbar */}
+      <div className="lm-w9-bar relative z-10 flex h-[40px] shrink-0 items-center gap-2 px-1">
+        <span className="lm-w9-raised flex h-[30px] shrink-0 items-center gap-1.5 px-2 text-[13px] font-bold"><FolderGlyph size={16} />Links</span>
+        <span className="lm-w9-sunk hidden h-[30px] min-w-0 max-w-[180px] flex-1 items-center truncate px-2 text-[12px] @min-[420px]:flex">{name}</span>
+        <div className="ml-auto flex items-center">
+          <SocialRow socials={data.socials} mode={mode} iconClass="size-8! text-black/80 hover:bg-black/10 rounded-none!" size={15} />
+        </div>
+        <span className="lm-w9-sunk flex h-[30px] shrink-0 items-center px-2 text-[12px] tabular-nums">{time}</span>
       </div>
     </ThemeRoot>
+  );
+}
+
+/** A plain manila folder, drawn in a few flat blocks. */
+function FolderGlyph({ size, open = false }: { size: number; open?: boolean }) {
+  return (
+    <svg aria-hidden viewBox="0 0 32 26" width={size} height={size * 26 / 32} shapeRendering="crispEdges" className="shrink-0">
+      <path d="M1 3h11l2 3h17v19H1z" fill="#b8961e" />
+      <path d="M1 3h11l2 3h17v1H1z" fill="#ffe680" />
+      {open
+        ? <path d="M5 11h26l-4 14H1z" fill="#ffd84a" stroke="#806400" strokeWidth="1" />
+        : <path d="M1 9h30v16H1z" fill="#ffd84a" stroke="#806400" strokeWidth="1" />}
+      <path d="M2 10h28v1H2z" fill="#fff3b0" opacity={open ? 0 : 1} />
+    </svg>
   );
 }

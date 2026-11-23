@@ -2,26 +2,32 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CATEGORIES, getTheme, themesIn } from "@/themes/registry";
+import { liveCategories, getTheme, themesIn } from "@/themes/registry";
 import { PhonePlate, PlateDot } from "@/components/phone-plate";
 import { DEMO } from "@/themes/demo";
 import { BACKDROPS, DEFAULT_BACKDROP } from "@/themes/backdrops";
+import { instagramHandle } from "@/themes/options";
+import { THEMES } from "@/themes/registry";
+import { countWord } from "@/lib/words";
 
 export function Gallery({ initial }: { initial: string }) {
   const [id, setId] = useState(getTheme(initial).id);
   const [name, setName] = useState("");
   const [backdrop, setBackdrop] = useState(DEFAULT_BACKDROP);
+  const [layout, setLayout] = useState<"vertical" | "horizontal">("vertical");
+  const [ig, setIg] = useState("");
+  const handle = instagramHandle(ig);
   const t = getTheme(id);
-  const data = { ...DEMO, displayName: name || DEMO.displayName, backdrop };
+  const data = { ...DEMO, displayName: name || DEMO.displayName, backdrop, layout, instagram: handle ? { handle, reels: [] } : null };
   return (
     <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-5 pb-20 pt-4 sm:px-8 lg:grid-cols-[300px_minmax(0,1fr)]">
       <div>
         <h1 className="type-plate text-[clamp(3rem,6vw,4.4rem)]">Try every theme</h1>
-        <p className="mt-3 text-ink-2">Same links, twenty-two ways to show them. Every theme is free for 14 days, no card needed.</p>
+        <p className="mt-3 text-ink-2">Same links, {countWord(THEMES.length)} ways to show them. Every theme is free for 14 days, no card needed.</p>
         <label htmlFor="demo-name" className="label mt-6">See it with your name</label>
         <input id="demo-name" className="field" placeholder="Juno Park" value={name} onChange={(e) => setName(e.target.value)} maxLength={40} />
         <div className="mt-6 flex flex-col gap-5">
-          {CATEGORIES.map((c) => (
+          {liveCategories().map((c) => (
             <section key={c.id} aria-labelledby={`cat-${c.id}`}>
               <h2 id={`cat-${c.id}`} className="px-3 text-sm font-bold text-ink">{c.name}</h2>
               <ul className="mt-1 flex flex-col gap-0.5">
@@ -57,6 +63,28 @@ export function Gallery({ initial }: { initial: string }) {
               ))}
             </ul>
             <p className="mt-1 text-xs text-ink-3">Or upload your own once it&apos;s your page.</p>
+          </div>
+        ) : null}
+        {id === "stack" ? (
+          <div className="mt-4 flex flex-col items-center">
+            <p id="layout-label" className="text-sm font-semibold">Layout</p>
+            <div role="radiogroup" aria-labelledby="layout-label" className="mt-2 flex rounded-full bg-black/5 p-1">
+              {(["vertical", "horizontal"] as const).map((v) => (
+                <button key={v} type="button" role="radio" aria-checked={layout === v} onClick={() => setLayout(v)}
+                  className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${layout === v ? "bg-ink text-paper" : "text-ink-2 hover:text-ink"}`}>
+                  {v === "vertical" ? "Up and down" : "Sideways"}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+        {id === "reels" ? (
+          <div className="mt-4 flex w-full max-w-[360px] flex-col">
+            <label htmlFor="ig-link" className="label">Your Instagram link</label>
+            <input id="ig-link" className="field" placeholder="instagram.com/yourname" value={ig} onChange={(e) => setIg(e.target.value)} maxLength={200} inputMode="url" autoComplete="off" />
+            <p className="mt-1.5 text-xs text-ink-3">
+              {ig && !handle ? "That doesn't look like an Instagram profile link." : "Your handle goes on the page. Once it's your page, add your reel clips in the editor and they play behind your links."}
+            </p>
           </div>
         ) : null}
         <Link href="/login" className="btn btn-primary mt-5">Use {t.name} on my page</Link>

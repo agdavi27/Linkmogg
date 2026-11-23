@@ -1,3 +1,4 @@
+import { DEFAULT_THEME } from "@/themes/registry";
 import { NextResponse, type NextRequest } from "next/server";
 import { eq } from "drizzle-orm";
 import { db, links, pages, prospects, socialLinks } from "@/lib/db";
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest, { params }: RouteContext<"/claim/[to
     const username = await freeUsername(p.handle);
     [page] = await db.insert(pages).values({
       userId: user.id, username, displayName: p.displayName ?? p.handle, bio: (p.bio ?? "").slice(0, 160),
-      avatarUrl: p.avatarUrl, themeId: p.themeId ?? "classic",
+      avatarUrl: p.avatarUrl, themeId: p.themeId ?? DEFAULT_THEME,
     }).returning();
     if (p.links.length) await db.insert(links).values(p.links.map((l, i) => ({ pageId: page!.id, title: l.title.slice(0, 80), url: l.url, position: i })));
     if (p.socials.length) await db.insert(socialLinks).values(p.socials.map((s, i) => ({ pageId: page!.id, platform: s.platform, url: s.url, position: i })));

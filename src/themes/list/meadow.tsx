@@ -52,7 +52,7 @@ export default function Meadow({ data, mode }: ThemeProps) {
 
   const top = 44; // leave room for the share button
   const cw = w / 4, ch = (h - top) / 6;
-  const icon = Math.max(54, Math.min(cw * 0.56, ch * 0.62, 96));
+  const icon = Math.max(66, Math.min(cw * 0.74, ch * 0.66, 124)); // big targets: a thumb, not a cursor
   const win = { w: Math.min(w * 0.5, 520), h: Math.min(h * 0.32, 380) };
 
   return (
@@ -74,13 +74,13 @@ export default function Meadow({ data, mode }: ThemeProps) {
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(i); } }}
               aria-label={`${l.title}${sel === i ? ", selected. Press again to open" : ""}`}
               className={`lm-md-icon absolute flex touch-none select-none flex-col items-center outline-none ${sel === i ? "is-on" : ""}`}
-              style={{ left: x, top: y, width: icon * 1.5, ["--d" as string]: `${i * 50}ms` } as CSSProperties}>
+              style={{ left: x, top: y, width: Math.min(cw, icon * 1.5), padding: 6, ["--d" as string]: `${i * 50}ms` } as CSSProperties}>
               {kind === 1 ? <Folder size={icon} /> : (
                 <span className="lm-md-photo block" style={{ width: icon, height: icon * 0.78, rotate: kind === 2 ? `${(k % 9) - 4}deg` : undefined }}>
                   <LinkArt link={l} className="size-full" icon={Math.round(icon * 0.28)} blur={0.4} />
                 </span>
               )}
-              <span className="lm-md-label mt-1 max-w-full truncate px-1 text-[11px] font-medium leading-tight">{fileName(l, kind)}</span>
+              <span className="lm-md-label mt-1 max-w-full truncate px-1.5 text-[12.5px] font-semibold leading-tight">{fileName(l, kind)}</span>
             </button>
           );
         }) : null}

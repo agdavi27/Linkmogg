@@ -2,15 +2,15 @@ import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import { hostLabel, PRICE_LABEL, TRIAL_DAYS } from "@/lib/config";
 import { THEMES } from "@/themes/registry";
+import { countWord } from "@/lib/words";
 import { ClaimInput } from "./claim-input";
 import { HeroPlate } from "./demo-phone";
 import { ThemeReel } from "./theme-reel";
 
-const COUNT = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen", "Twenty", "Twenty-one", "Twenty-two", "Twenty-three", "Twenty-four", "Twenty-five"];
 
 export default function Home() {
   const host = hostLabel();
-  const count = COUNT[THEMES.length] ?? String(THEMES.length);
+  const count = countWord(THEMES.length, true);
   return (
     <main>
       <HeroPlate>
@@ -59,7 +59,7 @@ export default function Home() {
           </div>
           <div className="flex flex-col justify-end">
             <ul className="flex flex-col divide-y divide-white/12 border-y border-white/12 text-[15px]">
-              {[`Every theme free for ${TRIAL_DAYS} days`, "No credit card to start", "Unlimited links and socials", "No badge once you subscribe", "Cancel any time. Your page stays up in Classic."].map((f) => (
+              {[`Every theme free for ${TRIAL_DAYS} days`, "No credit card to start", "Unlimited links and socials", "No badge once you subscribe", "Cancel any time. Your page stays up in a plain version."].map((f) => (
                 <li key={f} className="flex gap-3 py-3"><Check size={18} className="mt-0.5 shrink-0 text-accent" aria-hidden />{f}</li>
               ))}
             </ul>

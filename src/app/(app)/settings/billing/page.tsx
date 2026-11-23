@@ -18,8 +18,8 @@ export default async function Billing({ searchParams }: PageProps<"/settings/bil
   const sub = subscribed
     ? "Every theme is unlocked and the badge is off. Thanks for backing Linkmogg."
     : plan.reason === "trial"
-      ? `Every theme is unlocked until your trial ends. After that, upgrade to keep your theme. Your page stays up in the Classic look until you do.`
-      : "Your page is still up in the Classic look with a small badge. Upgrade to bring back your theme and pick any other.";
+      ? `Every theme is unlocked until your trial ends. After that, upgrade to keep your theme. Your page stays up in a plain version until you do.`
+      : "Your page is still up in a plain version with a small badge. Upgrade to bring back your theme and pick any other.";
   return (
     <main className="min-h-dvh">
       <header className="mx-auto flex max-w-3xl items-center gap-4 px-5 py-5">
