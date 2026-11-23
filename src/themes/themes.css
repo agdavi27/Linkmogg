@@ -347,6 +347,19 @@ button.lm-st-chip:active { transform: scale(.95); }
   .lm-bb-move, .lm-bb-haze, .lm-bb-track, .lm-bb-bubble, .lm-bb-face > * { animation: none; }
 }
 
+.lm-bb-name { transform-origin: 0 0; text-shadow: 0 2px 24px rgba(10,30,70,.35); white-space: nowrap; }
+.lm-bb-rail { scrollbar-width: none; overscroll-behavior-x: contain; touch-action: pan-x; }
+.lm-bb-rail::-webkit-scrollbar { display: none; }
+/* glass, drawn without backdrop-filter, which doesn't survive the board's 3D warp */
+.lm-bb-glass { background: linear-gradient(160deg, rgba(255,255,255,.95), rgba(255,255,255,.55) 45%, rgba(225,229,236,.7));
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.9), inset 0 -18px 30px -18px rgba(120,130,160,.35), 0 18px 30px -16px rgba(20,30,60,.28);
+  transition: transform .35s cubic-bezier(0.23,1,0.32,1), box-shadow .3s ease; -webkit-tap-highlight-color: transparent; }
+.lm-bb-glass.is-on { transform: translateY(-8px) scale(1.04); box-shadow: inset 0 0 0 3px #1d1d22, 0 26px 36px -16px rgba(20,30,60,.4); }
+.lm-bb-glass:active { transform: scale(.96); }
+.lm-bb-glass:focus-visible { box-shadow: inset 0 0 0 4px #2a46ff; }
+.lm-bb-glass .lm-bb-bubble { animation-duration: 4s; }
+@media (hover: hover) and (pointer: fine) { .lm-bb-glass:hover { transform: translateY(-6px); } }
+
 /* ---------- Pass (member card) ---------- */
 .lm-ps { background: radial-gradient(80% 60% at 50% 40%, #2b3230, #141716 80%); }
 .lm-ps-card { border-radius: 10px; font-size: clamp(12px, 3cqmin, 16px);

@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Plus } from "lucide-react";
 import { encodeDraft, handleFrom, parsePasted } from "@/lib/convert";
-import { detectPlatform } from "@/lib/socials/detect";
+import { detectPlatform, normalizeUrl } from "@/lib/socials/detect";
 import { platformLabel } from "@/lib/socials/platforms";
 import { THEMES, getTheme } from "@/themes/registry";
 import { ThemeRenderer } from "@/themes/render";
@@ -26,8 +26,23 @@ export function Converter({ host }: { host: string }) {
   const [themeId, setThemeId] = useState("pocket");
 
   const handle = handleFrom(address);
-  const parsed = useMemo(() => parsePasted(pasted), [pasted]);
+  const found = useMemo(() => parsePasted(pasted), [pasted]);
+  const [skip, setSkip] = useState<Set<string>>(new Set()); // urls the person unticked
+  const [extra, setExtra] = useState<{ title: string; url: string }[]>([]);
+  const [newTitle, setNewTitle] = useState("");
+  const [newUrl, setNewUrl] = useState("");
+  const parsed = {
+    links: [...found.links.filter((l) => !skip.has(l.url)), ...extra].slice(0, 40),
+    socials: found.socials.filter((u) => !skip.has(u)),
+  };
   const count = parsed.links.length + parsed.socials.length;
+  const toggle = (url: string) => setSkip((cur) => { const next = new Set(cur); if (next.has(url)) next.delete(url); else next.add(url); return next; });
+  const addExtra = () => {
+    const url = normalizeUrl(newUrl);
+    if (!url) return;
+    setExtra((x) => [...x, { title: (newTitle.trim() || new URL(url.startsWith("mailto:") ? "https://email.me" : url).hostname.replace(/^www\./, "")).slice(0, 80), url }]);
+    setNewTitle(""); setNewUrl("");
+  };
 
   const data: PageData = {
     username: handle || "you",
@@ -65,18 +80,38 @@ export function Converter({ host }: { host: string }) {
               Profile links on their own, like instagram.com/you, become social icons.
             </p>
             <textarea id="cv-links" className="field min-h-48 resize-y font-mono text-[13px] leading-relaxed" value={pasted} onChange={(e) => setPasted(e.target.value)} placeholder={SAMPLE} spellCheck={false} />
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-3">
-              <span>{parsed.links.length} link{parsed.links.length === 1 ? "" : "s"} · {parsed.socials.length} social icon{parsed.socials.length === 1 ? "" : "s"}</span>
-              {!pasted ? <button type="button" className="font-medium text-ink underline underline-offset-2" onClick={() => { setPasted(SAMPLE); if (!address) setAddress("linktr.ee/junopark"); }}>Try it with an example</button> : null}
-            </div>
-            {parsed.socials.length ? (
-              <p className="mt-1 text-sm text-ink-3">Icons: {parsed.socials.map((u) => platformLabel(detectPlatform(u)?.platform ?? "website")).join(", ")}</p>
+            {!pasted ? (
+              <button type="button" className="mt-2 text-sm font-medium text-ink underline underline-offset-2" onClick={() => { setPasted(SAMPLE); if (!address) setAddress("linktr.ee/junopark"); }}>Try it with an example</button>
             ) : null}
+          </li>
+
+          <li>
+            <p className="label">3. Choose what to keep <span className="font-normal text-ink-3">({count} selected)</span></p>
+            {found.links.length || found.socials.length || extra.length ? (
+              <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white">
+                {found.links.map((l) => (
+                  <li key={l.url}><Pick on={!skip.has(l.url)} onChange={() => toggle(l.url)} title={l.title} sub={l.url.replace(/^https?:\/\/(www\.)?/, "").replace(/^mailto:/, "")} /></li>
+                ))}
+                {found.socials.map((u) => (
+                  <li key={u}><Pick on={!skip.has(u)} onChange={() => toggle(u)} title={`${platformLabel(detectPlatform(u)?.platform ?? "website")} icon`} sub={u.replace(/^https?:\/\/(www\.)?/, "")} /></li>
+                ))}
+                {extra.map((l, k) => (
+                  <li key={`x${k}`}><Pick on onChange={() => setExtra((x) => x.filter((_, j) => j !== k))} title={l.title} sub={`${l.url.replace(/^https?:\/\/(www\.)?/, "")} · added`} /></li>
+                ))}
+              </ul>
+            ) : <p className="text-sm text-ink-3">Your links show up here once they&apos;re in. Untick anything you don&apos;t want.</p>}
+            <form className="mt-3 flex flex-col gap-2 sm:flex-row" onSubmit={(e) => { e.preventDefault(); addExtra(); }}>
+              <label htmlFor="cv-nt" className="sr-only">New link title</label>
+              <input id="cv-nt" className="field sm:max-w-[38%]" placeholder="Title (optional)" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} maxLength={80} />
+              <label htmlFor="cv-nu" className="sr-only">New link address</label>
+              <input id="cv-nu" className="field flex-1" placeholder="Add another link: example.com/new" value={newUrl} onChange={(e) => setNewUrl(e.target.value)} autoCapitalize="none" spellCheck={false} />
+              <button className="btn btn-ghost shrink-0" disabled={!normalizeUrl(newUrl)}><Plus size={16} /> Add</button>
+            </form>
           </li>
 
           <li className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="cv-name" className="label">3. Name on the page</label>
+              <label htmlFor="cv-name" className="label">4. Name on the page</label>
               <input id="cv-name" className="field" placeholder={handle || "Juno Park"} value={name} onChange={(e) => setName(e.target.value)} maxLength={60} />
             </div>
             <div>
@@ -86,7 +121,7 @@ export function Converter({ host }: { host: string }) {
           </li>
 
           <li>
-            <p className="label">4. Pick a theme</p>
+            <p className="label">5. Pick a theme</p>
             <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Theme">
               {PICKS.map((id) => {
                 const t = getTheme(id);
@@ -123,5 +158,17 @@ export function Converter({ host }: { host: string }) {
         <p className="mt-3 text-center text-sm text-ink-3">Live preview · {getTheme(themeId).name}</p>
       </div>
     </div>
+  );
+}
+
+function Pick({ on, onChange, title, sub }: { on: boolean; onChange: () => void; title: string; sub: string }) {
+  return (
+    <label className={`flex cursor-pointer items-center gap-3 px-4 py-2.5 transition-colors hover:bg-paper-2/60 ${on ? "" : "opacity-50"}`}>
+      <input type="checkbox" checked={on} onChange={onChange} className="size-4 shrink-0 accent-[var(--ink)]" />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-medium">{title}</span>
+        <span className="block truncate text-xs text-ink-3">{sub}</span>
+      </span>
+    </label>
   );
 }

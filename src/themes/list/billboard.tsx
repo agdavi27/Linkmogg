@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Empty, ThemeRoot, hash, hostOf, linkTarget } from "../shared";
+import { Empty, ThemeRoot, hostOf, linkTarget, usePrefersReducedMotion } from "../shared";
 import { LinkArt } from "../art";
 import { buzz, tick, useSize } from "../motion";
 import type { ThemeProps } from "../types";
@@ -29,13 +29,9 @@ function warp() {
 }
 const WARP = warp();
 
-// Where bubbles sit on one tile of the board: [x%, y%, size]. The middle is kept clear for the name.
-const SLOTS: [number, number, number][] = [
-  [7, 26, 0.95], [19, 13, 1.3], [31, 9, 0.75], [41, 13, 0.62], [13, 50, 0.8], [26, 42, 0.62],
-  [17, 76, 1.4], [33, 66, 1.05], [57, 10, 0.75], [67, 14, 0.66], [60, 34, 0.64], [75, 33, 1.25],
-  [90, 27, 0.62], [89, 50, 0.9], [69, 68, 0.82], [81, 64, 0.78], [77, 86, 0.55], [93, 78, 1.1],
-];
-const UNIT = FH * 0.19;
+// The board's top edge leans down to the right in the photo; the name above it leans with it.
+const TOP_TILT = Math.atan2(QUAD[1][1] - QUAD[0][1], QUAD[1][0] - QUAD[0][0]) * (180 / Math.PI);
+const CARD_W = 270, CARD_GAP = 34;
 
 export default function Billboard({ data, mode }: ThemeProps) {
   const n = data.links.length;
@@ -48,7 +44,7 @@ export default function Billboard({ data, mode }: ThemeProps) {
   // Cover the screen with the photo, but never let the board get cut off on a narrow phone.
   const s = Math.max(w / IW, Math.min(h / IH, (w * 0.96) / BOARD.w));
   const ox = Math.min(0, Math.max(w - IW * s, w / 2 - BOARD.cx * s));
-  const oy = IH * s < h ? h - IH * s : Math.min(0, Math.max(h - IH * s, h * 0.36 - BOARD.cy * s));
+  const oy = IH * s < h ? h - IH * s : Math.min(0, Math.max(h - IH * s, h * (w > h ? 0.5 : 0.4) - BOARD.cy * s));
 
   const pick = (i: number) => {
     if (sel === i) { openRef.current?.click(); return; }
@@ -56,7 +52,6 @@ export default function Billboard({ data, mode }: ThemeProps) {
     tick(1500 + (i % 6) * 110, 0.015, 0.04);
     buzz(5);
   };
-  const next = () => { if (n) pick(sel === null ? 0 : (sel + 1) % n); };
   const current = sel !== null ? data.links[sel] : null;
 
   return (
@@ -69,55 +64,18 @@ export default function Billboard({ data, mode }: ThemeProps) {
               <div aria-hidden className="lm-bb-haze" />
 
               {/* the board face, warped onto the photo */}
-              <div className="lm-bb-face" style={{ width: FW, height: FH, transform: WARP }}>
-                <div className="lm-bb-field absolute inset-0">
-                  <div className="lm-bb-track absolute inset-y-0 left-0 flex w-[200%]">
-                    {n > 0 ? [0, 1].map((copy) => (
-                      <ul key={copy} className="relative h-full w-1/2" aria-hidden={copy === 1 || undefined} aria-label={copy === 0 ? "Links" : undefined}>
-                        {SLOTS.map(([x, y, k], slot) => {
-                          const i = (slot + copy * Math.ceil(n / 2)) % n;
-                          const l = data.links[i];
-                          const size = UNIT * k;
-                          const real = copy === 0 && slot < n; // one focusable bubble per link
-                          return (
-                            <li key={slot} className="absolute" style={{ left: `${x}%`, top: `${y}%`, width: size, height: size, marginLeft: -size / 2, marginTop: -size / 2 }}>
-                              <button type="button" tabIndex={real ? 0 : -1} aria-hidden={!real || undefined} onClick={() => pick(i)}
-                                onPointerEnter={(e) => { if (e.pointerType === "mouse") setSel(i); }}
-                                aria-label={real ? `${l.title}${sel === i ? ", selected. Press again to open" : ""}` : undefined}
-                                className={`lm-bb-bubble relative block size-full rounded-full outline-none ${sel === i ? "is-on" : ""}`}
-                                style={{ animationDelay: `${-(hash(`b${slot}`) % 50) / 10}s` }}>
-                                <LinkArt link={l} className="size-full rounded-full" icon={Math.round(size * 0.3)} blur={0.6} mark={size > 40} />
-                                <span aria-hidden className="lm-bb-gloss" />
-                              </button>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )) : null}
-                  </div>
-                </div>
+              {/* your name, painted on the sky just above the board, following its top edge */}
+              <h1 className="lm-bb-name absolute font-display font-bold leading-none tracking-[-0.05em] text-white"
+                style={{ left: QUAD[0][0] + 4, top: QUAD[0][1], fontSize: Math.min(96, 1300 / Math.max(6, name.length)), transform: `rotate(${TOP_TILT}deg) translateY(-100%)` }}>
+                <span className="block max-w-[700px] truncate pb-[0.18em]">{name}</span>
+              </h1>
 
-                <div className="pointer-events-none absolute inset-x-0 top-[19%] z-10 flex flex-col items-center px-6 text-center" aria-live="polite">
-                  <button type="button" onClick={next} aria-label="Next link"
-                    className="lm-bb-plus pointer-events-auto mb-[14px] grid size-[42px] place-items-center rounded-full text-[26px] text-[#6b6b74]">+</button>
-                  <h1 className="max-w-[560px] truncate font-display font-semibold lowercase leading-[0.9] tracking-[-0.06em]" style={{ fontSize: Math.min(126, 1000 / Math.max(5, name.length)) }}>{name}</h1>
-                  <div className="mt-[12px] min-h-[2.6em] max-w-[420px] text-[22px] leading-snug text-[#7a7a80]">
-                    {current ? (
-                      <p key={current.id} className="lm-pop truncate"><span className="text-[#2a2a2e]">{current.title}</span><br />{hostOf(current.url)}</p>
-                    ) : (
-                      <p className="line-clamp-2">{data.bio || "Tap a bubble to see where it goes."}</p>
-                    )}
-                  </div>
-                  {current ? (
-                    <a ref={openRef} href={current.url} key={current.id} {...linkTarget(mode, current.url)}
-                      className="lm-pop lm-bb-pill pointer-events-auto mt-[10px] rounded-full bg-white px-6 py-2.5 text-[20px] font-semibold">Open link</a>
-                  ) : (
-                    <button type="button" onClick={next} className="lm-bb-pill pointer-events-auto mt-[10px] rounded-full bg-white px-6 py-2.5 text-[20px] font-semibold">
-                      {n ? "Show me" : "No links yet"}
-                    </button>
-                  )}
-                </div>
-                {n === 0 ? <Empty className="absolute inset-x-0 bottom-8 text-[22px]" /> : null}
+              {/* the board face, warped onto the photo: a glass rail of your links that drifts and scrolls */}
+              <div className="lm-bb-face" style={{ width: FW, height: FH, transform: WARP }}>
+                {data.bio ? <p className="absolute left-[34px] right-[34px] top-[22px] z-10 truncate text-[22px] text-[#6d6d74]">{data.bio}</p> : null}
+                <Rail data={data} sel={sel} onPick={pick} onHover={setSel} />
+                <p aria-hidden className="absolute bottom-[18px] right-[34px] z-10 text-[18px] font-medium text-[#8a8a90]">{n ? `${n} link${n === 1 ? "" : "s"} · swipe →` : ""}</p>
+                {n === 0 ? <Empty className="absolute inset-x-0 top-1/2 text-[22px]" /> : null}
                 <div aria-hidden className="lm-bb-light" />
               </div>
             </div>
@@ -127,7 +85,7 @@ export default function Billboard({ data, mode }: ThemeProps) {
         {/* down on the grass: a readable version of the pick, and the socials */}
         <div className="absolute inset-x-0 bottom-0 z-20 flex flex-col items-center gap-2 px-4 pb-2">
           {current ? (
-            <a key={current.id} href={current.url} {...linkTarget(mode, current.url)} tabIndex={-1} aria-hidden
+            <a ref={openRef} key={current.id} href={current.url} {...linkTarget(mode, current.url)}
               className="lm-pop flex max-w-full items-center gap-2 rounded-full bg-white/90 py-1.5 pl-4 pr-1.5 text-[14px] font-semibold text-[#121212] shadow-lg backdrop-blur">
               <span className="truncate">{current.title}</span>
               <span className="shrink-0 rounded-full bg-[#121212] px-3 py-1 text-[12px] text-white">Open ↗</span>
@@ -143,5 +101,59 @@ export default function Billboard({ data, mode }: ThemeProps) {
         </div>
       </div>
     </ThemeRoot>
+  );
+}
+
+/** A glass rail of big bubbles. It drifts on its own, and you can swipe or scroll it any time. */
+function Rail({ data, sel, onPick, onHover }: { data: ThemeProps["data"]; sel: number | null; onPick: (i: number) => void; onHover: (i: number) => void }) {
+  const rail = useRef<HTMLDivElement>(null);
+  const hold = useRef(0); // drift waits until this time after someone touches the rail
+  const reduced = usePrefersReducedMotion();
+  const n = data.links.length;
+
+  useEffect(() => {
+    const el = rail.current;
+    if (!el || reduced || n < 2) return;
+    let raf = 0, last = performance.now();
+    const loop = (t: number) => {
+      const dt = Math.min(64, t - last); last = t;
+      if (t > hold.current) {
+        el.scrollLeft += dt * 0.035;
+        const half = el.scrollWidth / 2;
+        if (el.scrollLeft >= half) el.scrollLeft -= half; // the second copy takes over seamlessly
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [reduced, n]);
+
+  const touch = () => { hold.current = performance.now() + 4000; };
+  const copies = n > 1 && !reduced ? [0, 1] : [0];
+
+  return (
+    <div ref={rail} className="lm-bb-rail absolute inset-x-0 top-[70px] bottom-[52px] flex items-center overflow-x-auto"
+      onPointerDown={touch} onWheel={touch} onTouchStart={touch} onFocusCapture={touch}>
+      {copies.map((copy) => (
+        <ul key={copy} className="flex shrink-0 items-center" style={{ gap: CARD_GAP, paddingLeft: CARD_GAP }} aria-hidden={copy === 1 || undefined} aria-label={copy === 0 ? "Links" : undefined}>
+          {data.links.map((l, i) => (
+            <li key={l.id} className="shrink-0">
+              <button type="button" tabIndex={copy === 1 ? -1 : 0} onClick={() => onPick(i)}
+                onPointerEnter={(e) => { if (e.pointerType === "mouse") onHover(i); }}
+                aria-label={`${l.title}${sel === i ? ", selected. Press again to open" : ""}`}
+                className={`lm-bb-glass flex flex-col items-center rounded-[44px] px-[22px] pb-[22px] pt-[26px] outline-none ${sel === i ? "is-on" : ""}`}
+                style={{ width: CARD_W }}>
+                <span className="lm-bb-bubble relative block size-[190px] rounded-full">
+                  <LinkArt link={l} className="size-full rounded-full" icon={58} blur={0.6} mark />
+                  <span aria-hidden className="lm-bb-gloss" />
+                </span>
+                <span className="mt-[18px] block w-full truncate text-center text-[30px] font-semibold leading-tight tracking-[-0.03em] text-[#1d1d22]">{l.title}</span>
+                <span className="mt-[4px] block w-full truncate text-center text-[19px] text-[#7a7a80]">{hostOf(l.url)}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ))}
+    </div>
   );
 }
