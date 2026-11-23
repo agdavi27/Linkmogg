@@ -8,7 +8,7 @@ function client() {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error("DATABASE_URL is not set");
   if (!globalForDb.pg) {
-    globalForDb.pg = postgres(url, { prepare: false, max: process.env.NODE_ENV === "production" ? 3 : 10 });
+    globalForDb.pg = postgres(url, { prepare: false, max: process.env.NODE_ENV === "production" ? 3 : 10, connect_timeout: 10, idle_timeout: 20 });
   }
   return globalForDb.pg;
 }
