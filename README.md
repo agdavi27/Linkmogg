@@ -1,7 +1,7 @@
 # Linkmogg
 
 A link-in-bio platform with interactive themes and a creator outreach pipeline.
-Next.js 16 (App Router) · TypeScript · Tailwind v4 · Postgres (Neon) + Drizzle · Stripe · Resend.
+Next.js 16 (App Router) · TypeScript · Tailwind v4 · Postgres (Supabase or Neon) + Drizzle · Stripe · Resend.
 
 ## What's here
 
@@ -36,7 +36,7 @@ npm run lint
 ## Deploy to Vercel
 
 1. Import the GitHub repo in Vercel. `vercel.json` already sets the build command (runs migrations, then `next build`) and a daily cron for outreach.
-2. Add a Neon database from the Vercel Marketplace (Storage → Neon). It sets `DATABASE_URL` and `DATABASE_URL_UNPOOLED`.
+2. Database (Supabase): create a new project just for Linkmogg. In Connect → ORMs/Connection string, copy the **Transaction pooler** URL (port 6543) into `DATABASE_URL` and the **Session pooler** URL (port 5432) into `DATABASE_URL_UNPOOLED`. Migrations run on every deploy. (Neon from the Vercel Marketplace works the same way.)
 3. Add a Vercel Blob store (Storage → Blob) for avatar uploads. It sets `BLOB_READ_WRITE_TOKEN`.
 4. Add the rest of the variables from `.env.example` (Settings → Environment Variables), then redeploy.
 5. Stripe: create a product with a $10/month recurring price, put its id in `STRIPE_PRICE_ID`. Add a webhook to `https://YOUR_DOMAIN/api/stripe/webhook` for `checkout.session.completed` and `customer.subscription.created/updated/deleted`. Turn on the customer portal in Stripe settings.
