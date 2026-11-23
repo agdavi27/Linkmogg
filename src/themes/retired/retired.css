@@ -349,3 +349,47 @@
 .lm-mu-arrow:hover { background: rgba(244,239,230,.22); } .lm-mu-arrow:active { transform: scale(.94); }
 @media (prefers-reduced-motion: reduce) { .lm-mu-world.is-anim { transition: none; } }
 
+
+/* ---------- Gallery (isometric room) ---------- */
+.lm-gr { background: radial-gradient(80% 60% at 50% 50%, #f1f0f3, #e2e1e6 80%); }
+.lm-gr-scene { perspective: 3000px; perspective-origin: 50% 30%; animation: lm-gr-in 1.2s cubic-bezier(0.23,1,0.32,1) backwards; }
+.lm-gr-room { transform-style: preserve-3d; }
+.lm-gr-room.is-anim { transition: transform .9s cubic-bezier(0.23,1,0.32,1); }
+@keyframes lm-gr-in { from { opacity: 0; translate: 0 30px; } }
+.lm-gr-room * { transform-style: preserve-3d; }
+.lm-gr-floor { background:
+    repeating-linear-gradient(90deg, rgba(60,30,15,.22) 0 1px, transparent 1px 100%) 0 0 / 14.28% 100%,
+    repeating-linear-gradient(0deg, rgba(60,30,15,.12) 0 1px, transparent 1px 100%) 0 0 / 100% 9%,
+    linear-gradient(90deg, #b9774f, #c98b62 30%, #b06d46 60%, #c58660);
+  box-shadow: 0 0 0 1px rgba(80,40,20,.3); }
+.lm-gr-floor::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 6px; background: #9c5e3c; transform-origin: 0 0; transform: rotateX(90deg); }
+.lm-gr-rug { border-radius: 2px;
+  background: repeating-linear-gradient(90deg, #1b1b22 0 3px, transparent 3px 7px) 0 0 / 100% 7% no-repeat, repeating-linear-gradient(90deg, #1b1b22 0 3px, transparent 3px 7px) 0 100% / 100% 7% no-repeat,
+    radial-gradient(circle, #d8392b 0 9%, transparent 10%) 0 0 / 33% 33%, conic-gradient(from 45deg, #1b1b22 25%, transparent 0 50%, #1b1b22 0 75%, transparent 0) 50% 50% / 33% 33%, #f3ece2;
+  box-shadow: 0 0 0 3px #f3ece2, 0 0 0 4px rgba(0,0,0,.1); }
+.lm-gr-wall { backface-visibility: visible;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,.45) 0 1px, transparent 1px 100%) 0 0 / 100% 7.5%,
+    linear-gradient(90deg, rgba(255,255,255,.4) 1px, transparent 1px) 0 0 / 12% 15%, linear-gradient(90deg, rgba(255,255,255,.4) 1px, transparent 1px) 6% 7.5% / 12% 15%,
+    radial-gradient(60% 50% at 70% 40%, rgba(255,240,220,.35), transparent 70%), linear-gradient(180deg, #dca78b, #d39a7d);
+  box-shadow: inset 0 0 0 1px rgba(120,60,40,.25); }
+.lm-gr-wall-l { filter: brightness(1.03); }
+.lm-gr-wall-r { filter: brightness(.95); }
+.lm-gr-window { background: linear-gradient(90deg, #15151a 3px, transparent 3px) 0 0 / 25% 100%, linear-gradient(180deg, #15151a 3px, transparent 3px) 0 0 / 100% 25%, linear-gradient(160deg, #f4f5f7, #d9dde3); border: 3px solid #15151a; }
+.lm-gr-curtain { background: repeating-linear-gradient(90deg, #22243a 0 4px, #2e3150 4px 7px); border-radius: 2px; }
+.lm-gr-art { background: #f8f6f2; padding: 4%; box-shadow: 0 0 0 2px #1d1a17, 0 4px 8px -3px rgba(0,0,0,.4); transition: transform .3s cubic-bezier(0.23,1,0.32,1), box-shadow .2s ease; -webkit-tap-highlight-color: transparent; }
+.lm-gr-art > .lm-gr-canvas { inset: 4%; }
+.lm-gr-art.is-on { transform: translateZ(6px) scale(1.12); box-shadow: 0 0 0 2px #1d1a17, 0 0 0 5px #ffd36e, 0 10px 18px -6px rgba(0,0,0,.5); }
+.lm-gr-art:focus-visible { box-shadow: 0 0 0 2px #1d1a17, 0 0 0 5px #2a46ff; }
+@media (hover: hover) and (pointer: fine) { .lm-gr-art:hover { transform: translateZ(4px) scale(1.06); } }
+.lm-gr-face { transform-origin: 50% 100%; transform: rotateZ(calc(var(--rz) * -1)) rotateX(-58deg); pointer-events: none; }
+.lm-gr-glow { background: radial-gradient(circle, rgba(255,226,170,.75), rgba(255,226,170,0) 65%); animation: lm-gr-glow 3.6s ease-in-out infinite alternate; mix-blend-mode: screen; }
+@keyframes lm-gr-glow { to { opacity: .6; transform: translate(-50%, -50%) scale(.9); } }
+
+.lm-gr-leaves > i { clip-path: polygon(50% 0, 100% 100%, 0 70%); }
+.lm-gr-leaves { transform-origin: 50% 100%; animation: lm-gr-rustle 5s ease-in-out infinite alternate; }
+@keyframes lm-gr-rustle { from { transform: rotate(-2deg); } to { transform: rotate(2deg) scale(1.02); } }
+.lm-gr-plant > span:not(:last-child) { animation: lm-gr-leaf 4s ease-in-out infinite alternate; }
+@keyframes lm-gr-leaf { to { transform: rotate(4deg); } }
+.lm-gr-arrow { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; border-radius: 999px; background: #fff; font-size: 22px; box-shadow: 0 4px 14px -8px rgba(0,0,0,.4); transition: transform .15s ease-out; }
+.lm-gr-arrow:active { transform: scale(.92); }
+@media (prefers-reduced-motion: reduce) { .lm-gr-scene, .lm-gr-glow, .lm-gr-leaves, .lm-gr-plant > span { animation: none; } .lm-gr-room.is-anim { transition: none; } }

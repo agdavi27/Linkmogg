@@ -6,6 +6,9 @@ import { LinkArt } from "../art";
 import { buzz, tick, useDragX } from "../motion";
 import type { ThemeProps } from "../types";
 
+// Folder colors, cycled through the stack.
+const FOLDER = ["#7fb2f0", "#f2c14e", "#e9e4d8", "#9bd3b0", "#f19a8e", "#b7a6f0", "#cfd5dc"];
+
 export default function Strata({ data, mode }: ThemeProps) {
   const n = data.links.length;
   const [sel, setSel] = useState(0);
@@ -44,10 +47,19 @@ export default function Strata({ data, mode }: ThemeProps) {
                   aria-label={on ? `Open ${l.title}` : `Show ${l.title}`} aria-current={on || undefined}
                   className={`lm-st-pane absolute outline-none ${drag ? "" : "is-anim"} ${on ? "is-on" : ""}`}
                   style={{ ["--d" as string]: d, zIndex: 100 - Math.round(Math.abs(d) * 2), opacity: d < -1.5 ? 0 : 1 } as CSSProperties}>
-                  <LinkArt link={l} className="absolute inset-0" icon={42} />
-                  <span className="lm-st-glass absolute inset-0" />
-                  <span className="absolute left-3 top-3 right-3 flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.08em] text-white mix-blend-difference">
-                    <span className="truncate">{l.title}</span><span>{String(i + 1).padStart(2, "0")}</span>
+                  {/* a folder: back with a tab, a photo tucked inside, and a front flap with the label */}
+                  <span className="lm-st-back absolute inset-0" style={{ ["--fc" as string]: FOLDER[i % FOLDER.length] } as CSSProperties} />
+                  <span className="lm-st-paper absolute">
+                    <LinkArt link={l} className="absolute inset-[6%] rounded-[3px]" icon={30} blur={0.4} />
+                  </span>
+                  <span className="lm-st-front absolute inset-x-0 bottom-0" style={{ ["--fc" as string]: FOLDER[i % FOLDER.length] } as CSSProperties}>
+                    <span className="absolute inset-x-[6%] bottom-[12%] flex items-end justify-between gap-2 text-left">
+                      <span className="min-w-0">
+                        <span className="block truncate text-[clamp(13px,3.6cqw,17px)] font-semibold leading-tight">{l.title}</span>
+                        <span className="block truncate text-[10.5px] opacity-60">{hostOf(l.url)}</span>
+                      </span>
+                      <span className="shrink-0 text-[11px] font-semibold tabular opacity-60">{String(i + 1).padStart(2, "0")}</span>
+                    </span>
                   </span>
                 </button>
               );
