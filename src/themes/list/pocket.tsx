@@ -1,13 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import Image from "next/image";
-import { detectPlatform } from "@/lib/socials/detect";
-import { SocialIcon } from "@/lib/socials/icons";
 import { Avatar, SocialRow, ThemeRoot, hash, hostOf, linkTarget } from "../shared";
 import { buzz, tick, useParallax } from "../motion";
-import { photoOf } from "../art";
-import { photoUrl } from "../photos";
+import { LinkArt } from "../art";
 import type { ThemeProps } from "../types";
 
 const STEP_DEG = 24;
@@ -96,16 +92,20 @@ export default function PocketPlayer({ data, mode }: ThemeProps) {
 
   return (
     <ThemeRoot data={data} mode={mode} label="Pocket Player" className="lm-pk-bg overflow-hidden text-[#1b1b1b]">
-      <div ref={stage} className="relative flex min-h-0 flex-1 flex-col items-center justify-center px-4 py-3">
+      <div ref={stage} className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden px-4 pt-12">
         <div aria-hidden className="lm-pk-glow" />
-        <div className="lm-pk-float">
-          <div className="lm-pocket-body relative rounded-[36px] p-[18px] pb-7" style={{ width: "min(360px, 88cqw, calc((100cqh - 210px) / 1.63))" }}>
+        <div className="relative z-10 mb-4 flex flex-col items-center">
+          <SocialRow socials={data.socials} mode={mode} iconClass="text-white hover:bg-white/15" />
+          <p className="text-center text-xs text-white/80">Spin the wheel or swipe the covers. Press the center to open.</p>
+        </div>
+        <div className="relative">
+          <div className="lm-pocket-body relative rounded-[30px] p-[18px] pb-7" style={{ width: "min(330px, 74cqw, calc((100cqh - 230px) / 1.63))" }}>
             <div aria-hidden className="lm-pk-sheen" />
             {/* Screen */}
             <div className="lm-pocket-screen relative overflow-hidden rounded-[9px]">
-              <div className="relative z-10 flex items-center justify-between border-b border-black/25 bg-gradient-to-b from-[#fbfcfd] to-[#b9c3cc] px-2 py-[3px] text-[11px] font-bold">
+              <div className="relative z-10 flex items-center justify-between border-b border-black/25 bg-gradient-to-b from-[#fbfcfd] to-[#b9c3cc] px-2 py-[3px] text-[10px] font-bold">
                 <span aria-hidden className="w-4 text-[9px]">{view === "playing" ? "▶" : ""}</span>
-                <span className="truncate">{view === "about" ? "About" : view === "playing" ? "Now Playing" : data.displayName || `@${data.username}`}</span>
+                <span className="truncate">{view === "about" ? "About" : view === "playing" ? "Now Playing" : "Player"}</span>
                 <span aria-hidden className="lm-pocket-battery" />
               </div>
               <div className="lm-pk-lcd relative aspect-[1.32] overflow-hidden">
@@ -117,39 +117,25 @@ export default function PocketPlayer({ data, mode }: ThemeProps) {
                     onPointerDown={(e) => { swipe.current = e.clientX; }}
                     onPointerUp={(e) => { if (swipe.current === null) return; const dx = e.clientX - swipe.current; swipe.current = null; if (Math.abs(dx) > 24) step(dx < 0 ? 1 : -1); }}
                     className="lm-pk-flow relative min-h-0 flex-1 touch-pan-y outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#2a7de1]">
+                    {/* full-screen cover art, one per link, sliding sideways */}
                     {data.links.map((l, i) => {
                       const d = i - idx;
-                      const ad = Math.abs(d);
-                      if (ad > 4) return null;
-                      const [a, b] = ART[hash(l.id) % ART.length];
-                      const plat = detectPlatform(l.url)?.platform ?? "website";
-                      const transform = d === 0
-                        ? "translate(-50%, -50%) translateZ(30px)"
-                        : `translate(-50%, -50%) translateX(${Math.sign(d) * (58 + (ad - 1) * 22)}%) translateZ(-40px) rotateY(${-Math.sign(d) * 62}deg)`;
+                      if (Math.abs(d) > 1) return null;
                       return (
                         <div key={l.id} id={`pk-${i}`} role="option" aria-selected={d === 0} aria-label={l.title}
                           onClick={() => (d === 0 ? play() : (setSel(i), tick(2200, 0.008, 0.05)))}
-                          className="lm-pk-cov absolute left-1/2 top-[47%] aspect-square w-[46%] cursor-pointer"
-                          style={{ transform, zIndex: 20 - ad, ["--a" as string]: a, ["--b" as string]: b, ["--g" as string]: `${(hash(l.title) % 70) + 20}%` } as CSSProperties}>
-                          <span aria-hidden className={`lm-pk-cov-art absolute inset-0 grid place-items-center overflow-hidden rounded-[3px] ${d === 0 ? "" : "brightness-[.78]"}`}>
-                            <Image src={photoUrl(photoOf(l))} alt="" fill sizes="160px" draggable={false} className="scale-110 object-cover opacity-90 mix-blend-luminosity blur-[2.5px]" />
-                            <span className="lm-pk-cov-rings" />
-                            {plat !== "website" && plat !== "email"
-                              ? <SocialIcon platform={plat} size={30} color="#fff" className="relative drop-shadow-[0_2px_4px_rgba(0,0,0,.3)]" />
-                              : <span className="relative text-[30px] font-black leading-none text-white drop-shadow-[0_2px_4px_rgba(0,0,0,.3)]">{l.title.trim()[0]?.toUpperCase()}</span>}
-                            <span className="absolute inset-x-1.5 bottom-1 truncate text-left text-[7.5px] font-black uppercase tracking-[0.08em] text-white/90">{l.title}</span>
+                          className="lm-pk-full absolute inset-0 cursor-pointer" style={{ transform: `translateX(${d * 100}%)` }}>
+                          <LinkArt link={l} className="absolute inset-0" icon={44} blur={0.6} />
+                          <span aria-hidden className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/55 to-transparent" />
+                          <span className="absolute inset-x-2.5 bottom-2 text-left text-white">
+                            <span className="block truncate text-[13px] font-bold leading-tight drop-shadow">{l.title}</span>
+                            <span className="block truncate text-[10.5px] text-white/75">{hostOf(l.url)} · {i + 1} of {n}</span>
                           </span>
                         </div>
                       );
                     })}
                     {n === 0 ? <p className="p-3 text-center text-xs">No links yet.</p> : null}
                   </div>
-                  {current ? (
-                    <div key={current.id} className="lm-pk-cap shrink-0 px-2 pb-1.5 text-center">
-                      <p className="truncate text-[12.5px] font-bold leading-tight">{current.title}</p>
-                      <p className="truncate text-[10.5px] text-black/55">{hostOf(current.url)} · {idx + 1} of {n}</p>
-                    </div>
-                  ) : null}
                 </div>
 
                 {/* about */}
@@ -193,27 +179,25 @@ export default function PocketPlayer({ data, mode }: ThemeProps) {
               className="lm-pocket-wheel relative mx-auto mt-[9%] aspect-square w-[76%] touch-none select-none rounded-full">
               {touch !== null ? <span aria-hidden className="lm-pk-touch" style={{ transform: `rotate(${touch + 90}deg)` }} /> : null}
               <button type="button" onClick={() => { flash("menu"); tick(1600, 0.01); setView((v) => (v === "about" ? "list" : "about")); }} aria-label="Menu: about"
-                className={`absolute left-1/2 top-[6%] -translate-x-1/2 px-2 py-1 text-[11px] font-bold tracking-[0.14em] text-[#a4a9ae] transition-transform duration-100 ${pressed === "menu" ? "scale-90" : ""}`}>MENU</button>
+                className={`absolute left-1/2 top-[6%] -translate-x-1/2 px-2 py-1 text-[11px] font-bold tracking-[0.14em] text-[#75797e] transition-transform duration-100 ${pressed === "menu" ? "scale-90" : ""}`}>MENU</button>
               <button type="button" onClick={() => { flash("prev"); step(-1); }} aria-label="Previous link"
-                className={`absolute left-[6%] top-1/2 -translate-y-1/2 p-1.5 text-[#a4a9ae] transition-transform duration-100 ${pressed === "prev" ? "scale-90" : ""}`}>
+                className={`absolute left-[6%] top-1/2 -translate-y-1/2 p-1.5 text-[#75797e] transition-transform duration-100 ${pressed === "prev" ? "scale-90" : ""}`}>
                 <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor" aria-hidden><path d="M0 6l8-6v12zM8 6l8-6v12z" /><rect x="16" width="2" height="12" /></svg>
               </button>
               <button type="button" onClick={() => { flash("next"); step(1); }} aria-label="Next link"
-                className={`absolute right-[6%] top-1/2 -translate-y-1/2 p-1.5 text-[#a4a9ae] transition-transform duration-100 ${pressed === "next" ? "scale-90" : ""}`}>
+                className={`absolute right-[6%] top-1/2 -translate-y-1/2 p-1.5 text-[#75797e] transition-transform duration-100 ${pressed === "next" ? "scale-90" : ""}`}>
                 <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor" aria-hidden><rect width="2" height="12" /><path d="M2 0l8 6-8 6zM10 0l8 6-8 6z" /></svg>
               </button>
               <button type="button" onClick={play} aria-label={current ? `Play: open ${current.title}` : "Play"}
-                className="absolute bottom-[6%] left-1/2 -translate-x-1/2 p-1.5 text-[#a4a9ae]">
+                className="absolute bottom-[6%] left-1/2 -translate-x-1/2 p-1.5 text-[#75797e]">
                 <svg width="20" height="12" viewBox="0 0 20 12" fill="currentColor" aria-hidden><path d="M0 0l8 6-8 6z" /><rect x="11" width="3" height="12" /><rect x="16" width="3" height="12" /></svg>
               </button>
               <button type="button" onClick={play} aria-label={current ? `Open ${current.title}` : "Select"}
                 className={`lm-pocket-center absolute left-1/2 top-1/2 size-[37%] -translate-x-1/2 -translate-y-1/2 rounded-full outline-none transition-transform duration-100 ${pressed === "center" ? "scale-[.94]" : ""}`} />
             </div>
           </div>
-          <div aria-hidden className="lm-pk-shadow" />
+          <div aria-hidden className="lm-pk-cable"><span /></div>
         </div>
-        <p className="mt-3 text-center text-xs text-black/50">Spin the wheel or swipe the covers. Press the center to open.</p>
-        <SocialRow socials={data.socials} mode={mode} className="mt-1" iconClass="text-[#2b2b2b] hover:bg-black/5" />
       </div>
     </ThemeRoot>
   );

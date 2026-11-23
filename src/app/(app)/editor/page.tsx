@@ -15,7 +15,7 @@ export default async function EditorPage({ searchParams }: PageProps<"/editor">)
   const trialDaysLeft = daysLeft(plan.trialEndsAt);
   return (
     <Editor
-      page={{ username: page.username, displayName: page.displayName, bio: page.bio, avatarUrl: page.avatarUrl, themeId: page.themeId }}
+      page={{ username: page.username, displayName: page.displayName, bio: page.bio, avatarUrl: page.avatarUrl, themeId: page.themeId, backdrop: typeof page.themeOptions?.backdrop === "string" ? page.themeOptions.backdrop : null }}
       links={links.map(({ id, title, url, enabled }) => ({ id, title, url, enabled }))}
       socials={socials.map(({ id, platform, url }) => ({ id, platform, url }))}
       plan={{ isPro: plan.isPro, reason: plan.reason, trialDaysLeft }}

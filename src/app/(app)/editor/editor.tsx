@@ -16,13 +16,14 @@ import { platformLabel } from "@/lib/socials/platforms";
 import { detectPlatform } from "@/lib/socials/detect";
 import { CATEGORIES, getTheme, themesIn } from "@/themes/registry";
 import { ThemeRenderer } from "@/themes/render";
+import { BACKDROPS, DEFAULT_BACKDROP, isPresetBackdrop } from "@/themes/backdrops";
 import type { PageData } from "@/themes/types";
 import * as A from "./actions";
 
 type L = { id: string; title: string; url: string; enabled: boolean };
 type S = { id: string; platform: string; url: string };
 type Props = {
-  page: { username: string; displayName: string; bio: string; avatarUrl: string | null; themeId: string };
+  page: { username: string; displayName: string; bio: string; avatarUrl: string | null; themeId: string; backdrop: string | null };
   links: L[];
   socials: S[];
   plan: { isPro: boolean; reason: "subscription" | "trial" | "free"; trialDaysLeft: number | null };
@@ -68,6 +69,7 @@ export function Editor(props: Props) {
   const [socials, setSocials] = useState<S[]>(props.socials);
   const [savedTheme, setSavedTheme] = useState(props.page.themeId);
   const [previewTheme, setPreviewTheme] = useState(props.page.themeId);
+  const [backdrop, setBackdropState] = useState(props.page.backdrop);
   const [tab, setTab] = useState<"edit" | "preview">("edit");
   const [copied, setCopied] = useState(false);
   const { status, run, clear } = useStatus();
@@ -91,7 +93,8 @@ export function Editor(props: Props) {
     socials,
     showBadge: !props.plan.isPro,
     badgeUrl: props.badgeUrl,
-  }), [profile, links, socials, props.page.username, props.plan.isPro, props.badgeUrl]);
+    backdrop,
+  }), [profile, links, socials, props.page.username, props.plan.isPro, props.badgeUrl, backdrop]);
 
   const onLinkDrag = (e: DragEndEvent) => {
     if (!e.over || e.active.id === e.over.id) return;
@@ -229,6 +232,10 @@ export function Editor(props: Props) {
             </ul>
             </div>
             ))}
+            {previewTheme === "meadow" ? (
+              <BackdropPicker value={backdrop} onChange={(v) => { setBackdropState(v); run(A.setBackdrop(v)); }}
+                onUploaded={(url) => setBackdropState(url)} run={run} />
+            ) : null}
           </section>
         </div>
 
@@ -413,5 +420,45 @@ function SocialChip({ s, onDelete }: { s: S; onDelete: () => void }) {
       </button>
       <button type="button" onClick={onDelete} aria-label={`Remove ${platformLabel(s.platform)}`} className="rounded-full p-1 text-ink-3 hover:bg-black/5 hover:text-accent-ink"><X size={14} /></button>
     </li>
+  );
+}
+
+/** Backdrop choices for themes that sit on one. Presets, or the person's own picture. */
+function BackdropPicker({ value, onChange, onUploaded, run }: {
+  value: string | null; onChange: (v: string) => void; onUploaded: (url: string) => void;
+  run: ReturnType<typeof useStatus>["run"];
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [pending, start] = useTransition();
+  const [url, setUrl] = useState(value && !isPresetBackdrop(value) ? value : "");
+  const current = value || DEFAULT_BACKDROP;
+  return (
+    <div className="mt-5 border-t border-line pt-4">
+      <h3 className="text-sm font-semibold">Backdrop</h3>
+      <p className="mt-0.5 text-xs text-ink-2">What your desktop sits on. Grass is the default.</p>
+      <ul className="mt-2 flex flex-wrap gap-2">
+        {BACKDROPS.map((b) => (
+          <li key={b.id}>
+            <button type="button" onClick={() => onChange(b.id)} aria-pressed={current === b.id} aria-label={b.name}
+              className={`block size-14 rounded-xl border-2 transition-transform active:scale-95 ${current === b.id ? "border-ink" : "border-transparent"}`} style={b.style} />
+          </li>
+        ))}
+      </ul>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <input type="file" accept="image/*" ref={fileRef} className="hidden" onChange={(e) => {
+          const f = e.target.files?.[0]; if (!f) return;
+          const fd = new FormData(); fd.set("file", f);
+          start(async () => { const r = await run(A.uploadBackdrop(fd)); if (r.ok && r.data) onUploaded(r.data); });
+        }} />
+        <button type="button" onClick={() => fileRef.current?.click()} className="btn btn-ghost btn-sm" disabled={pending}>
+          <Upload size={14} /> {pending ? "Uploading" : "Upload your own"}
+        </button>
+        <form className="flex min-w-0 flex-1 gap-2" onSubmit={(e) => { e.preventDefault(); if (url.trim()) onChange(url.trim()); }}>
+          <label className="sr-only" htmlFor="bd-url">Backdrop image link</label>
+          <input id="bd-url" className="field min-w-0 flex-1 text-sm" placeholder="or paste an image link (https://…)" value={url} onChange={(e) => setUrl(e.target.value)} />
+          <button type="submit" className="btn btn-ghost btn-sm">Use</button>
+        </form>
+      </div>
+    </div>
   );
 }

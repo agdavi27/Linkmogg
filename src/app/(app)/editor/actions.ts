@@ -9,6 +9,7 @@ import { requireUser } from "@/lib/auth";
 import { getPlan } from "@/lib/entitlements";
 import { detectPlatform, normalizeUrl } from "@/lib/socials/detect";
 import { getTheme } from "@/themes/registry";
+import { isPresetBackdrop } from "@/themes/backdrops";
 
 type Result<T = undefined> = { ok: true; data?: T } | { ok: false; error: string };
 
@@ -49,6 +50,31 @@ export async function uploadAvatar(form: FormData): Promise<Result<string>> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) return { ok: false, error: "Uploads aren't set up yet. Paste an image URL instead." };
   const blob = await put(`avatars/${page.id}-${Date.now()}`, file, { access: "public", contentType: file.type });
   await db.update(pages).set({ avatarUrl: blob.url }).where(eq(pages.id, page.id));
+  await touch(page.id, page.username);
+  return { ok: true, data: blob.url };
+}
+
+/** Saves the backdrop for themes that use one: a preset id, or an https image URL. */
+export async function setBackdrop(value: string): Promise<Result> {
+  const v = z.string().trim().max(1000).safeParse(value);
+  if (!v.success) return { ok: false, error: "That backdrop is too long." };
+  const ok = isPresetBackdrop(v.data) || /^https:\/\/[^\s"'()]+$/.test(v.data);
+  if (!ok) return { ok: false, error: "Use one of the backdrops, or an https image link." };
+  const { page } = await myPage();
+  await db.update(pages).set({ themeOptions: { ...page.themeOptions, backdrop: v.data } }).where(eq(pages.id, page.id));
+  await touch(page.id, page.username);
+  return { ok: true };
+}
+
+export async function uploadBackdrop(form: FormData): Promise<Result<string>> {
+  const { page } = await myPage();
+  const file = form.get("file");
+  if (!(file instanceof File) || file.size === 0) return { ok: false, error: "Pick an image first." };
+  if (!file.type.startsWith("image/")) return { ok: false, error: "That file isn't an image." };
+  if (file.size > 6 * 1024 * 1024) return { ok: false, error: "Keep it under 6 MB." };
+  if (!process.env.BLOB_READ_WRITE_TOKEN) return { ok: false, error: "Uploads aren't set up yet. Paste an image link instead." };
+  const blob = await put(`backdrops/${page.id}-${Date.now()}`, file, { access: "public", contentType: file.type });
+  await db.update(pages).set({ themeOptions: { ...page.themeOptions, backdrop: blob.url } }).where(eq(pages.id, page.id));
   await touch(page.id, page.username);
   return { ok: true, data: blob.url };
 }

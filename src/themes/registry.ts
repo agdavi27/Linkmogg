@@ -35,10 +35,15 @@ export const THEMES: ThemeDef[] = [
   { id: "billboard", name: "Billboard", blurb: "Your name on a roadside billboard, with links drifting by in bubbles.", pro: true, swatch: ["#1d3c7c", "#f4f3f1"], category: "spatial" },
   { id: "panorama", name: "Panorama", blurb: "Your links as screens on a curved band. Spin it to look around.", pro: true, swatch: ["#dcdcda", "#0e0e0e"], category: "spatial" },
   { id: "window", name: "Window Seat", blurb: "A plane window with a flight readout. Swipe for the next link.", pro: true, swatch: ["#0c0e10", "#3f7f86"], category: "spatial" },
+  { id: "stack", name: "Stack", blurb: "Your links as a deep stack of pages. Scroll and the next one comes forward.", pro: true, swatch: ["#0b0b0c", "#e94a2b"], category: "spatial" },
+  { id: "cases", name: "Cases", blurb: "A long row of CD cases. Tap one and it slides out.", pro: true, swatch: ["#d6d6d6", "#151515"], category: "spatial" },
   { id: "world", name: "World", blurb: "Your links as cards slowly circling your name.", pro: true, swatch: ["#f6f3ec", "#141414"], category: "spatial" },
   // Retro tech
   { id: "folders", name: "Folders", blurb: "Every link is a folder in its own material.", pro: true, swatch: ["#e4e4e2", "#3f7be0"], category: "retro" },
   { id: "discs", name: "Discs", blurb: "A row of discs. The one in the middle gets circled in marker.", pro: true, swatch: ["#efeeeb", "#141414"], category: "retro" },
+  { id: "meadow", name: "Meadow", blurb: "A desktop lying in the grass. Your links are files around a little window.", pro: true, swatch: ["#3d6b2a", "#69bdf0"], category: "retro" },
+  { id: "glow", name: "Glow", blurb: "A glowing folder in the dark, with your links floating out as files.", pro: true, swatch: ["#000000", "#2f66f0"], category: "retro" },
+  { id: "scatter", name: "Scatter", blurb: "Your photo, soft and big, with your links scattered around it and a dock below.", pro: true, swatch: ["#e9e9ec", "#141414"], category: "retro" },
   { id: "id", name: "ID Card", blurb: "An old turquoise ID card with your links typed into its fields.", pro: true, swatch: ["#5fa8a0", "#6a3d8f"], category: "retro" },
   // Cozy
   { id: "garden", name: "Garden", blurb: "A poster on a hillside. Every link is a pixel flower.", pro: true, swatch: ["#3b7be0", "#e3231b"], category: "cozy" },

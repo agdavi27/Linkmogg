@@ -10,6 +10,8 @@ export type PageData = {
   socials: ThemeSocial[];
   showBadge: boolean;
   badgeUrl: string;
+  /** For themes that sit on a backdrop: a preset id or an https image URL. */
+  backdrop?: string | null;
 };
 
 export type ThemeMode = "live" | "preview";

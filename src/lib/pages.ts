@@ -27,6 +27,7 @@ export function toPageData(
     socials: ss.map(({ platform, url }) => ({ platform, url })),
     showBadge: !isPro,
     badgeUrl: badgeUrl(),
+    backdrop: typeof page.themeOptions?.backdrop === "string" ? page.themeOptions.backdrop : null,
   };
 }
 

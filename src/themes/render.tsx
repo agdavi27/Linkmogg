@@ -24,6 +24,11 @@ const COMPONENTS: Record<string, ComponentType<ThemeProps>> = {
   id: dynamic(() => import("./list/id")),
   window: dynamic(() => import("./list/window")),
   world: dynamic(() => import("./list/world")),
+  meadow: dynamic(() => import("./list/meadow")),
+  glow: dynamic(() => import("./list/glow")),
+  stack: dynamic(() => import("./list/stack")),
+  scatter: dynamic(() => import("./list/scatter")),
+  cases: dynamic(() => import("./list/cases")),
 };
 
 export function ThemeRenderer({ themeId, ...props }: ThemeProps & { themeId: string }) {
