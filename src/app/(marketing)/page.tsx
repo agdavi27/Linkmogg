@@ -31,7 +31,7 @@ export default function Home() {
       <section className="border-y border-line bg-paper-2/60 py-20">
         <div className="lm-reveal mx-auto max-w-6xl px-5">
           <div className="flex flex-wrap items-end justify-between gap-4">
-            <h2 className="max-w-[18ch] font-display text-4xl font-semibold leading-tight tracking-[-0.03em] text-balance">Sixteen themes, all with the same links inside</h2>
+            <h2 className="max-w-[18ch] font-display text-4xl font-semibold leading-tight tracking-[-0.03em] text-balance">Nineteen themes, all with the same links inside</h2>
             <Link href="/themes" className="btn btn-ghost">Try them all live</Link>
           </div>
           <p className="mt-4 max-w-[60ch] text-ink-2">Switch themes whenever you like. Your links, icons and bio stay put, and every theme works with touch, a keyboard and a screen reader.</p>

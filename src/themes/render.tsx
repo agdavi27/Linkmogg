@@ -23,6 +23,9 @@ const COMPONENTS: Record<string, ComponentType<ThemeProps>> = {
   pass: dynamic(() => import("./list/pass")),
   poster: dynamic(() => import("./list/poster")),
   garden: dynamic(() => import("./list/garden")),
+  panorama: dynamic(() => import("./list/panorama")),
+  discs: dynamic(() => import("./list/discs")),
+  dial: dynamic(() => import("./list/dial")),
 };
 
 export function ThemeRenderer({ themeId, ...props }: ThemeProps & { themeId: string }) {

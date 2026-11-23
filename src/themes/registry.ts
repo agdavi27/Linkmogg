@@ -36,9 +36,12 @@ export const THEMES: ThemeDef[] = [
   { id: "strata", name: "Strata", blurb: "Links as a stack of folders, fanned out in 3D.", pro: true, swatch: ["#ffffff", "#2a46ff"], category: "spatial" },
   { id: "spindle", name: "Spindle", blurb: "A stack of discs. Swipe and the one in focus opens up.", pro: true, swatch: ["#000000", "#f2f2f2"], category: "spatial" },
   { id: "billboard", name: "Billboard", blurb: "Your name on a roadside billboard, with links drifting by in bubbles.", pro: true, swatch: ["#1d3c7c", "#f4f3f1"], category: "spatial" },
+  { id: "panorama", name: "Panorama", blurb: "Your links as screens on a curved band. Spin it to look around.", pro: true, swatch: ["#dcdcda", "#0e0e0e"], category: "spatial" },
+  { id: "dial", name: "Dial", blurb: "A huge dial in the dark. Turn it and each link comes round as a sticker.", pro: true, swatch: ["#000000", "#ff4b2b"], category: "spatial" },
   // Retro tech
   { id: "folders", name: "Folders", blurb: "Every link is a folder in its own material.", pro: true, swatch: ["#e4e4e2", "#3f7be0"], category: "retro" },
   { id: "pass", name: "Pass", blurb: "A worn member card with your photo and your links typed in.", pro: true, swatch: ["#8fd3cf", "#6a3fd1"], category: "retro" },
+  { id: "discs", name: "Discs", blurb: "A row of discs. The one in the middle gets circled in marker.", pro: true, swatch: ["#efeeeb", "#141414"], category: "retro" },
   // Cozy
   { id: "garden", name: "Garden", blurb: "A poster on a hillside. Every link is a pixel flower.", pro: true, swatch: ["#3b7be0", "#e3231b"], category: "cozy" },
   { id: "sunflower", name: "Sunflower", blurb: "Every link is a named petal. Tap one to bloom it.", pro: true, swatch: ["#bfe3f2", "#f2b632"], category: "cozy" },

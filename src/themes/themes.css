@@ -491,3 +491,47 @@ button.lm-st-chip:active { transform: scale(.95); }
 .lm-gd-flower:active { scale: .92; }
 @media (hover: hover) and (pointer: fine) { .lm-gd-flower:hover { scale: 1.15; } }
 @media (prefers-reduced-motion: reduce) { .lm-gd-clouds, .lm-gd-title, .lm-gd-flower { animation: none; } }
+
+/* ---------- Panorama ---------- */
+.lm-pa-ring { transform-style: preserve-3d; }
+.lm-pa-ring > div { transform-style: preserve-3d; }
+.lm-pa-turn { transition: transform .9s cubic-bezier(0.23,1,0.32,1); }
+/* no box-shadow here: Chromium skips painting 3D-turned panels that carry a big shadow */
+.lm-pa-screen { background: #0e0e0e; border-radius: 4px; outline: 1px solid rgba(255,255,255,.06); outline-offset: -1px;
+  filter: brightness(calc(1 - var(--d) * .35)); transition: filter .5s ease; -webkit-tap-highlight-color: transparent; }
+.lm-pa-screen:focus-visible { outline: 2px solid #111; outline-offset: 4px; }
+.lm-pa-floor { position: absolute; left: 10%; right: 10%; top: 50%; height: 40%; pointer-events: none; background: radial-gradient(50% 30% at 50% 50%, rgba(0,0,0,.08), transparent 70%); }
+.lm-pa { animation: lm-pop .8s cubic-bezier(0.23,1,0.32,1) both; }
+.lm-pa-dot { width: 6px; height: 6px; border-radius: 99px; background: rgba(17,17,17,.25); transition: width .3s cubic-bezier(0.23,1,0.32,1), background-color .2s ease; }
+.lm-pa-dot.is-on { width: 18px; background: #111; }
+@media (prefers-reduced-motion: reduce) { .lm-pa-turn, .lm-pa-dot { transition: none; } .lm-pa { animation: none; } }
+
+/* ---------- Discs ---------- */
+.lm-dc-slide { transition: transform .7s cubic-bezier(0.23,1,0.32,1); }
+.lm-dc-disc { -webkit-tap-highlight-color: transparent; filter: drop-shadow(0 18px 22px rgba(0,0,0,.18)); }
+.lm-dc-face { -webkit-mask: radial-gradient(circle, transparent 9.5%, #000 10%); mask: radial-gradient(circle, transparent 9.5%, #000 10%);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); transform: rotate(var(--tilt)); }
+.lm-dc-disc.is-on .lm-dc-face { animation: lm-dc-spin 26s linear infinite; }
+@keyframes lm-dc-spin { from { transform: rotate(var(--tilt)); } to { transform: rotate(calc(var(--tilt) + 360deg)); } }
+.lm-dc-label { color: #fff; text-shadow: 0 1px 10px rgba(0,0,0,.45); }
+.lm-dc-sheen { background: conic-gradient(from 20deg, rgba(255,255,255,0) 0deg, rgba(255,255,255,.22) 40deg, rgba(255,255,255,0) 90deg, rgba(255,255,255,0) 200deg, rgba(255,255,255,.16) 240deg, rgba(255,255,255,0) 290deg); mix-blend-mode: screen; }
+.lm-dc-hub { background: radial-gradient(circle, transparent 31%, rgba(255,255,255,.9) 33%, #d9dcdf 45%, #f4f5f6 60%, rgba(200,205,210,.6) 70%, transparent 72%); }
+.lm-dc-disc:focus-visible { outline: 2px dashed #141414; outline-offset: 6px; border-radius: 50%; }
+.lm-dc-loop path { fill: none; stroke: #141414; stroke-width: 1.6; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: lm-dc-draw .9s cubic-bezier(0.65,0,0.35,1) .25s forwards; }
+.lm-dc-loop .lm-dc-loop2 { stroke-width: 1; opacity: .7; animation-delay: .5s; }
+@keyframes lm-dc-draw { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) { .lm-dc-slide { transition: none; } .lm-dc-disc.is-on .lm-dc-face { animation: none; } .lm-dc-loop path { animation: none; stroke-dashoffset: 0; } }
+
+/* ---------- Dial ---------- */
+.lm-di-dial { width: 0; height: 0; }
+.lm-di-turn { transition: transform .8s cubic-bezier(0.23,1,0.32,1); }
+.lm-di-tick { position: absolute; left: 0; top: 0; height: 1.5px; margin-top: -.75px; transform-origin: 0 50%; background: rgba(255,255,255,.55); border-radius: 1px; }
+.lm-di-tick.is-major { background: rgba(255,255,255,.8); }
+.lm-di-label { font-size: clamp(10px, 2.8cqw, 13px); text-transform: uppercase; letter-spacing: .04em; color: rgba(255,255,255,.5); transition: color .3s ease; }
+.lm-di-label.is-on { color: #fff; }
+.lm-di-sticker { -webkit-tap-highlight-color: transparent; filter: drop-shadow(0 8px 14px rgba(0,0,0,.6)); }
+.lm-di-sticker > span { transition: scale .5s cubic-bezier(0.23,1,0.32,1); }
+.lm-di-sticker.is-on > span { scale: 1.18; }
+.lm-di-sticker:focus-visible { outline: 2px dashed #fff; outline-offset: 6px; border-radius: 12px; }
+@media (hover: hover) and (pointer: fine) { .lm-di-sticker:hover > span { scale: 1.1; } .lm-di-sticker.is-on:hover > span { scale: 1.22; } }
+@media (prefers-reduced-motion: reduce) { .lm-di-turn, .lm-di-sticker > span { transition: none; } }
