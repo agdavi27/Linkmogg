@@ -594,26 +594,21 @@ button.lm-st-chip:active { transform: scale(.95); }
 .lm-gm-sculpture { border-radius: 50% 50% 46% 46%; background: radial-gradient(circle at 35% 30%, #ffffff, #cfcac2 55%, #9b958c); clip-path: polygon(30% 0, 70% 0, 90% 40%, 75% 100%, 25% 100%, 10% 40%); }
 .lm-gm-leaf { animation: lm-gm-leaf 4s ease-in-out infinite alternate; }
 @keyframes lm-gm-leaf { to { transform: rotate(4deg); } }
-/* visitors walk a loop along the walls, pausing at the art */
-.lm-gm-walk.is-a { animation: lm-gm-path-a 26s ease-in-out infinite; }
-.lm-gm-walk.is-b { animation: lm-gm-path-b 31s ease-in-out infinite; animation-delay: -9s; }
-@keyframes lm-gm-path-a {
-  0%, 8% { transform: translate3d(calc(var(--s) * .14), calc(var(--s) * .2), 0); }
-  30%, 40% { transform: translate3d(calc(var(--s) * .48), calc(var(--s) * .18), 0); }
-  62%, 70% { transform: translate3d(calc(var(--s) * .78), calc(var(--s) * .22), 0); }
-  88%, 100% { transform: translate3d(calc(var(--s) * .14), calc(var(--s) * .2), 0); }
-}
-@keyframes lm-gm-path-b {
-  0%, 10% { transform: translate3d(calc(var(--s) * .8), calc(var(--s) * .3), 0); }
-  32%, 44% { transform: translate3d(calc(var(--s) * .82), calc(var(--s) * .62), 0); }
-  60%, 68% { transform: translate3d(calc(var(--s) * .6), calc(var(--s) * .82), 0); }
-  86%, 100% { transform: translate3d(calc(var(--s) * .8), calc(var(--s) * .3), 0); }
-}
-.lm-gm-person { animation: lm-gm-bob .5s ease-in-out infinite alternate; }
-@keyframes lm-gm-bob { to { translate: 0 -2%; } }
-.lm-gm-leg { transform-origin: 50% 0; animation: lm-gm-step .5s ease-in-out infinite alternate; }
-.lm-gm-leg.is-b { animation-direction: alternate-reverse; }
-@keyframes lm-gm-step { from { rotate: -12deg; } to { rotate: 12deg; } }
+/* visitors: their position comes from script; legs and arms only swing while walking */
+.lm-gm-walk { will-change: transform; }
+.lm-gm-walk[data-flip="1"] .lm-gm-person { transform: scaleX(-1); }
+.lm-gm-person { transform-origin: 50% 100%; animation: lm-gm-breathe 3.2s ease-in-out infinite alternate; }
+@keyframes lm-gm-breathe { to { scale: 1 1.012; } }
+.lm-gm-head { transform-origin: 50% 100%; animation: lm-gm-look 6s ease-in-out infinite; }
+@keyframes lm-gm-look { 0%, 40% { rotate: 0deg; } 50%, 80% { rotate: -6deg; } 90%, 100% { rotate: 3deg; } }
+.lm-gm-leg, .lm-gm-arm { transform-origin: 50% 0; }
+.lm-gm-walk[data-walk="1"] .lm-gm-leg { animation: lm-gm-step .42s ease-in-out infinite alternate; }
+.lm-gm-walk[data-walk="1"] .lm-gm-leg.is-b { animation-direction: alternate-reverse; }
+.lm-gm-walk[data-walk="1"] .lm-gm-arm { animation: lm-gm-step .42s ease-in-out infinite alternate-reverse; }
+.lm-gm-walk[data-walk="1"] .lm-gm-arm.is-b { animation-direction: alternate; }
+.lm-gm-walk[data-walk="1"] .lm-gm-head { animation: lm-gm-nod .42s ease-in-out infinite alternate; }
+@keyframes lm-gm-step { from { rotate: -14deg; } to { rotate: 14deg; } }
+@keyframes lm-gm-nod { to { translate: 0 -3%; } }
 .lm-gm-modal { background: rgba(30,26,22,.35); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: lm-fade .25s ease both; }
 .lm-gm-card { box-shadow: 0 30px 60px -20px rgba(0,0,0,.45); animation: lm-gm-card .45s cubic-bezier(0.23,1,0.32,1) both; }
 @keyframes lm-gm-card { from { opacity: 0; transform: translateY(16px) scale(.94); } }
@@ -623,8 +618,33 @@ button.lm-st-chip:active { transform: scale(.95); }
 .lm-gm-arrow:hover { background: rgba(0,0,0,.1); }
 .lm-gm-arrow:active { transform: scale(.92); }
 @media (prefers-reduced-motion: reduce) {
-  .lm-gm-scene, .lm-gm-leaf, .lm-gm-person, .lm-gm-leg, .lm-gm-card, .lm-gm-modal { animation: none; }
-  .lm-gm-walk.is-a, .lm-gm-walk.is-b { animation: none; transform: translate3d(calc(var(--s) * .3), calc(var(--s) * .2), 0); }
-  .lm-gm-walk.is-b { transform: translate3d(calc(var(--s) * .8), calc(var(--s) * .6), 0); }
+  .lm-gm-scene, .lm-gm-leaf, .lm-gm-person, .lm-gm-head, .lm-gm-leg, .lm-gm-arm, .lm-gm-card, .lm-gm-modal { animation: none !important; }
   .lm-gm-room.is-anim { transition: none; }
 }
+
+/* ---------- Garden ---------- */
+.lm-gd-sky { position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+  background: linear-gradient(180deg, #2a63d4 0%, #3b7be0 35%, #6aa2ec 62%, #9cc3f2 72%); }
+.lm-gd-clouds { position: absolute; left: 0; top: 40%; width: 200%; height: 34%; opacity: .85; filter: blur(5px);
+  background: radial-gradient(9% 12% at 10% 40%, #fff, transparent 70%), radial-gradient(6% 8% at 16% 60%, rgba(255,255,255,.8), transparent 70%),
+    radial-gradient(10% 10% at 38% 78%, rgba(255,255,255,.75), transparent 70%), radial-gradient(7% 9% at 70% 30%, rgba(255,255,255,.7), transparent 70%),
+    radial-gradient(12% 10% at 86% 80%, rgba(255,255,255,.85), transparent 70%);
+  background-size: 50% 100%; background-repeat: repeat-x; animation: lm-bb-drift 140s linear infinite; }
+.lm-gd-clouds.is-2 { top: 12%; height: 30%; opacity: .45; animation-duration: 90s; filter: blur(8px); }
+.lm-gd-field { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 42%; pointer-events: none; }
+.lm-gd-grain { position: absolute; inset: 0; pointer-events: none; opacity: .18; mix-blend-mode: overlay;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.35) 0 1px, transparent 1px 3px), repeating-linear-gradient(-45deg, rgba(0,0,0,.25) 0 1px, transparent 1px 4px); }
+.lm-gd-sig { transform: rotate(-4deg); text-shadow: 0 1px 0 rgba(0,0,0,.08); }
+.lm-gd-red { color: #e3231b; }
+.lm-gd-bio { text-shadow: 0 0 8px rgba(255,255,255,.55), 0 0 2px rgba(255,255,255,.7); }
+.lm-gd-title { text-shadow: 0 0 1px rgba(227,35,27,.6); animation: lm-gd-scrawl 1s cubic-bezier(0.23,1,0.32,1) both; }
+@keyframes lm-gd-scrawl { from { opacity: 0; clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.lm-gd-flower { transform-origin: 50% 100%; animation: lm-gd-grow .7s steps(6) both, lm-gd-sway 3s steps(4) infinite alternate;
+  transition: scale .3s cubic-bezier(0.23,1,0.32,1); -webkit-tap-highlight-color: transparent; filter: drop-shadow(0 3px 0 rgba(0,0,0,.15)); }
+@keyframes lm-gd-grow { from { transform: scaleY(0); } }
+@keyframes lm-gd-sway { from { rotate: -3deg; } to { rotate: 3deg; } }
+.lm-gd-flower.is-on { scale: 1.22; filter: drop-shadow(0 0 0 #fff) drop-shadow(0 4px 0 rgba(0,0,0,.2)); }
+.lm-gd-flower:focus-visible { outline: 2px dashed #fff; outline-offset: 4px; }
+.lm-gd-flower:active { scale: .92; }
+@media (hover: hover) and (pointer: fine) { .lm-gd-flower:hover { scale: 1.15; } }
+@media (prefers-reduced-motion: reduce) { .lm-gd-clouds, .lm-gd-title, .lm-gd-flower { animation: none; } }

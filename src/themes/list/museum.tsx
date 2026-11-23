@@ -21,8 +21,8 @@ export default function Gallery({ data, mode }: ThemeProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const { w, h } = useSize(stage);
 
-  const S = Math.max(170, Math.min(w * 0.68, h * 0.66, 600)); // floor size
-  const H = S * 0.5; // wall height
+  const S = Math.max(170, Math.min(w * (w < 600 ? 0.74 : 0.8), h * 0.64, 640)); // floor size
+  const H = S * 0.62; // wall height
   const rz = -45 + Math.max(-28, Math.min(28, spin + drag));
   const dragProps = useDragX((dx) => setDrag(dx / 6), (dx) => { setDrag(0); setSpin((s) => Math.max(-28, Math.min(28, s + dx / 6))); });
 
@@ -32,7 +32,7 @@ export default function Gallery({ data, mode }: ThemeProps) {
   const sizeFor = (c: number) => {
     const rows = c > 4 ? 2 : 1;
     const cols = Math.ceil(c / rows);
-    return Math.min((S * 0.84) / cols - S * 0.04, (H * 0.68) / rows - H * 0.06);
+    return Math.min((S * 0.92) / cols - S * 0.035, (H * 0.8) / rows - H * 0.09);
   };
 
   const pick = (i: number) => {
@@ -47,14 +47,14 @@ export default function Gallery({ data, mode }: ThemeProps) {
   const wall = (links: ThemeLink[]) => {
     const size = sizeFor(links.length);
     return (
-      <div className="flex size-full flex-wrap content-center items-center justify-center gap-x-[6%] gap-y-[8%] px-[6%] pb-[4%] pt-[12%]">
+      <div className="flex size-full flex-wrap content-center items-center justify-center gap-x-[3.5%] gap-y-[9%] px-[3%] pb-[7%] pt-[8%]">
         {links.map((l) => {
           const i = data.links.indexOf(l);
           return (
             <button key={l.id} type="button" onClick={() => pick(i)} aria-label={`View ${l.title}`}
-              className={`lm-gm-art relative shrink-0 outline-none ${sel === i ? "is-on" : ""}`} style={{ width: size, height: size * 0.8 }}>
+              className={`lm-gm-art relative shrink-0 outline-none ${sel === i ? "is-on" : ""}`} style={{ width: size, height: size * 0.82 }}>
               <span aria-hidden className="lm-gm-spot" />
-              <LinkArt link={l} className="absolute inset-[7%]" icon={Math.round(size * 0.18)} blur={0} mark={size > 46} />
+              <LinkArt link={l} className="absolute inset-[5%]" icon={Math.round(size * 0.18)} blur={0} mark={size > 46} />
               <span className="lm-gm-plaque absolute left-1/2 top-[104%] max-w-full -translate-x-1/2 truncate" style={{ fontSize: Math.max(5, size * 0.075) }}>{l.title}</span>
             </button>
           );
@@ -90,17 +90,15 @@ export default function Gallery({ data, mode }: ThemeProps) {
                 </div>
               </div>
 
-              {/* benches and a sculpture on a plinth */}
-              <Box x={S * 0.34} y={S * 0.5} w={S * 0.3} d={S * 0.08} h={S * 0.045} top="#3b3633" side="#28231f" />
-              <Box x={S * 0.38} y={S * 0.51} w={S * 0.02} d={S * 0.06} h={S * 0.025} top="#8c8a86" side="#6a6864" />
-              <Box x={S * 0.6} y={S * 0.51} w={S * 0.02} d={S * 0.06} h={S * 0.025} top="#8c8a86" side="#6a6864" />
-              <Box x={S * 0.14} y={S * 0.74} w={S * 0.1} d={S * 0.1} h={S * 0.12} top="#fbfaf8" side="#dedbd6" />
-              <Sprite x={S * 0.19} y={S * 0.79} z={S * 0.12} w={S * 0.09} h={S * 0.12}><span className="lm-gm-sculpture absolute inset-0" /></Sprite>
-              <Sprite x={S * 0.86} y={S * 0.88} w={S * 0.1} h={S * 0.18}><Fern /></Sprite>
+              {/* a statue on a plinth in the middle, benches either side */}
+              <Box x={S * 0.43} y={S * 0.43} w={S * 0.14} d={S * 0.14} h={S * 0.1} top="#fbfaf8" side="#dedbd6" />
+              <Sprite x={S * 0.5} y={S * 0.5} z={S * 0.1} w={S * 0.14} h={S * 0.34}><Statue /></Sprite>
+              <Box x={S * 0.2} y={S * 0.68} w={S * 0.2} d={S * 0.07} h={S * 0.04} top="#3b3633" side="#28231f" />
+              <Box x={S * 0.68} y={S * 0.24} w={S * 0.07} d={S * 0.2} h={S * 0.04} top="#3b3633" side="#28231f" />
+              <Sprite x={S * 0.9} y={S * 0.9} w={S * 0.1} h={S * 0.18}><Fern /></Sprite>
 
               {/* visitors */}
-              <Walker path="a" s={S} shirt="#d9553b" pants="#2b2f3a" hair="#2a1d16" />
-              <Walker path="b" s={S} shirt="#3d6fd6" pants="#3a3530" hair="#c9a36b" />
+              <Visitors s={S} rz={rz} />
             </div>
           </div>
         ) : null}
@@ -172,19 +170,97 @@ function Fern() {
   );
 }
 
-/** A visitor strolling a loop along the walls, stopping now and then to look. */
-function Walker({ path, s, shirt, pants, hair }: { path: "a" | "b"; s: number; shirt: string; pants: string; hair: string }) {
+const PEOPLE = [
+  { shirt: "#d9553b", pants: "#2b2f3a", hair: "#2a1d16", skin: "#e2b293" },
+  { shirt: "#3d6fd6", pants: "#3a3530", hair: "#c9a36b", skin: "#c98f6b" },
+];
+
+/**
+ * Visitors wander from painting to painting: they pick a spot in front of a wall, walk there at
+ * an easy pace, face the way they're going, and stand looking for a few seconds.
+ */
+function Visitors({ s, rz }: { s: number; rz: number }) {
+  const els = useRef<(HTMLDivElement | null)[]>([]);
+  const rzRef = useRef(rz);
+  useEffect(() => { rzRef.current = rz; }, [rz]);
+
+  useEffect(() => {
+    const spot = (k: number) => {
+      const r = Math.random();
+      // in front of the left wall (y small) or the right wall (x large), clear of the statue
+      return k % 2 === 0
+        ? { x: s * (0.12 + r * 0.7), y: s * (0.13 + Math.random() * 0.06) }
+        : { x: s * (0.81 + Math.random() * 0.06), y: s * (0.14 + r * 0.7) };
+    };
+    const people = PEOPLE.map((_, k) => ({ ...spot(k), t: spot(k + (k % 2 ? 0 : 1)), wait: 1 + k * 1.5, v: 0, flip: false, side: k }));
+    const place = () => people.forEach((p, k) => {
+      const el = els.current[k];
+      if (!el) return;
+      el.style.transform = `translate3d(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px, 0)`;
+      el.dataset.walk = p.v > 0.02 * s ? "1" : "0";
+      el.dataset.flip = p.flip ? "1" : "0";
+    });
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { place(); return; }
+    let raf = 0, last = performance.now();
+    const frame = (now: number) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      for (const p of people) {
+        if (p.wait > 0) { p.wait -= dt; p.v = 0; continue; }
+        const dx = p.t.x - p.x, dy = p.t.y - p.y, d = Math.hypot(dx, dy);
+        if (d < 2) {
+          p.wait = 2.5 + Math.random() * 4;
+          p.side = Math.random() < 0.7 ? p.side : p.side + 1; // mostly stay on the same wall
+          p.t = spot(p.side);
+          continue;
+        }
+        const top = s * 0.09; // walking speed per second
+        p.v = Math.min(top, p.v + top * dt * 2, d * 1.5); // ease in and slow down on arrival
+        p.x += (dx / d) * p.v * dt;
+        p.y += (dy / d) * p.v * dt;
+        const a = (rzRef.current * Math.PI) / 180;
+        const screenX = Math.cos(a) * dx - Math.sin(a) * dy;
+        if (Math.abs(screenX) > 1) p.flip = screenX < 0;
+      }
+      place();
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(raf);
+  }, [s]);
+
   return (
-    <div className={`lm-gm-walk is-${path} absolute left-0 top-0`} style={{ ["--s" as string]: `${s}px` } as CSSProperties}>
-      <div className="lm-gm-face absolute" style={{ width: s * 0.06, height: s * 0.2, left: -s * 0.03, top: -s * 0.2 }}>
-        <span className="lm-gm-person absolute inset-0">
-          <span className="absolute left-1/2 top-0 h-[17%] w-[62%] -translate-x-1/2 rounded-full bg-[#e2b293]" />
-          <span className="absolute left-1/2 top-[-2%] h-[9%] w-[66%] -translate-x-1/2 rounded-t-full" style={{ background: hair }} />
-          <span className="absolute left-1/2 top-[18%] h-[40%] w-[100%] -translate-x-1/2 rounded-[40%_40%_10%_10%]" style={{ background: shirt }} />
-          <span className="lm-gm-leg absolute top-[56%] h-[44%] w-[38%] rounded-b-[3px]" style={{ left: "10%", background: pants }} />
-          <span className="lm-gm-leg is-b absolute top-[56%] h-[44%] w-[38%] rounded-b-[3px]" style={{ right: "10%", background: pants }} />
-        </span>
-      </div>
-    </div>
+    <>
+      {PEOPLE.map((c, k) => (
+        <div key={k} ref={(el) => { els.current[k] = el; }} className="lm-gm-walk absolute left-0 top-0" data-walk="0">
+          <div className="lm-gm-face absolute" style={{ width: s * 0.065, height: s * 0.21, left: -s * 0.0325, top: -s * 0.21 }}>
+            <span className="lm-gm-person absolute inset-0">
+              <span className="lm-gm-arm absolute left-[-6%] top-[20%] h-[34%] w-[22%] rounded-full" style={{ background: c.shirt, filter: "brightness(.85)" }} />
+              <span className="lm-gm-arm is-b absolute right-[-6%] top-[20%] h-[34%] w-[22%] rounded-full" style={{ background: c.shirt, filter: "brightness(.85)" }} />
+              <span className="lm-gm-leg absolute top-[55%] h-[45%] w-[36%] rounded-b-[3px]" style={{ left: "12%", background: c.pants }} />
+              <span className="lm-gm-leg is-b absolute top-[55%] h-[45%] w-[36%] rounded-b-[3px]" style={{ right: "12%", background: c.pants }} />
+              <span className="absolute left-1/2 top-[17%] h-[41%] w-[92%] -translate-x-1/2 rounded-[42%_42%_12%_12%]" style={{ background: c.shirt }} />
+              <span className="lm-gm-head absolute left-1/2 top-0 h-[17%] w-[60%] -translate-x-1/2 rounded-full" style={{ background: c.skin }}>
+                <span className="absolute inset-x-[-4%] top-[-8%] h-[52%] rounded-t-full" style={{ background: c.hair }} />
+              </span>
+            </span>
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+
+/** A marble figure, drawn as a soft silhouette. */
+function Statue() {
+  return (
+    <svg viewBox="0 0 40 100" className="absolute inset-0 size-full drop-shadow-[0_4px_6px_rgba(0,0,0,.25)]" aria-hidden>
+      <defs>
+        <linearGradient id="lm-gm-marble" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#d9d5ce" /><stop offset=".45" stopColor="#ffffff" /><stop offset="1" stopColor="#bdb8af" />
+        </linearGradient>
+      </defs>
+      <path fill="url(#lm-gm-marble)" d="M20 2c4 0 6.5 3 6.5 7s-2.5 7-6.5 7-6.5-3-6.5-7S16 2 20 2zm-6 16c4-1.5 8-1.5 12 0 4 1.5 6 5 6.5 10l2 16c.4 2.5-3 3.4-3.8 1L29 31l-.5 17 2 24 1.5 22c.2 3-5 3.5-5.5.5L23 72h-6l-3.5 22.5c-.5 3-5.7 2.5-5.5-.5L9.5 72l2-24-.5-17-1.7 14c-.8 2.4-4.2 1.5-3.8-1l2-16c.5-5 2.5-8.5 6.5-10z" />
+    </svg>
   );
 }

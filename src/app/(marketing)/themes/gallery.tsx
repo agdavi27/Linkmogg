@@ -15,7 +15,7 @@ export function Gallery({ initial }: { initial: string }) {
     <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-5 pb-20 lg:grid-cols-[320px_minmax(0,1fr)]">
       <div>
         <h1 className="font-display text-4xl font-semibold tracking-[-0.03em]">Try every theme</h1>
-        <p className="mt-3 text-ink-2">Same links, seventeen ways to show them. Tap, spin, drag and tune. Everything here works.</p>
+        <p className="mt-3 text-ink-2">Same links, eighteen ways to show them. Tap, spin, drag and tune. Everything here works.</p>
         <label htmlFor="demo-name" className="label mt-6">See it with your name</label>
         <input id="demo-name" className="field" placeholder="Juno Park" value={name} onChange={(e) => setName(e.target.value)} maxLength={40} />
         <div className="mt-6 flex flex-col gap-5">

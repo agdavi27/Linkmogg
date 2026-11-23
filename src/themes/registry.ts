@@ -15,7 +15,7 @@ export const CATEGORIES: { id: CategoryId; name: string; blurb: string }[] = [
   { id: "minimal", name: "Minimal", blurb: "Clean type and quiet motion." },
   { id: "spatial", name: "Spatial", blurb: "3D scenes, arches and wheels." },
   { id: "retro", name: "Retro tech", blurb: "Gadgets and desktops, rebuilt." },
-  { id: "cozy", name: "Cozy", blurb: "Hand-made gardens." },
+  { id: "cozy", name: "Cozy", blurb: "Hand-made gardens and flowers." },
 ];
 
 export const DEFAULT_THEME = "classic";
@@ -42,6 +42,7 @@ export const THEMES: ThemeDef[] = [
   { id: "desktop", name: "Mogg OS", blurb: "A chunky retro desktop. Every link is a file.", pro: true, swatch: ["#7fb7a4", "#f2c94c"], category: "retro" },
   { id: "pass", name: "Pass", blurb: "A worn member card with your photo and your links typed in.", pro: true, swatch: ["#8fd3cf", "#6a3fd1"], category: "retro" },
   // Cozy
+  { id: "garden", name: "Garden", blurb: "A poster on a hillside. Every link is a pixel flower.", pro: true, swatch: ["#3b7be0", "#e3231b"], category: "cozy" },
   { id: "sunflower", name: "Sunflower", blurb: "Every link is a named petal. Tap one to bloom it.", pro: true, swatch: ["#bfe3f2", "#f2b632"], category: "cozy" },
 ];
 
