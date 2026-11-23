@@ -5,12 +5,14 @@ import Link from "next/link";
 import { CATEGORIES, getTheme, themesIn } from "@/themes/registry";
 import { ThemeRenderer } from "@/themes/render";
 import { DEMO } from "@/themes/demo";
+import { BACKDROPS, DEFAULT_BACKDROP } from "@/themes/backdrops";
 
 export function Gallery({ initial }: { initial: string }) {
   const [id, setId] = useState(getTheme(initial).id);
   const [name, setName] = useState("");
+  const [backdrop, setBackdrop] = useState(DEFAULT_BACKDROP);
   const t = getTheme(id);
-  const data = { ...DEMO, displayName: name || DEMO.displayName };
+  const data = { ...DEMO, displayName: name || DEMO.displayName, backdrop };
   return (
     <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-5 pb-20 lg:grid-cols-[320px_minmax(0,1fr)]">
       <div>
@@ -43,6 +45,23 @@ export function Gallery({ initial }: { initial: string }) {
             <ThemeRenderer themeId={id} data={data} mode="preview" />
           </div>
         </div>
+        {id === "meadow" ? (
+          <div className="mt-4 flex flex-col items-center">
+            <p className="text-sm font-semibold">Backdrop</p>
+            <ul className="mt-2 flex flex-wrap justify-center gap-2">
+              {BACKDROPS.map((b) => (
+                <li key={b.id}>
+                  <button type="button" onClick={() => setBackdrop(b.id)} aria-pressed={backdrop === b.id} title={b.name}
+                    className={`flex flex-col items-center gap-1 rounded-xl p-1 text-[11px] transition-transform active:scale-95 ${backdrop === b.id ? "bg-ink text-paper" : "hover:bg-black/5"}`}>
+                    <span aria-hidden className="block size-12 rounded-lg ring-1 ring-black/10" style={b.style} />
+                    {b.name}
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-1 text-xs text-ink-3">Or upload your own once it&apos;s your page.</p>
+          </div>
+        ) : null}
         <p className="mt-4 max-w-[44ch] text-center text-sm text-ink-2">{t.blurb}</p>
         <Link href="/login" className="btn btn-accent mt-4">Use {t.name} on my page</Link>
       </div>

@@ -1,10 +1,10 @@
 "use client";
 
 import { useRef, useState, type CSSProperties } from "react";
-import { Avatar, Empty, SocialRow, ThemeRoot, hash, hostOf, linkTarget } from "../shared";
+import { Avatar, Empty, SocialRow, ThemeRoot, hash, hostOf, linkTarget, usePrefersReducedMotion } from "../shared";
 import { LinkArt } from "../art";
 import { buzz, tick, useSize } from "../motion";
-import { backdropStyle } from "../backdrops";
+import { backdropStyle, backdropVideo } from "../backdrops";
 import type { ThemeProps, ThemeLink } from "../types";
 
 // Where icons can sit, as a 4 x 6 grid around the window in the middle.
@@ -23,6 +23,8 @@ export default function Meadow({ data, mode }: ThemeProps) {
   const drag = useRef<{ id: string; x: number; y: number; ox: number; oy: number; far: boolean } | null>(null);
   const { w, h } = useSize(stage);
   const name = data.displayName || data.username;
+  const video = backdropVideo(data.backdrop);
+  const reduced = usePrefersReducedMotion();
   const shown = data.links.slice(0, ORDER.length);
   const current = sel !== null ? data.links[sel] : null;
 
@@ -51,11 +53,12 @@ export default function Meadow({ data, mode }: ThemeProps) {
   const top = 44; // leave room for the share button
   const cw = w / 4, ch = (h - top) / 6;
   const icon = Math.max(54, Math.min(cw * 0.56, ch * 0.62, 96));
-  const win = { w: Math.min(w * 0.6, 520), h: Math.min(h * 0.32, 380) };
+  const win = { w: Math.min(w * 0.5, 520), h: Math.min(h * 0.32, 380) };
 
   return (
-    <ThemeRoot data={data} mode={mode} label="Meadow" badgeTone="light" className="lm-md bg-[#1f3a16] text-white">
+    <ThemeRoot data={data} mode={mode} label="Meadow" badgeTone="light" className="lm-md bg-[#121212] text-white">
       <div ref={stage} className="lm-md-stage relative min-h-0 flex-1 overflow-hidden" style={backdropStyle(data.backdrop)}>
+        {video && !reduced ? <video key={video} src={video} autoPlay muted loop playsInline preload="auto" aria-hidden className="pointer-events-none absolute inset-0 size-full object-cover" /> : null}
         {w > 0 ? shown.map((l, i) => {
           const [c, r] = SLOTS[ORDER[i]];
           const k = hash(l.id + l.title);

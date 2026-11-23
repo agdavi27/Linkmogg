@@ -540,7 +540,7 @@ button.lm-st-chip:active { transform: scale(.95); }
 .lm-md-open { background: #e0443e; }
 .lm-md-bin { width: 40px; height: 48px; border-radius: 3px 3px 8px 8px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.75) 0 3px, rgba(200,205,210,.75) 3px 6px); box-shadow: 0 4px 10px rgba(0,0,0,.3); }
 .lm-md-bin::before { content: ""; position: absolute; left: -3px; right: -3px; top: -5px; height: 6px; border-radius: 3px; background: rgba(235,238,240,.9); }
-.lm-md-foot { background: linear-gradient(180deg, transparent, rgba(0,0,0,.25)); }
+.lm-md-foot { background: #121212; }
 @media (prefers-reduced-motion: reduce) { .lm-md-icon, .lm-md-win { animation: none; } }
 
 /* ---------- Glow ---------- */

@@ -435,7 +435,7 @@ function BackdropPicker({ value, onChange, onUploaded, run }: {
   return (
     <div className="mt-5 border-t border-line pt-4">
       <h3 className="text-sm font-semibold">Backdrop</h3>
-      <p className="mt-0.5 text-xs text-ink-2">What your desktop sits on. Grass is the default.</p>
+      <p className="mt-0.5 text-xs text-ink-2">What your desktop sits on. The windy field is the default.</p>
       <ul className="mt-2 flex flex-wrap gap-2">
         {BACKDROPS.map((b) => (
           <li key={b.id}>
