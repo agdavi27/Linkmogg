@@ -455,29 +455,19 @@ button.lm-st-chip:active { transform: scale(.95); }
 @media (prefers-reduced-motion: reduce) { .lm-sp-disc.is-anim { transition: none; } .lm-sp-disc.is-on > span:first-child, .lm-sp-wave i, .lm-sp-next span { animation: none; } .lm-sp-next span { padding-left: 0; } }
 
 /* ---------- Billboard ---------- */
-.lm-bb { perspective: 1100px; }
-.lm-bb-sky { position: absolute; inset: 0; overflow: hidden; pointer-events: none;
-  background: radial-gradient(90% 50% at 50% 100%, #4f73b4 0%, transparent 70%), linear-gradient(180deg, #0b1f4e 0%, #163a7e 38%, #2a56a0 70%, #5a7fbc 100%); }
-.lm-bb-clouds { position: absolute; left: 0; display: flex; width: 200%; will-change: transform; animation: lm-bb-drift linear infinite; }
-.lm-bb-c1 { top: -6%; height: 78%; opacity: .95; animation-duration: 180s; }
-.lm-bb-c2 { top: 4%; height: 60%; opacity: .55; animation-duration: 110s; mix-blend-mode: screen; }
+.lm-bb-scene { position: absolute; left: 0; top: 0; width: 1200px; height: 1500px; transform-origin: 0 0; }
+.lm-bb-move { transform-origin: 49% 43%; animation: lm-bb-breathe 26s ease-in-out infinite alternate; }
+@keyframes lm-bb-breathe { from { transform: scale(1); } to { transform: scale(1.04) translate(-6px, -4px); } }
+.lm-bb-haze { position: absolute; top: 0; left: 0; width: 200%; height: 55%; pointer-events: none; opacity: .2; mix-blend-mode: screen;
+  background: radial-gradient(30% 10% at 20% 30%, #fff, transparent 70%), radial-gradient(24% 8% at 70% 18%, #fff, transparent 70%), radial-gradient(36% 9% at 50% 52%, #fff, transparent 70%);
+  background-size: 50% 100%; animation: lm-bb-drift 120s linear infinite; }
 @keyframes lm-bb-drift { to { transform: translateX(-50%); } }
-.lm-bb-mountain { position: absolute; left: 0; right: 0; bottom: 24cqh; height: 10cqh; pointer-events: none; background: linear-gradient(180deg, #1a2c52, #0e1a33);
-  clip-path: polygon(0 55%, 6% 40%, 14% 22%, 20% 30%, 27% 48%, 35% 70%, 45% 100%, 0 100%); }
-.lm-bb-grass { position: absolute; left: -3%; right: -3%; bottom: 0; height: 32cqh; z-index: 15; pointer-events: none; transform-origin: 50% 100%; will-change: transform;
-  animation: lm-bb-sway 6s ease-in-out infinite alternate; }
-@keyframes lm-bb-sway { from { transform: skewX(-1.4deg); } to { transform: skewX(1.4deg) translateX(.4%); } }
-.lm-bb-sign { transform: rotateY(-13deg) rotateX(4deg) rotateZ(-.6deg); transform-origin: 30% 50%; animation: lm-bb-rise 1.1s cubic-bezier(0.23,1,0.32,1) both; }
-@keyframes lm-bb-rise { from { opacity: 0; transform: translateY(24px) rotateY(-22deg) rotateX(8deg); } }
-.lm-bb-board { border-radius: 2px; border: clamp(3px, .8cqw, 7px) solid #e9ecef;
-  background: radial-gradient(70% 50% at 50% 50%, #ffffff, #f2f2f4 80%), #f4f4f6;
-  box-shadow: 0 0 0 1px #9aa1a8, 0 40px 60px -30px rgba(0,10,40,.6), inset 0 0 0 1px rgba(0,0,0,.06); }
-.lm-bb-catwalk { height: clamp(14px, 3.2cqh, 26px); margin: 0 1.5%; position: relative;
-  background: linear-gradient(180deg, #ffffff 0 30%, #d7dde2 30% 36%, #f6f7f8 36% 70%, #b8c0c7 70% 100%); box-shadow: 0 8px 14px -8px rgba(0,0,0,.6); }
-.lm-bb-pole { position: absolute; left: 47%; top: 100%; width: clamp(24px, 6cqw, 52px); height: 60cqh; transform: translateX(-50%); z-index: -1;
-  background: linear-gradient(90deg, #9ea6ad, #ffffff 35%, #e6eaed 60%, #8e979f); }
-.lm-bb-field { --m: radial-gradient(ellipse 40% 30% at 50% 50%, transparent 66%, #000 100%); -webkit-mask-image: var(--m); mask-image: var(--m); }
-.is-narrow .lm-bb-field { --m: radial-gradient(ellipse 80% 24% at 50% 50%, transparent 70%, #000 100%); }
+.lm-bb-face { position: absolute; left: 0; top: 0; transform-origin: 0 0; overflow: hidden; background: rgb(235,236,237); }
+.lm-bb-face > :not(.lm-bb-light) { animation: lm-bb-post .9s cubic-bezier(0.23,1,0.32,1) .15s both; }
+@keyframes lm-bb-post { from { opacity: 0; clip-path: inset(0 100% 0 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
+.lm-bb-light { position: absolute; inset: 0; pointer-events: none; z-index: 20;
+  background: linear-gradient(105deg, rgba(255,255,255,.08), transparent 40%, rgba(40,50,80,.08)); box-shadow: inset 0 0 18px rgba(30,40,60,.12); }
+.lm-bb-field { --m: radial-gradient(ellipse 34% 40% at 50% 50%, transparent 66%, #000 100%); -webkit-mask-image: var(--m); mask-image: var(--m); }
 .lm-bb-track { animation: lm-bb-scroll 60s linear infinite; will-change: transform; }
 @keyframes lm-bb-scroll { to { transform: translateX(-50%); } }
 .lm-bb-bubble { box-shadow: 0 10px 18px -10px rgba(20,20,40,.5), inset 0 0 0 1px rgba(255,255,255,.5); transition: transform .35s cubic-bezier(0.23,1,0.32,1), box-shadow .3s ease;
@@ -493,14 +483,14 @@ button.lm-st-chip:active { transform: scale(.95); }
 .lm-bb-plus:active { transform: scale(.9); }
 .lm-bb-pill { box-shadow: 0 2px 10px rgba(0,0,0,.1), 0 0 0 1px rgba(0,0,0,.05); transition: transform .15s ease-out; }
 .lm-bb-pill:active { transform: scale(.95); }
-.lm-bb-board:focus-within .lm-bb-track { animation-play-state: paused; }
+.lm-bb-face:focus-within .lm-bb-track { animation-play-state: paused; }
 @media (hover: hover) and (pointer: fine) {
-  .lm-bb-board:hover .lm-bb-track { animation-play-state: paused; }
+  .lm-bb-face:hover .lm-bb-track { animation-play-state: paused; }
   .lm-bb-bubble:hover { transform: scale(1.08); }
   .lm-bb-plus:hover { transform: rotate(90deg); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .lm-bb-clouds, .lm-bb-grass, .lm-bb-track, .lm-bb-bubble, .lm-bb-sign { animation: none; }
+  .lm-bb-move, .lm-bb-haze, .lm-bb-track, .lm-bb-bubble, .lm-bb-face > * { animation: none; }
 }
 
 /* ---------- Pass (member card) ---------- */

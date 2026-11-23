@@ -1,12 +1,33 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Image from "next/image";
 import { Empty, ThemeRoot, hash, hostOf, linkTarget } from "../shared";
 import { LinkArt } from "../art";
 import { buzz, tick, useSize } from "../motion";
 import type { ThemeProps } from "../types";
 import { platformLabel } from "@/lib/socials/platforms";
 import { SocialIcon } from "@/lib/socials/icons";
+import photo from "../assets/billboard.jpg";
+
+// The photo is 1200 x 1500. These are the four corners of the blank board face in it,
+// clockwise from top left. The page is drawn flat and then warped onto them.
+const IW = 1200, IH = 1500;
+const QUAD: [number, number][] = [[229, 415], [937, 523], [939, 867], [228, 826]];
+const BOARD = { cx: 584, cy: 640, w: 711 };
+const FW = 1000, FH = 500; // the flat size of the board's content
+
+/** The CSS matrix that takes a FW x FH box onto QUAD (a standard square-to-quad homography). */
+function warp() {
+  const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = QUAD;
+  const dx1 = x1 - x2, dx2 = x3 - x2, dy1 = y1 - y2, dy2 = y3 - y2;
+  const sx = x0 - x1 + x2 - x3, sy = y0 - y1 + y2 - y3;
+  const det = dx1 * dy2 - dx2 * dy1;
+  const g = (sx * dy2 - dx2 * sy) / det, h = (dx1 * sy - sx * dy1) / det;
+  const a = x1 - x0 + g * x1, b = x3 - x0 + h * x3, d = y1 - y0 + g * y1, e = y3 - y0 + h * y3;
+  return `matrix3d(${[a / FW, d / FW, 0, g / FW, b / FH, e / FH, 0, h / FH, 0, 0, 1, 0, x0, y0, 0, 1].join(",")})`;
+}
+const WARP = warp();
 
 // Where bubbles sit on one tile of the board: [x%, y%, size]. The middle is kept clear for the name.
 const SLOTS: [number, number, number][] = [
@@ -14,33 +35,20 @@ const SLOTS: [number, number, number][] = [
   [17, 76, 1.4], [33, 66, 1.05], [57, 10, 0.75], [67, 14, 0.66], [60, 34, 0.64], [75, 33, 1.25],
   [90, 27, 0.62], [89, 50, 0.9], [69, 68, 0.82], [81, 64, 0.78], [77, 86, 0.55], [93, 78, 1.1],
 ];
-
-// The field, drawn in a 1000x300 box: soft mounds with a fringe of short blades, generated once.
-const BLADES = (() => {
-  let d = "M0 300 L0 70";
-  for (let i = 0; i <= 500; i++) {
-    const x = i * 2;
-    const k = hash(`g${i}`);
-    const mound = 62 + Math.sin(x * 0.011) * 16 + Math.sin(x * 0.031 + 1) * 9;
-    d += ` L${x - 0.6} ${(mound + 4).toFixed(1)} L${x} ${(mound - 6 - ((k >>> 3) % 22)).toFixed(1)} L${x + 0.6} ${(mound + 4).toFixed(1)}`;
-  }
-  return d + " L1000 300 Z";
-})();
-
-const FLOWERS = Array.from({ length: 90 }, (_, i) => {
-  const k = hash(`f${i}`);
-  const x = i % 3 === 0 ? k % 320 : 560 + (k % 440);
-  return { x, y: 52 + ((k >>> 6) % 90), r: 2 + ((k >>> 12) % 10) / 3, c: ["#f7a6bf", "#ffc2d2", "#f08fae", "#ffd9e3"][(k >>> 3) % 4] };
-});
+const UNIT = FH * 0.19;
 
 export default function Billboard({ data, mode }: ThemeProps) {
   const n = data.links.length;
   const [sel, setSel] = useState<number | null>(null);
-  const board = useRef<HTMLDivElement>(null);
+  const stage = useRef<HTMLDivElement>(null);
   const openRef = useRef<HTMLAnchorElement>(null);
-  const { w: bw, h: bh } = useSize(board);
+  const { w, h } = useSize(stage);
   const name = data.displayName || data.username;
-  const unit = Math.max(26, bh * 0.19);
+
+  // Cover the screen with the photo, but never let the board get cut off on a narrow phone.
+  const s = Math.max(w / IW, Math.min(h / IH, (w * 0.96) / BOARD.w));
+  const ox = Math.min(0, Math.max(w - IW * s, w / 2 - BOARD.cx * s));
+  const oy = IH * s < h ? h - IH * s : Math.min(0, Math.max(h - IH * s, h * 0.36 - BOARD.cy * s));
 
   const pick = (i: number) => {
     if (sel === i) { openRef.current?.click(); return; }
@@ -50,125 +58,90 @@ export default function Billboard({ data, mode }: ThemeProps) {
   };
   const next = () => { if (n) pick(sel === null ? 0 : (sel + 1) % n); };
   const current = sel !== null ? data.links[sel] : null;
-  const small = Math.max(9.5, Math.min(bh * 0.04, 14));
 
   return (
-    <ThemeRoot data={data} mode={mode} label="Billboard" badgeTone="light" className="lm-bb bg-[#0b3d22] text-[#121212]">
-      <Sky />
-      <div aria-hidden className="lm-bb-mountain" />
+    <ThemeRoot data={data} mode={mode} label="Billboard" badgeTone="light" className="lm-bb bg-[#26598a] text-[#121212]">
+      <div ref={stage} className="relative min-h-0 flex-1 overflow-hidden">
+        {w > 0 ? (
+          <div className="lm-bb-scene" style={{ transform: `translate(${ox}px, ${oy}px) scale(${s})` }}>
+            <div className="lm-bb-move absolute inset-0">
+              <Image src={photo} alt="" fill priority sizes="(max-width: 700px) 100vw, 1600px" placeholder="blur" className="pointer-events-none select-none object-cover" />
+              <div aria-hidden className="lm-bb-haze" />
 
-      <div className="relative z-10 flex min-h-0 flex-1 items-start justify-center px-[5%] pt-[clamp(28px,12cqh,120px)]">
-        <div className="lm-bb-sign relative w-full" style={{ maxWidth: "min(820px, 84cqh)" }}>
-          <div ref={board} className={`lm-bb-board relative overflow-hidden ${bw && bw < 520 ? "is-narrow" : ""}`} style={{ aspectRatio: bw && bw < 520 ? "1.15" : "1.75" }}>
-            {/* drifting bubbles: two copies of one tile, slid sideways forever */}
-            <div className="lm-bb-field absolute inset-0">
-              <div className="lm-bb-track absolute inset-y-0 left-0 flex w-[200%]">
-                {bw > 0 && n > 0 ? [0, 1].map((copy) => (
-                  <ul key={copy} className="relative h-full w-1/2" aria-hidden={copy === 1 || undefined} aria-label={copy === 0 ? "Links" : undefined}>
-                    {SLOTS.map(([x, y, s], k) => {
-                      const i = (k + copy * Math.ceil(n / 2)) % n;
-                      const l = data.links[i];
-                      const size = unit * s;
-                      const real = copy === 0 && k < n; // one focusable bubble per link
-                      return (
-                        <li key={k} className="absolute" style={{ left: `${x}%`, top: `${y}%`, width: size, height: size, marginLeft: -size / 2, marginTop: -size / 2 }}>
-                          <button type="button" tabIndex={real ? 0 : -1} aria-hidden={!real || undefined} onClick={() => pick(i)}
-                            onPointerEnter={(e) => { if (e.pointerType === "mouse") setSel(i); }}
-                            aria-label={real ? `${l.title}${sel === i ? ", selected. Press again to open" : ""}` : undefined}
-                            className={`lm-bb-bubble relative block size-full rounded-full outline-none ${sel === i ? "is-on" : ""}`}
-                            style={{ animationDelay: `${-(hash(`b${k}`) % 50) / 10}s` }}>
-                            <LinkArt link={l} className="size-full rounded-full" icon={Math.round(size * 0.3)} blur={0.6} mark={size > 40} />
-                            <span aria-hidden className="lm-bb-gloss" />
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )) : null}
+              {/* the board face, warped onto the photo */}
+              <div className="lm-bb-face" style={{ width: FW, height: FH, transform: WARP }}>
+                <div className="lm-bb-field absolute inset-0">
+                  <div className="lm-bb-track absolute inset-y-0 left-0 flex w-[200%]">
+                    {n > 0 ? [0, 1].map((copy) => (
+                      <ul key={copy} className="relative h-full w-1/2" aria-hidden={copy === 1 || undefined} aria-label={copy === 0 ? "Links" : undefined}>
+                        {SLOTS.map(([x, y, k], slot) => {
+                          const i = (slot + copy * Math.ceil(n / 2)) % n;
+                          const l = data.links[i];
+                          const size = UNIT * k;
+                          const real = copy === 0 && slot < n; // one focusable bubble per link
+                          return (
+                            <li key={slot} className="absolute" style={{ left: `${x}%`, top: `${y}%`, width: size, height: size, marginLeft: -size / 2, marginTop: -size / 2 }}>
+                              <button type="button" tabIndex={real ? 0 : -1} aria-hidden={!real || undefined} onClick={() => pick(i)}
+                                onPointerEnter={(e) => { if (e.pointerType === "mouse") setSel(i); }}
+                                aria-label={real ? `${l.title}${sel === i ? ", selected. Press again to open" : ""}` : undefined}
+                                className={`lm-bb-bubble relative block size-full rounded-full outline-none ${sel === i ? "is-on" : ""}`}
+                                style={{ animationDelay: `${-(hash(`b${slot}`) % 50) / 10}s` }}>
+                                <LinkArt link={l} className="size-full rounded-full" icon={Math.round(size * 0.3)} blur={0.6} mark={size > 40} />
+                                <span aria-hidden className="lm-bb-gloss" />
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )) : null}
+                  </div>
+                </div>
+
+                <div className="pointer-events-none absolute inset-x-0 top-[19%] z-10 flex flex-col items-center px-6 text-center" aria-live="polite">
+                  <button type="button" onClick={next} aria-label="Next link"
+                    className="lm-bb-plus pointer-events-auto mb-[14px] grid size-[42px] place-items-center rounded-full text-[26px] text-[#6b6b74]">+</button>
+                  <h1 className="max-w-[560px] truncate font-display font-semibold lowercase leading-[0.9] tracking-[-0.06em]" style={{ fontSize: Math.min(126, 1000 / Math.max(5, name.length)) }}>{name}</h1>
+                  <div className="mt-[12px] min-h-[2.6em] max-w-[420px] text-[22px] leading-snug text-[#7a7a80]">
+                    {current ? (
+                      <p key={current.id} className="lm-pop truncate"><span className="text-[#2a2a2e]">{current.title}</span><br />{hostOf(current.url)}</p>
+                    ) : (
+                      <p className="line-clamp-2">{data.bio || "Tap a bubble to see where it goes."}</p>
+                    )}
+                  </div>
+                  {current ? (
+                    <a ref={openRef} href={current.url} key={current.id} {...linkTarget(mode, current.url)}
+                      className="lm-pop lm-bb-pill pointer-events-auto mt-[10px] rounded-full bg-white px-6 py-2.5 text-[20px] font-semibold">Open link</a>
+                  ) : (
+                    <button type="button" onClick={next} className="lm-bb-pill pointer-events-auto mt-[10px] rounded-full bg-white px-6 py-2.5 text-[20px] font-semibold">
+                      {n ? "Show me" : "No links yet"}
+                    </button>
+                  )}
+                </div>
+                {n === 0 ? <Empty className="absolute inset-x-0 bottom-8 text-[22px]" /> : null}
+                <div aria-hidden className="lm-bb-light" />
               </div>
             </div>
-
-            {/* the middle of the board */}
-            <div className="pointer-events-none absolute inset-x-0 top-[21%] z-10 flex flex-col items-center px-4 text-center" aria-live="polite">
-              <button type="button" onClick={next} aria-label="Next link"
-                className="lm-bb-plus pointer-events-auto mb-[3%] grid place-items-center rounded-full text-[#6b6b74]" style={{ width: unit * 0.42, height: unit * 0.42, fontSize: unit * 0.26 }}>+</button>
-              <h1 className="max-w-full truncate font-display font-semibold lowercase leading-[0.85] tracking-[-0.06em]" style={{ fontSize: Math.max(30, Math.min(bh * 0.25, bw * 0.13)) }}>{name}</h1>
-              <div className="mt-[2.5%] min-h-[2.5em] max-w-[34ch] leading-snug text-[#7a7a80]" style={{ fontSize: small }}>
-                {current ? (
-                  <p key={current.id} className="lm-pop truncate"><span className="text-[#2a2a2e]">{current.title}</span><br />{hostOf(current.url)}</p>
-                ) : (
-                  <p className="line-clamp-2">{data.bio || "Tap a bubble to see where it goes."}</p>
-                )}
-              </div>
-              {current ? (
-                <a ref={openRef} href={current.url} key={current.id} {...linkTarget(mode, current.url)}
-                  className="lm-pop lm-bb-pill pointer-events-auto mt-[2%] rounded-full bg-white px-4 py-1.5 font-semibold" style={{ fontSize: small }}>
-                  Open link
-                </a>
-              ) : (
-                <button type="button" onClick={next} className="lm-bb-pill pointer-events-auto mt-[2%] rounded-full bg-white px-4 py-1.5 font-semibold" style={{ fontSize: small }}>
-                  {n ? "Show me" : "No links yet"}
-                </button>
-              )}
-            </div>
-            {n === 0 ? <Empty className="absolute inset-x-0 bottom-6" /> : null}
           </div>
-          <div aria-hidden className="lm-bb-catwalk" />
-          <div aria-hidden className="lm-bb-pole" />
+        ) : null}
+
+        {/* down on the grass: a readable version of the pick, and the socials */}
+        <div className="absolute inset-x-0 bottom-0 z-20 flex flex-col items-center gap-2 px-4 pb-2">
+          {current ? (
+            <a key={current.id} href={current.url} {...linkTarget(mode, current.url)} tabIndex={-1} aria-hidden
+              className="lm-pop flex max-w-full items-center gap-2 rounded-full bg-white/90 py-1.5 pl-4 pr-1.5 text-[14px] font-semibold text-[#121212] shadow-lg backdrop-blur">
+              <span className="truncate">{current.title}</span>
+              <span className="shrink-0 rounded-full bg-[#121212] px-3 py-1 text-[12px] text-white">Open ↗</span>
+            </a>
+          ) : null}
+          {data.socials.length ? (
+            <ul className="flex justify-center gap-1" aria-label="Social profiles">
+              {data.socials.map((so, i) => (
+                <li key={i}><a href={so.url} {...linkTarget(mode, so.url)} aria-label={platformLabel(so.platform)} className="grid size-9 place-items-center rounded-full text-white/90 transition-colors hover:bg-white/15"><SocialIcon platform={so.platform} size={18} /></a></li>
+              ))}
+            </ul>
+          ) : null}
         </div>
       </div>
-
-      {/* grass, with a few pink flowers, swaying a little */}
-      <div aria-hidden className="lm-bb-grass">
-        <svg className="absolute inset-0 size-full" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMin slice">
-          <defs>
-            <filter id="lm-bb-tex" x="0" y="0" width="100%" height="100%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.09 0.012" numOctaves="3" seed="3" />
-              <feColorMatrix values="0 0 0 0 0.55  0 0 0 0 1  0 0 0 0 0.6  0 0 0 2.2 -1" />
-              <feComposite in2="SourceGraphic" operator="in" />
-            </filter>
-            <filter id="lm-bb-shade" x="0" y="0" width="100%" height="100%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.012 0.03" numOctaves="4" seed="9" />
-              <feColorMatrix values="0 0 0 0 0  0 0 0 0 0.12  0 0 0 0 0.05  0 0 0 2.4 -1.1" />
-              <feComposite in2="SourceGraphic" operator="in" />
-            </filter>
-            <linearGradient id="lm-bb-green" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#27b25c" /><stop offset=".3" stopColor="#139048" /><stop offset=".75" stopColor="#0a6a33" /><stop offset="1" stopColor="#053d1d" />
-            </linearGradient>
-          </defs>
-          <path d={BLADES} fill="url(#lm-bb-green)" />
-          <path d={BLADES} fill="#000" filter="url(#lm-bb-shade)" />
-          <path d={BLADES} fill="#000" filter="url(#lm-bb-tex)" opacity=".7" />
-          {FLOWERS.map((f, i) => <ellipse key={i} cx={f.x} cy={f.y} rx={f.r * 0.7} ry={f.r} fill={f.c} opacity=".85" />)}
-        </svg>
-      </div>
-
-      {data.socials.length ? (
-        <ul className="relative z-20 flex shrink-0 justify-center gap-1 pb-1" aria-label="Social profiles">
-          {data.socials.map((s, i) => (
-            <li key={i}><a href={s.url} {...linkTarget(mode, s.url)} aria-label={platformLabel(s.platform)} className="grid size-9 place-items-center rounded-full text-white/90 transition-colors hover:bg-white/15"><SocialIcon platform={s.platform} size={18} /></a></li>
-          ))}
-        </ul>
-      ) : null}
     </ThemeRoot>
-  );
-}
-
-/** A deep blue sky with soft, drifting clouds made from fractal noise. */
-function Sky() {
-  const tile = (seed: number, fx: string, a: string, key: number) => (
-    <svg key={key} className="h-full w-1/2" viewBox="0 0 1200 800" preserveAspectRatio="none">
-      <filter id={`lm-bb-cloud-${seed}-${key}`} x="0" y="0" width="100%" height="100%">
-        <feTurbulence type="fractalNoise" baseFrequency={fx} numOctaves="5" seed={seed} stitchTiles="stitch" />
-        <feColorMatrix values={`0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  ${a}`} />
-      </filter>
-      <rect width="1200" height="800" filter={`url(#lm-bb-cloud-${seed}-${key})`} />
-    </svg>
-  );
-  return (
-    <div aria-hidden className="lm-bb-sky">
-      <div className="lm-bb-clouds lm-bb-c1">{[0, 1].map((k) => tile(7, "0.0028 0.0075", "1.6 0 0 0 -0.72", k))}</div>
-      <div className="lm-bb-clouds lm-bb-c2">{[0, 1].map((k) => tile(11, "0.006 0.016", "1.5 0 0 0 -0.8", k))}</div>
-    </div>
   );
 }
