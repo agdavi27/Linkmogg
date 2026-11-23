@@ -38,7 +38,15 @@ export default function Portrait({ data, mode }: ThemeProps) {
           {data.avatarUrl
             // eslint-disable-next-line @next/next/no-img-element
             ? <img src={data.avatarUrl} alt="" className="size-full object-cover" />
-            : <span className="grid size-full place-items-center bg-[radial-gradient(circle_at_40%_35%,#cfcfd6,#8d8f99_60%,#5d5f68)] font-display text-[40cqmin] font-bold text-white/70">{initials(name)}</span>}
+            : (
+              // No photo yet: a soft head-and-shoulders shape in warm tones, so the layout still reads.
+              <span className="relative block size-full bg-[#e9e4dc]">
+                <span className="absolute left-1/2 top-[18%] h-[34%] w-[38%] -translate-x-1/2 rounded-[50%] bg-[radial-gradient(circle_at_42%_38%,#e8b89a,#b97a5c_70%)]" />
+                <span className="absolute left-1/2 top-[8%] h-[22%] w-[42%] -translate-x-1/2 rounded-[50%_50%_40%_40%] bg-[#3a2a22]" />
+                <span className="absolute bottom-[-6%] left-1/2 h-[46%] w-[96%] -translate-x-1/2 rounded-t-[50%] bg-[radial-gradient(circle_at_50%_20%,#4a6bd0,#26386f_75%)]" />
+                <span className="absolute inset-0 grid place-items-end justify-center pb-[18%] font-display text-[14cqmin] font-bold text-white/60">{initials(name)}</span>
+              </span>
+            )}
         </div>
         <div aria-hidden className="lm-pt-veil" />
 

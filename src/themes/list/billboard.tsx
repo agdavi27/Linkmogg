@@ -1,21 +1,37 @@
 "use client";
 
-import { useRef, useState, type CSSProperties } from "react";
-import { Empty, SocialRow, ThemeRoot, hash, hostOf, linkTarget } from "../shared";
+import { useRef, useState } from "react";
+import { Empty, ThemeRoot, hash, hostOf, linkTarget } from "../shared";
 import { LinkArt } from "../art";
 import { buzz, tick, useSize } from "../motion";
-import type { ThemeLink, ThemeProps } from "../types";
+import type { ThemeProps } from "../types";
+import { platformLabel } from "@/lib/socials/platforms";
+import { SocialIcon } from "@/lib/socials/icons";
 
-/** One row of bubbles. Links repeat until the row is wide enough to loop without a gap. */
-function rowOf(links: ThemeLink[], offset: number, min: number) {
-  if (!links.length) return [];
-  const out: { l: ThemeLink; i: number }[] = [];
-  for (let k = 0; out.length < Math.max(min, links.length); k++) {
-    const i = (k + offset) % links.length;
-    out.push({ l: links[i], i });
+// Where bubbles sit on one tile of the board: [x%, y%, size]. The middle is kept clear for the name.
+const SLOTS: [number, number, number][] = [
+  [7, 26, 0.95], [19, 13, 1.3], [31, 9, 0.75], [41, 13, 0.62], [13, 50, 0.8], [26, 42, 0.62],
+  [17, 76, 1.4], [33, 66, 1.05], [57, 10, 0.75], [67, 14, 0.66], [60, 34, 0.64], [75, 33, 1.25],
+  [90, 27, 0.62], [89, 50, 0.9], [69, 68, 0.82], [81, 64, 0.78], [77, 86, 0.55], [93, 78, 1.1],
+];
+
+// The field, drawn in a 1000x300 box: soft mounds with a fringe of short blades, generated once.
+const BLADES = (() => {
+  let d = "M0 300 L0 70";
+  for (let i = 0; i <= 500; i++) {
+    const x = i * 2;
+    const k = hash(`g${i}`);
+    const mound = 62 + Math.sin(x * 0.011) * 16 + Math.sin(x * 0.031 + 1) * 9;
+    d += ` L${x - 0.6} ${(mound + 4).toFixed(1)} L${x} ${(mound - 6 - ((k >>> 3) % 22)).toFixed(1)} L${x + 0.6} ${(mound + 4).toFixed(1)}`;
   }
-  return out;
-}
+  return d + " L1000 300 Z";
+})();
+
+const FLOWERS = Array.from({ length: 90 }, (_, i) => {
+  const k = hash(`f${i}`);
+  const x = i % 3 === 0 ? k % 320 : 560 + (k % 440);
+  return { x, y: 52 + ((k >>> 6) % 90), r: 2 + ((k >>> 12) % 10) / 3, c: ["#f7a6bf", "#ffc2d2", "#f08fae", "#ffd9e3"][(k >>> 3) % 4] };
+});
 
 export default function Billboard({ data, mode }: ThemeProps) {
   const n = data.links.length;
@@ -24,12 +40,7 @@ export default function Billboard({ data, mode }: ThemeProps) {
   const openRef = useRef<HTMLAnchorElement>(null);
   const { w: bw, h: bh } = useSize(board);
   const name = data.displayName || data.username;
-
-  // Bubble size follows the board, so a phone and a desktop both show a full row.
-  const bub = Math.max(36, Math.min(bh * 0.19, bw * 0.22, 110));
-  const perRow = Math.ceil(bw / (bub * 0.95)) + 2;
-  const top = rowOf(data.links, 0, perRow);
-  const bottom = rowOf(data.links, Math.ceil(n / 2), perRow);
+  const unit = Math.max(26, bh * 0.19);
 
   const pick = (i: number) => {
     if (sel === i) { openRef.current?.click(); return; }
@@ -37,41 +48,69 @@ export default function Billboard({ data, mode }: ThemeProps) {
     tick(1500 + (i % 6) * 110, 0.015, 0.04);
     buzz(5);
   };
+  const next = () => { if (n) pick(sel === null ? 0 : (sel + 1) % n); };
   const current = sel !== null ? data.links[sel] : null;
+  const small = Math.max(9.5, Math.min(bh * 0.04, 14));
 
   return (
-    <ThemeRoot data={data} mode={mode} label="Billboard" badgeTone="light" className="lm-bb bg-[#0a4f28] text-[#121212]">
-      <div aria-hidden className="lm-bb-sky">
-        <span className="lm-bb-clouds lm-bb-c1" />
-        <span className="lm-bb-clouds lm-bb-c2" />
-      </div>
-      <div aria-hidden className="lm-bb-hills" />
+    <ThemeRoot data={data} mode={mode} label="Billboard" badgeTone="light" className="lm-bb bg-[#0b3d22] text-[#121212]">
+      <Sky />
+      <div aria-hidden className="lm-bb-mountain" />
 
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center px-[4%] pb-[22cqh] pt-[clamp(14px,5cqh,48px)]">
-        <div className="lm-bb-sign relative flex w-full max-w-[760px] flex-col" style={{ height: "min(100%, max(340px, 62cqw, 54cqh))" }}>
-          <div ref={board} className="lm-bb-board relative flex min-h-0 flex-1 flex-col overflow-hidden">
-            {bw > 0 ? <BubbleRow items={top} dir={1} rowKey="t" bub={bub} n={n} sel={sel} onPick={pick} onHover={setSel} /> : null}
-            <div className="relative z-10 flex shrink-0 flex-col items-center px-4 py-[clamp(6px,2cqh,16px)] text-center" aria-live="polite">
-              <h1 className="lm-bb-name max-w-full truncate font-display text-[clamp(34px,11cqw,84px)] font-bold lowercase leading-[0.9] tracking-[-0.055em]">{name}</h1>
-              <div className="mt-1.5 h-[2.6em] max-w-[40ch] text-[clamp(11px,2.8cqw,14px)] leading-snug text-black/55">
+      <div className="relative z-10 flex min-h-0 flex-1 items-start justify-center px-[5%] pt-[clamp(28px,12cqh,120px)]">
+        <div className="lm-bb-sign relative w-full" style={{ maxWidth: "min(820px, 84cqh)" }}>
+          <div ref={board} className={`lm-bb-board relative overflow-hidden ${bw && bw < 520 ? "is-narrow" : ""}`} style={{ aspectRatio: bw && bw < 520 ? "1.15" : "1.75" }}>
+            {/* drifting bubbles: two copies of one tile, slid sideways forever */}
+            <div className="lm-bb-field absolute inset-0">
+              <div className="lm-bb-track absolute inset-y-0 left-0 flex w-[200%]">
+                {bw > 0 && n > 0 ? [0, 1].map((copy) => (
+                  <ul key={copy} className="relative h-full w-1/2" aria-hidden={copy === 1 || undefined} aria-label={copy === 0 ? "Links" : undefined}>
+                    {SLOTS.map(([x, y, s], k) => {
+                      const i = (k + copy * Math.ceil(n / 2)) % n;
+                      const l = data.links[i];
+                      const size = unit * s;
+                      const real = copy === 0 && k < n; // one focusable bubble per link
+                      return (
+                        <li key={k} className="absolute" style={{ left: `${x}%`, top: `${y}%`, width: size, height: size, marginLeft: -size / 2, marginTop: -size / 2 }}>
+                          <button type="button" tabIndex={real ? 0 : -1} aria-hidden={!real || undefined} onClick={() => pick(i)}
+                            onPointerEnter={(e) => { if (e.pointerType === "mouse") setSel(i); }}
+                            aria-label={real ? `${l.title}${sel === i ? ", selected. Press again to open" : ""}` : undefined}
+                            className={`lm-bb-bubble relative block size-full rounded-full outline-none ${sel === i ? "is-on" : ""}`}
+                            style={{ animationDelay: `${-(hash(`b${k}`) % 50) / 10}s` }}>
+                            <LinkArt link={l} className="size-full rounded-full" icon={Math.round(size * 0.3)} blur={0.6} mark={size > 40} />
+                            <span aria-hidden className="lm-bb-gloss" />
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )) : null}
+              </div>
+            </div>
+
+            {/* the middle of the board */}
+            <div className="pointer-events-none absolute inset-x-0 top-[21%] z-10 flex flex-col items-center px-4 text-center" aria-live="polite">
+              <button type="button" onClick={next} aria-label="Next link"
+                className="lm-bb-plus pointer-events-auto mb-[3%] grid place-items-center rounded-full text-[#6b6b74]" style={{ width: unit * 0.42, height: unit * 0.42, fontSize: unit * 0.26 }}>+</button>
+              <h1 className="max-w-full truncate font-display font-semibold lowercase leading-[0.85] tracking-[-0.06em]" style={{ fontSize: Math.max(30, Math.min(bh * 0.25, bw * 0.13)) }}>{name}</h1>
+              <div className="mt-[2.5%] min-h-[2.5em] max-w-[34ch] leading-snug text-[#7a7a80]" style={{ fontSize: small }}>
                 {current ? (
-                  <p key={current.id} className="lm-pop truncate"><span className="font-semibold text-black/80">{current.title}</span> · {hostOf(current.url)}</p>
+                  <p key={current.id} className="lm-pop truncate"><span className="text-[#2a2a2e]">{current.title}</span><br />{hostOf(current.url)}</p>
                 ) : (
                   <p className="line-clamp-2">{data.bio || "Tap a bubble to see where it goes."}</p>
                 )}
               </div>
               {current ? (
                 <a ref={openRef} href={current.url} key={current.id} {...linkTarget(mode, current.url)}
-                  className="lm-pop mt-1 rounded-full bg-white px-4 py-1.5 text-[12px] font-semibold shadow-[0_2px_10px_rgba(0,0,0,.12),0_0_0_1px_rgba(0,0,0,.05)] transition-transform duration-150 ease-out active:scale-95">
-                  Open {current.title.length > 20 ? "link" : current.title} ↗
+                  className="lm-pop lm-bb-pill pointer-events-auto mt-[2%] rounded-full bg-white px-4 py-1.5 font-semibold" style={{ fontSize: small }}>
+                  Open link
                 </a>
               ) : (
-                <button type="button" onClick={() => n && pick(0)} className="mt-1 rounded-full bg-white px-4 py-1.5 text-[12px] font-semibold shadow-[0_2px_10px_rgba(0,0,0,.12),0_0_0_1px_rgba(0,0,0,.05)] transition-transform duration-150 ease-out active:scale-95">
+                <button type="button" onClick={next} className="lm-bb-pill pointer-events-auto mt-[2%] rounded-full bg-white px-4 py-1.5 font-semibold" style={{ fontSize: small }}>
                   {n ? "Show me" : "No links yet"}
                 </button>
               )}
             </div>
-            {bw > 0 && n > 1 ? <BubbleRow items={bottom} dir={-1} rowKey="b" bub={bub} n={n} sel={sel} onPick={pick} onHover={setSel} /> : <div className="flex-1" />}
             {n === 0 ? <Empty className="absolute inset-x-0 bottom-6" /> : null}
           </div>
           <div aria-hidden className="lm-bb-catwalk" />
@@ -79,38 +118,57 @@ export default function Billboard({ data, mode }: ThemeProps) {
         </div>
       </div>
 
-      <div aria-hidden className="lm-bb-grass" />
-      <SocialRow socials={data.socials} mode={mode} className="relative z-20 shrink-0 pb-1" iconClass="size-9! text-white/90 hover:bg-white/15" size={18} />
+      {/* grass, with a few pink flowers, swaying a little */}
+      <div aria-hidden className="lm-bb-grass">
+        <svg className="absolute inset-0 size-full" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMin slice">
+          <defs>
+            <filter id="lm-bb-tex" x="0" y="0" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.09 0.012" numOctaves="3" seed="3" />
+              <feColorMatrix values="0 0 0 0 0.55  0 0 0 0 1  0 0 0 0 0.6  0 0 0 2.2 -1" />
+              <feComposite in2="SourceGraphic" operator="in" />
+            </filter>
+            <filter id="lm-bb-shade" x="0" y="0" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.012 0.03" numOctaves="4" seed="9" />
+              <feColorMatrix values="0 0 0 0 0  0 0 0 0 0.12  0 0 0 0 0.05  0 0 0 2.4 -1.1" />
+              <feComposite in2="SourceGraphic" operator="in" />
+            </filter>
+            <linearGradient id="lm-bb-green" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#27b25c" /><stop offset=".3" stopColor="#139048" /><stop offset=".75" stopColor="#0a6a33" /><stop offset="1" stopColor="#053d1d" />
+            </linearGradient>
+          </defs>
+          <path d={BLADES} fill="url(#lm-bb-green)" />
+          <path d={BLADES} fill="#000" filter="url(#lm-bb-shade)" />
+          <path d={BLADES} fill="#000" filter="url(#lm-bb-tex)" opacity=".7" />
+          {FLOWERS.map((f, i) => <ellipse key={i} cx={f.x} cy={f.y} rx={f.r * 0.7} ry={f.r} fill={f.c} opacity=".85" />)}
+        </svg>
+      </div>
+
+      {data.socials.length ? (
+        <ul className="relative z-20 flex shrink-0 justify-center gap-1 pb-1" aria-label="Social profiles">
+          {data.socials.map((s, i) => (
+            <li key={i}><a href={s.url} {...linkTarget(mode, s.url)} aria-label={platformLabel(s.platform)} className="grid size-9 place-items-center rounded-full text-white/90 transition-colors hover:bg-white/15"><SocialIcon platform={s.platform} size={18} /></a></li>
+          ))}
+        </ul>
+      ) : null}
     </ThemeRoot>
   );
 }
 
-function BubbleRow({ items, dir, rowKey: key, bub, n, sel, onPick: pick, onHover: setSel }: {
-  items: { l: ThemeLink; i: number }[]; dir: 1 | -1; rowKey: string; bub: number; n: number; sel: number | null;
-  onPick: (i: number) => void; onHover: (i: number) => void;
-}) {
+/** A deep blue sky with soft, drifting clouds made from fractal noise. */
+function Sky() {
+  const tile = (seed: number, fx: string, a: string, key: number) => (
+    <svg key={key} className="h-full w-1/2" viewBox="0 0 1200 800" preserveAspectRatio="none">
+      <filter id={`lm-bb-cloud-${seed}-${key}`} x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency={fx} numOctaves="5" seed={seed} stitchTiles="stitch" />
+        <feColorMatrix values={`0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  ${a}`} />
+      </filter>
+      <rect width="1200" height="800" filter={`url(#lm-bb-cloud-${seed}-${key})`} />
+    </svg>
+  );
   return (
-    <div className="lm-bb-row relative min-h-0 flex-1 overflow-hidden" aria-hidden={key === "b" || undefined}>
-      <ul className="lm-bb-track absolute left-0 top-0 flex h-full items-center" style={{ ["--dur" as string]: `${Math.max(18, items.length * 3.2)}s`, animationDirection: dir === 1 ? "normal" : "reverse" } as CSSProperties}>
-        {[0, 1].map((copy) => items.map(({ l, i }, k) => {
-          const hv = hash(`${l.id}${key}${k}`);
-          const s = bub * (0.72 + (hv % 30) / 100);
-          const y = (k % 2 ? 1 : -1) * (6 + ((hv >> 5) % 14));
-          const first = key === "t" && copy === 0 && k < n;
-          return (
-            <li key={`${key}${copy}-${k}`} className="shrink-0" style={{ marginInline: bub * 0.08, translate: `0 ${y * bub / 100}px` }} aria-hidden={!first || undefined}>
-              <button type="button" tabIndex={first ? 0 : -1} onClick={() => pick(i)}
-                onPointerEnter={(e) => { if (e.pointerType === "mouse") setSel(i); }}
-                aria-label={first ? `${l.title}${sel === i ? ", selected. Press again to open" : ""}` : undefined}
-                className={`lm-bb-bubble relative block rounded-full outline-none ${sel === i ? "is-on" : ""}`}
-                style={{ width: s, height: s, animationDelay: `${-(hv % 50) / 10}s` }}>
-                <LinkArt link={l} className="size-full rounded-full" icon={Math.round(s * 0.3)} blur={1.2} />
-                <span aria-hidden className="lm-bb-gloss" />
-              </button>
-            </li>
-          );
-        }))}
-      </ul>
+    <div aria-hidden className="lm-bb-sky">
+      <div className="lm-bb-clouds lm-bb-c1">{[0, 1].map((k) => tile(7, "0.0028 0.0075", "1.6 0 0 0 -0.72", k))}</div>
+      <div className="lm-bb-clouds lm-bb-c2">{[0, 1].map((k) => tile(11, "0.006 0.016", "1.5 0 0 0 -0.8", k))}</div>
     </div>
   );
 }
