@@ -205,14 +205,25 @@ button.lm-st-chip:active { transform: scale(.95); }
 .lm-gd-bio { text-shadow: 0 1px 8px rgba(10,40,90,.3); }
 .lm-gd-title, .lm-gd-pick { text-shadow: 0 2px 18px rgba(10,40,90,.25); animation: lm-gd-scrawl 1s cubic-bezier(0.23,1,0.32,1) both; }
 @keyframes lm-gd-scrawl { from { opacity: 0; clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
-.lm-gd-flower { transform-origin: 50% 100%; animation: lm-gd-grow .7s steps(6) both, lm-gd-sway 3s steps(4) infinite alternate;
-  transition: scale .3s cubic-bezier(0.23,1,0.32,1); -webkit-tap-highlight-color: transparent; filter: drop-shadow(0 3px 0 rgba(0,0,0,.15)); }
+.lm-gd-flower { transform-origin: 50% 100%; animation: lm-gd-grow .9s cubic-bezier(0.23,1,0.32,1) both, lm-gd-sway 4s ease-in-out infinite alternate;
+  transition: scale .3s cubic-bezier(0.23,1,0.32,1); -webkit-tap-highlight-color: transparent; filter: drop-shadow(0 4px 6px rgba(20,60,10,.25)); }
 @keyframes lm-gd-grow { from { transform: scaleY(0); } }
-@keyframes lm-gd-sway { from { rotate: -3deg; } to { rotate: 3deg; } }
-.lm-gd-flower.is-on { scale: 1.22; filter: drop-shadow(0 0 0 #fff) drop-shadow(0 4px 0 rgba(0,0,0,.2)); }
-.lm-gd-flower:focus-visible { outline: 2px dashed #fff; outline-offset: 4px; }
-.lm-gd-flower:active { scale: .92; }
-@media (hover: hover) and (pointer: fine) { .lm-gd-flower:hover { scale: 1.15; } }
+@keyframes lm-gd-sway { from { rotate: -2.5deg; } to { rotate: 2.5deg; } }
+.lm-gd-flower.is-on { scale: 1.14; }
+.lm-gd-flower:focus-visible { outline: 2px dashed #fff; outline-offset: 4px; border-radius: 12px; }
+.lm-gd-flower:active { scale: .95; }
+@media (hover: hover) and (pointer: fine) { .lm-gd-flower:hover { scale: 1.08; } .lm-gd-flower.is-on:hover { scale: 1.14; } }
+/* each row of flowers grows out of its own band of grass */
+.lm-gd-bed + .lm-gd-bed { margin-top: 16px; }
+/* the hill: starts right behind the first row of grass and runs down under everything below it */
+.lm-gd-hill { position: absolute; left: -10%; right: -10%; bottom: -400px; border-radius: 50% 50% 0 0 / 46px 46px 0 0;
+  background: repeating-linear-gradient(100deg, rgba(255,255,255,.035) 0 2px, transparent 2px 7px), linear-gradient(180deg, #6fae45 0, #5c9c3a 60px, #4b8a2e 50%, #3e7f2c); box-shadow: 0 -6px 18px rgba(20,60,10,.15); }
+.lm-gd-ground { background: #3e7f2c; }
+.lm-gd-fringe { position: relative; z-index: 5; display: block; margin-top: -2px; filter: drop-shadow(0 -2px 3px rgba(20,60,10,.2)); }
+.lm-gd-fringe + ul { background: linear-gradient(180deg, #3e8a2f, rgba(62,138,47,0)); padding-top: 2px; padding-bottom: 6px; }
+.lm-gd-bud { animation: lm-gd-close .35s ease both; }
+@keyframes lm-gd-close { from { transform: scale(.7); } }
+.lm-gd-bloom ellipse { transform-box: view-box; }
 @media (prefers-reduced-motion: reduce) { .lm-gd-clouds, .lm-gd-title, .lm-gd-flower { animation: none; } }
 
 /* ---------- Meadow ---------- */
@@ -259,7 +270,8 @@ button.lm-st-chip:active { transform: scale(.95); }
 
 /* ---------- Reels ---------- */
 /* the clips are kept small, then blurred and dimmed, so the white type always reads */
-.lm-rl-wall { filter: blur(7px) saturate(1.15); transform: scale(1.08); }
+.lm-rl-wall { filter: blur(6px) saturate(1.15); transform: scale(1.06); }
+.lm-rl-clip { animation: lm-fade .8s ease both; }
 .lm-rl-veil { background: linear-gradient(180deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,.22) 35%, rgba(0,0,0,.6) 100%); }
 .lm-rl-row { animation: lm-fade .5s ease backwards; animation-delay: var(--d); }
 .lm-rl-row a { text-shadow: 0 1px 12px rgba(0,0,0,.35); }
@@ -335,7 +347,9 @@ button.lm-st-chip:active { transform: scale(.95); }
 /* Garden: buds that bloom, and the little name tags under them */
 .lm-gd-bloom { animation: lm-gd-bloom .55s cubic-bezier(.2,1.5,.4,1) both; }
 @keyframes lm-gd-bloom { from { transform: scale(.45); opacity: .4; } }
-.lm-gd-tag { color: #fff; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,.55), 0 0 8px rgba(0,0,0,.25); transition: transform .2s ease; }
-.lm-gd-tag.is-on { transform: translateY(1px); text-decoration: underline; text-underline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { .lm-gd-bloom { animation: none; } }
+/* the plant markers: little cream labels pushed into the soil in front of each flower */
+.lm-gd-tag { display: block; padding: 3px 6px 4px; border-radius: 4px; background: #fff8e6; color: #24401c; font-weight: 700; line-height: 1.1;
+  box-shadow: 0 2px 0 #c9b98f, 0 4px 8px rgba(20,50,10,.3); transition: background-color .2s ease, color .2s ease; }
+.lm-gd-tag.is-on { background: #24401c; color: #fff8e6; box-shadow: 0 2px 0 #0f230b, 0 4px 8px rgba(20,50,10,.35); }
+@media (prefers-reduced-motion: reduce) { .lm-gd-bloom, .lm-gd-bud { animation: none; } }
 .lm-rl-list { scrollbar-width: none; } .lm-rl-list::-webkit-scrollbar { display: none; }

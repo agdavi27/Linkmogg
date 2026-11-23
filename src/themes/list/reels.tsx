@@ -13,35 +13,29 @@ const still = (src: string) => (src.startsWith("/backdrops/") ? src.replace(/\.m
 export default function Reels({ data, mode }: ThemeProps) {
   const n = data.links.length;
   const stage = useRef<HTMLDivElement>(null);
-  const { w, h } = useSize(stage);
+  const { w } = useSize(stage);
   const reduced = usePrefersReducedMotion();
   const [hover, setHover] = useState<number | null>(null);
   const handle = data.instagram?.handle || data.username;
   const name = data.displayName || handle;
   const reels = data.instagram?.reels.length ? data.instagram.reels : SAMPLE;
 
-  // a profile-style grid of 9:16 tiles that covers the whole screen
-  const cols = w > 900 ? 5 : w > 560 ? 4 : 3;
-  const tileW = w / cols, tileH = tileW * 16 / 9;
-  const rows = tileH ? Math.min(4, Math.ceil(h / tileH)) : 0;
-  const tiles = Array.from({ length: cols * rows }, (_, i) => reels[i % reels.length]);
+  // one reel fills the whole background; with several, each plays through and hands off to the next
+  const [at, setAt] = useState(0);
+  const src = reels[at % reels.length];
   const big = n <= 5;
   const small = n > 9;
 
   return (
     <ThemeRoot data={data} mode={mode} label="Reels" badgeTone="light" className="lm-rl bg-[#0c0c0c] text-white">
       <div ref={stage} className="relative min-h-0 flex-1 overflow-hidden">
-        <div aria-hidden className="lm-rl-wall absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
-          {tiles.map((src, i) => (
-            <div key={i} className="relative overflow-hidden" style={{ height: tileH }}>
-              {reduced ? (
-                <video src={still(src) ? src : `${src}#t=0.1`} poster={still(src)} muted playsInline preload={still(src) ? "none" : "metadata"} className="size-full object-cover" />
-              ) : (
-                <video src={src} muted playsInline loop autoPlay preload="metadata" poster={still(src)} className="size-full object-cover"
-                  style={{ animationDelay: `${(i % 7) * -0.6}s` } as CSSProperties} />
-              )}
-            </div>
-          ))}
+        <div aria-hidden className="lm-rl-wall absolute inset-0">
+          {reduced ? (
+            <video key={src} src={still(src) ? src : `${src}#t=0.1`} poster={still(src)} muted playsInline preload={still(src) ? "none" : "metadata"} className="size-full object-cover" />
+          ) : (
+            <video key={src} src={src} poster={still(src)} muted playsInline autoPlay preload="auto" loop={reels.length === 1}
+              onEnded={() => setAt((i) => (i + 1) % reels.length)} className="lm-rl-clip size-full object-cover" />
+          )}
         </div>
         <div aria-hidden className="lm-rl-veil absolute inset-0" />
 
