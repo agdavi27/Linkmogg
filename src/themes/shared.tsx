@@ -121,7 +121,7 @@ export function ThemeRoot({
   badgeTone?: "dark" | "light"; label: string;
 }) {
   return (
-    <div className={`lm-theme relative flex min-h-full w-full flex-col ${className}`} style={style}
+    <div className={`lm-theme @container relative flex min-h-full w-full flex-1 flex-col ${className}`} style={style}
       data-mode={mode}>
       <SrLinkList data={data} mode={mode} />
       <div className="flex flex-1 flex-col" role="region" aria-label={`${label} layout`}>
