@@ -23,6 +23,7 @@ const COMPONENTS: Record<string, ComponentType<ThemeProps>> = {
   strata: dynamic(() => import("./list/strata")),
   museum: dynamic(() => import("./list/museum")),
   folders: dynamic(() => import("./list/folders")),
+  spindle: dynamic(() => import("./list/spindle")),
   field: dynamic(() => import("./list/field")),
 };
 

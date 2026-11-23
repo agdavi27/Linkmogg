@@ -216,30 +216,31 @@ export function useSize(ref: RefObject<HTMLElement | null>) {
 }
 
 /** Horizontal drag that reports how far the pointer moved, then whether it was a tap or a drag. */
-export function useDragX(onMove: (dx: number) => void, onEnd: (dx: number, vx: number) => void) {
+export function useDragX(onMove: (dx: number) => void, onEnd: (dx: number, vx: number) => void, axis: "x" | "y" = "x") {
+  const at = (e: { clientX: number; clientY: number }) => (axis === "x" ? e.clientX : e.clientY);
   const st = useRef<{ x: number; last: number; t: number; vx: number; id: number; moved: boolean } | null>(null);
   const cbs = useRef({ onMove, onEnd });
   useEffect(() => { cbs.current = { onMove, onEnd }; });
   return {
     onPointerDown: (e: React.PointerEvent) => {
       if (e.button !== 0) return;
-      st.current = { x: e.clientX, last: e.clientX, t: e.timeStamp, vx: 0, id: e.pointerId, moved: false };
+      st.current = { x: at(e), last: at(e), t: e.timeStamp, vx: 0, id: e.pointerId, moved: false };
     },
     onPointerMove: (e: React.PointerEvent) => {
       const s = st.current;
       if (!s || s.id !== e.pointerId) return;
-      const dx = e.clientX - s.x;
+      const dx = at(e) - s.x;
       if (!s.moved && Math.abs(dx) < 6) return;
       if (!s.moved) { s.moved = true; (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); }
       const dt = Math.max(1, e.timeStamp - s.t);
-      s.vx = (e.clientX - s.last) / dt;
-      s.last = e.clientX; s.t = e.timeStamp;
+      s.vx = (at(e) - s.last) / dt;
+      s.last = at(e); s.t = e.timeStamp;
       cbs.current.onMove(dx);
     },
     onPointerUp: (e: React.PointerEvent) => {
       const s = st.current;
       st.current = null;
-      if (s?.moved) { cbs.current.onEnd(e.clientX - s.x, s.vx); suppressClick.until = e.timeStamp + 50; }
+      if (s?.moved) { cbs.current.onEnd(at(e) - s.x, s.vx); suppressClick.until = e.timeStamp + 50; }
     },
     onPointerCancel: () => { const s = st.current; st.current = null; if (s?.moved) cbs.current.onEnd(s.last - s.x, 0); },
     onClickCapture: (e: React.MouseEvent) => { if (e.timeStamp < suppressClick.until) { e.preventDefault(); e.stopPropagation(); } },

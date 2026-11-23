@@ -31,6 +31,7 @@ export const THEMES: ThemeDef[] = [
   { id: "portrait", name: "Portrait", blurb: "Your photo, with your links floating around it.", pro: true, swatch: ["#f2f2f2", "#2b2b2b"], category: "spatial" },
   { id: "strata", name: "Strata", blurb: "Links as stacked panes of glass, fanned out in 3D.", pro: true, swatch: ["#ffffff", "#2a46ff"], category: "spatial" },
   { id: "museum", name: "Gallery", blurb: "Walk a 3D gallery where every painting is a link.", pro: true, swatch: ["#ece6dc", "#b8913f"], category: "spatial" },
+  { id: "spindle", name: "Spindle", blurb: "A stack of discs. Swipe and the one in focus opens up.", pro: true, swatch: ["#000000", "#f2f2f2"], category: "spatial" },
   { id: "orbit", name: "Orbit", blurb: "Links circle your avatar like satellites. Catch one to open it.", pro: true, swatch: ["#05060a", "#7cf7ff"], category: "spatial" },
   // Retro tech
   { id: "pocket", name: "Pocket Player", blurb: "Flip through album covers with a click wheel.", pro: true, swatch: ["#e9e4dc", "#2a6fd0"], category: "retro" },
@@ -39,7 +40,7 @@ export const THEMES: ThemeDef[] = [
   { id: "desktop", name: "Mogg OS", blurb: "A chunky retro desktop. Every link is a file.", pro: true, swatch: ["#7fb7a4", "#f2c94c"], category: "retro" },
   // Cozy
   { id: "sunflower", name: "Sunflower", blurb: "Every link is a named petal. Tap one to bloom it.", pro: true, swatch: ["#bfe3f2", "#f2b632"], category: "cozy" },
-  { id: "bookshelf", name: "Bookshelf", blurb: "Pull a book off the shelf and it opens.", pro: true, swatch: ["#2a1d14", "#c8a15a"], category: "cozy" },
+  { id: "bookshelf", name: "Bookshelf", blurb: "A row of spines. Pick one and it turns to show its cover.", pro: true, swatch: ["#050505", "#b8643f"], category: "cozy" },
   { id: "corkboard", name: "Corkboard", blurb: "Polaroids pinned to cork. Lift one to open it.", pro: true, swatch: ["#b98a55", "#fdfbf6"], category: "cozy" },
 ];
 

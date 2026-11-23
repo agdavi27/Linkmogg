@@ -144,3 +144,70 @@
 .lm-tuner:focus-visible { outline: 2px solid #ffd59a; outline-offset: 4px; }
 .lm-rd-foot { width: 40px; height: 9px; border-radius: 0 0 8px 8px; background: #2a1a0d; }
 @media (prefers-reduced-motion: reduce) { .lm-rd-cone-on, .lm-static { animation: none; } }
+
+/* ---------- Bookshelf ---------- */
+.lm-bs-room { background:
+  radial-gradient(70% 45% at 50% 8%, rgba(255,196,110,.35), rgba(255,196,110,0) 70%),
+  repeating-linear-gradient(90deg, rgba(0,0,0,.05) 0 2px, transparent 2px 64px),
+  linear-gradient(180deg, #4a3020 0%, #2a1a10 60%, #1b110a 100%); }
+.lm-bs-lamp { position: absolute; left: 50%; top: 0; z-index: 5; transform-origin: 50% 0; animation: lm-bs-swing 6s ease-in-out infinite; pointer-events: none; }
+@keyframes lm-bs-swing { 0%,100% { transform: translateX(-50%) rotate(1.8deg); } 50% { transform: translateX(-50%) rotate(-1.8deg); } }
+.lm-bs-cord { display: block; width: 2px; height: 26px; margin: 0 auto; background: #120b06; }
+.lm-bs-shade { display: block; width: 76px; height: 30px; margin: 0 auto; border-radius: 50% 50% 6px 6px / 90% 90% 6px 6px; background: linear-gradient(180deg, #2f5b43, #183a2a); box-shadow: inset 0 -3px 0 #c9a45a, 0 4px 10px rgba(0,0,0,.5); }
+.lm-bs-bulb { display: block; width: 26px; height: 12px; margin: -4px auto 0; border-radius: 0 0 99px 99px; background: #fff2c8; box-shadow: 0 0 18px 6px rgba(255,214,140,.8), 0 0 60px 20px rgba(255,190,90,.35); animation: lm-bs-flicker 5s steps(1) infinite; }
+@keyframes lm-bs-flicker { 0%, 61%, 64%, 100% { opacity: 1; } 62% { opacity: .75; } 63% { opacity: .95; } }
+.lm-bs-beam { position: absolute; left: 50%; top: 52px; width: 560px; height: 620px; margin-left: -280px; pointer-events: none; z-index: 1;
+  background: radial-gradient(50% 100% at 50% 0%, rgba(255,214,150,.20), rgba(255,214,150,0) 80%);
+  clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%); transform-origin: 50% 0; animation: lm-bs-swing2 6s ease-in-out infinite; }
+@keyframes lm-bs-swing2 { 0%,100% { transform: rotate(1.8deg); } 50% { transform: rotate(-1.8deg); } }
+.lm-bs-dust { z-index: 2; mask-image: radial-gradient(40% 60% at 50% 20%, #000, transparent); }
+.lm-case { position: relative; background:
+  repeating-linear-gradient(180deg, rgba(255,255,255,.025) 0 1px, transparent 1px 5px),
+  linear-gradient(180deg,#46301e,#2c1d12);
+  box-shadow: inset 0 0 0 7px #573b25, inset 0 0 0 8px #2a1a0e, inset 0 0 40px rgba(0,0,0,.65), 0 30px 50px -30px rgba(0,0,0,.9); }
+.lm-bs-back { background: linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.15) 30%, rgba(0,0,0,.35)); border-radius: 2px; }
+.lm-shelf { background: linear-gradient(180deg,#c08a55 0%,#9b6a3d 35%,#6f4a2b 100%); box-shadow: 0 8px 12px -5px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,230,190,.4); }
+.lm-book { border-radius: 3px 3px 2px 2px; background: var(--spine); transform-origin: 50% 100%;
+  box-shadow: inset -4px 0 7px rgba(0,0,0,.38), inset 3px 0 3px rgba(255,255,255,.14), 0 -2px 6px rgba(0,0,0,.35);
+  transition: transform .45s cubic-bezier(0.23,1,0.32,1), filter .2s ease;
+  animation: lm-bs-in .7s cubic-bezier(0.23,1,0.32,1) backwards; }
+@keyframes lm-bs-in { from { transform: translateY(-40px) rotate(-4deg); opacity: 0; } }
+@media (hover: hover) and (pointer: fine) { .lm-book:hover:not(.lm-book-on) { transform: translateY(-5%) rotate(-3deg); filter: brightness(1.12); } }
+.lm-book:focus-visible { outline: 2px solid #f5d27a; outline-offset: 2px; }
+.lm-book-on { transform: translateY(-26%) rotate(-2deg); filter: brightness(1.18) drop-shadow(0 10px 12px rgba(0,0,0,.6)); z-index: 2; }
+.lm-book-leather { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='80' height='80' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E"); mix-blend-mode: overlay; }
+.lm-book-band { height: 4px; background: linear-gradient(180deg, #f6e2a8, #b8913f 60%, #f6e2a8); box-shadow: 0 1px 0 rgba(0,0,0,.4); opacity: .9; }
+.lm-book-label { border-radius: 2px; background: #efe2c2; box-shadow: inset 0 0 0 1px rgba(0,0,0,.25); }
+.lm-spine-text { writing-mode: vertical-rl; transform: rotate(180deg); text-shadow: 0 1px 0 rgba(0,0,0,.35); }
+.lm-bookend { background: linear-gradient(90deg,#8d8d8d,#e3e3e3,#7a7a7a); clip-path: polygon(0 0, 100% 30%, 100% 100%, 0 100%); }
+.lm-bs-plant { position: relative; width: 34px; height: 60px; margin-right: 4px; }
+.lm-bs-plant::after { content: ""; position: absolute; bottom: 0; left: 4px; width: 26px; height: 22px; border-radius: 2px 2px 8px 8px; background: linear-gradient(180deg, #c76b43, #8a4026); }
+.lm-bs-plant i { position: absolute; bottom: 18px; left: 15px; width: 6px; height: 34px; border-radius: 100% 0; background: linear-gradient(#6fae4f, #2f6a1f); transform-origin: 50% 100%; animation: lm-sf-blade 4s ease-in-out infinite; }
+.lm-bs-plant i:nth-child(1) { rotate: -28deg; } .lm-bs-plant i:nth-child(3) { rotate: 26deg; height: 28px; animation-delay: -1.5s; }
+/* Pull a book: it lifts off the shelf, flies to the middle turning from spine to cover, then the cover swings open. */
+.lm-book-out { transform: translateY(-22%); opacity: 0; transition: transform .35s cubic-bezier(0.23,1,0.32,1), opacity .2s ease .25s; }
+.lm-bk-overlay { animation: lm-fade .35s ease both; }
+.lm-bk-overlay::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(60% 50% at 50% 50%, rgba(30,18,8,.55), rgba(10,6,2,.88)); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.lm-bk-overlay.is-closing { animation: lm-bk-out .26s ease both; }
+@keyframes lm-bk-out { to { opacity: 0; } }
+.lm-bk-stage { perspective: 1600px; }
+.lm-bk-fly { --bw: min(44cqw, 230px, 52cqh); width: var(--bw); height: calc(var(--bw) * 1.42); transform-style: preserve-3d;
+  animation: lm-bk-fly 1.5s cubic-bezier(0.23,1,0.32,1) both; filter: drop-shadow(0 30px 40px rgba(0,0,0,.6)); }
+@keyframes lm-bk-fly {
+  0% { transform: translate(var(--fx), var(--fy)) scale(var(--fs)) rotateY(90deg); }
+  48% { transform: translate(0, 0) scale(1) rotateY(0deg); }
+  56% { transform: translate(0, 0) scale(1) rotateY(0deg); }
+  100% { transform: translateX(50%); }
+}
+.lm-bk-cover { transform-origin: 0 50%; transform-style: preserve-3d; animation: lm-bk-open .95s cubic-bezier(0.77,0,0.175,1) .72s both; }
+@keyframes lm-bk-open { from { transform: rotateY(0deg); } to { transform: rotateY(-178deg); } }
+.lm-bk-front, .lm-bk-left { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.lm-bk-front { background: var(--spine); border-radius: 3px 8px 8px 3px; box-shadow: inset 6px 0 10px rgba(0,0,0,.35), inset -2px 0 0 rgba(255,255,255,.12); }
+.lm-bk-frame { border: 2px solid #c9a45a; border-radius: 4px; box-shadow: inset 0 0 0 4px transparent, inset 0 0 0 5px rgba(201,164,90,.5); }
+.lm-bk-left { transform: rotateY(180deg); border-radius: 8px 0 0 8px; box-shadow: inset -18px 0 22px -14px rgba(80,50,20,.6), -5px 0 0 var(--spine); }
+.lm-bk-page { background: linear-gradient(90deg, #efe2c6, #f8efdc 25%, #f8efdc 75%, #e9d9b8); }
+.lm-bk-right { border-radius: 0 8px 8px 0; transform: translateZ(-1px); box-shadow: inset 18px 0 22px -14px rgba(80,50,20,.6), 5px 0 0 var(--spine), 7px 2px 0 #d9c7a2; }
+.lm-bk-right > * { animation: lm-fade .4s ease 1.3s both; }
+.lm-bk-spine { --d: 30px; left: calc(var(--d) * -1); width: var(--d); transform-origin: 100% 50%; transform: rotateY(-90deg); background: var(--spine); box-shadow: inset -4px 0 7px rgba(0,0,0,.38), inset 3px 0 3px rgba(255,255,255,.14); border-radius: 3px 0 0 3px; }
+@media (prefers-reduced-motion: reduce) { .lm-bs-lamp, .lm-bs-beam, .lm-bs-bulb, .lm-bs-plant i { animation: none; } .lm-bs-lamp { transform: translateX(-50%); } .lm-book-out { transform: none; } }
+
