@@ -20,8 +20,16 @@ const PALETTES: [string, string, string][] = [
   ["#ff8fc4", "#ffc3de", "#5a1035"],
 ];
 
+/** FNV alone clusters on similar strings; a murmur-style finalizer spreads them out. */
+function mix(s: string) {
+  let h = hash(s);
+  h ^= h >>> 15; h = Math.imul(h, 2246822507);
+  h ^= h >>> 13; h = Math.imul(h, 3266489909);
+  return (h ^ (h >>> 16)) >>> 0;
+}
+
 export function paletteOf(link: ThemeLink) {
-  return PALETTES[hash(link.id + link.url) % PALETTES.length];
+  return PALETTES[mix(`${link.title}|${link.url}`) % PALETTES.length];
 }
 
 export function platformOf(link: ThemeLink) {
@@ -34,7 +42,7 @@ export function platformOf(link: ThemeLink) {
  * icon (or the title's first letter). Deterministic, so server and client render the same thing.
  */
 export function LinkArt({ link, className = "", icon = 34, mark = true, style }: { link: ThemeLink; className?: string; icon?: number; mark?: boolean; style?: CSSProperties }) {
-  const h = hash(link.title + link.id);
+  const h = mix(link.title + link.id);
   const [bg, mid, acc] = paletteOf(link);
   const kind = h % 4;
   const p = platformOf(link);
