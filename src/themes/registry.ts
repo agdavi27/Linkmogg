@@ -22,6 +22,7 @@ export const DEFAULT_THEME = "classic";
 export const THEMES: ThemeDef[] = [
   // Minimal
   { id: "classic", name: "Classic", blurb: "Clean stacked links on warm paper.", pro: false, swatch: ["#f4efe6", "#1d1a16"], category: "minimal" },
+  { id: "poster", name: "Poster", blurb: "Big stacked type on a backlit grid poster.", pro: true, swatch: ["#ece8df", "#151515"], category: "minimal" },
   // Spatial
   { id: "wheel", name: "Wheel", blurb: "Your links ride a big turning wheel of cards.", pro: true, swatch: ["#f1f1ef", "#ff6a2b"], category: "spatial" },
   { id: "halo", name: "Halo", blurb: "An arch of tiles drifts over your name.", pro: true, swatch: ["#07080b", "#e9e9ee"], category: "spatial" },
@@ -29,11 +30,13 @@ export const THEMES: ThemeDef[] = [
   { id: "strata", name: "Strata", blurb: "Links as stacked panes of glass, fanned out in 3D.", pro: true, swatch: ["#ffffff", "#2a46ff"], category: "spatial" },
   { id: "museum", name: "Gallery", blurb: "Walk a 3D gallery where every painting is a link.", pro: true, swatch: ["#ece6dc", "#b8913f"], category: "spatial" },
   { id: "spindle", name: "Spindle", blurb: "A stack of discs. Swipe and the one in focus opens up.", pro: true, swatch: ["#000000", "#f2f2f2"], category: "spatial" },
+  { id: "billboard", name: "Billboard", blurb: "Your name on a roadside billboard, with links drifting by in bubbles.", pro: true, swatch: ["#1d3c7c", "#f4f3f1"], category: "spatial" },
   // Retro tech
   { id: "pocket", name: "Pocket Player", blurb: "Flip through album covers with a click wheel.", pro: true, swatch: ["#e9e4dc", "#2a6fd0"], category: "retro" },
   { id: "gloss", name: "Gloss Phone", blurb: "Glossy app icons on a water-drop home screen.", pro: true, swatch: ["#2a6fb0", "#ffffff"], category: "retro" },
   { id: "folders", name: "Folders", blurb: "Every link is a folder in its own material.", pro: true, swatch: ["#e4e4e2", "#3f7be0"], category: "retro" },
   { id: "desktop", name: "Mogg OS", blurb: "A chunky retro desktop. Every link is a file.", pro: true, swatch: ["#7fb7a4", "#f2c94c"], category: "retro" },
+  { id: "pass", name: "Pass", blurb: "A worn member card with your photo and your links typed in.", pro: true, swatch: ["#8fd3cf", "#6a3fd1"], category: "retro" },
   // Cozy
   { id: "sunflower", name: "Sunflower", blurb: "Every link is a named petal. Tap one to bloom it.", pro: true, swatch: ["#bfe3f2", "#f2b632"], category: "cozy" },
   { id: "bookshelf", name: "Bookshelf", blurb: "A row of spines. Pick one and it turns to show its cover.", pro: true, swatch: ["#050505", "#b8643f"], category: "cozy" },
