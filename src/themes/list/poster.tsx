@@ -5,6 +5,7 @@ import { Empty, ThemeRoot, hostOf, linkTarget } from "../shared";
 import { buzz, useSize } from "../motion";
 import type { ThemeProps } from "../types";
 import { platformLabel } from "@/lib/socials/platforms";
+import { SocialIcon } from "@/lib/socials/icons";
 
 const COLS = 6;
 
@@ -70,6 +71,15 @@ export default function Poster({ data, mode }: ThemeProps) {
             <Hand style={{ left: left - PW * 0.035, top: top - PW * 0.05, width: PW * 0.15 }} />
             <Hand flip style={{ left: left + PW * 0.885, top: top - PW * 0.05, width: PW * 0.15 }} />
           </div>
+        ) : null}
+
+        {/* the same footer as the Billboard: a quiet row of social icons */}
+        {data.socials.length ? (
+          <ul className="absolute inset-x-0 bottom-0 z-20 flex justify-center gap-1 pb-1" aria-label="Social profiles">
+            {data.socials.map((s, i) => (
+              <li key={i}><a href={s.url} {...linkTarget(mode, s.url)} aria-label={platformLabel(s.platform)} className="grid size-9 place-items-center rounded-full bg-white/70 text-[#151515] backdrop-blur transition-colors hover:bg-white"><SocialIcon platform={s.platform} size={18} /></a></li>
+            ))}
+          </ul>
         ) : null}
       </div>
     </ThemeRoot>

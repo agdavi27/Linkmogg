@@ -30,7 +30,7 @@ export default function Home() {
       <section className="border-y border-line bg-paper-2/60 py-20">
         <div className="lm-reveal mx-auto max-w-6xl px-5">
           <div className="flex flex-wrap items-end justify-between gap-4">
-            <h2 className="max-w-[18ch] font-display text-4xl font-semibold leading-tight tracking-[-0.03em] text-balance">Eighteen themes, all with the same links inside</h2>
+            <h2 className="max-w-[18ch] font-display text-4xl font-semibold leading-tight tracking-[-0.03em] text-balance">Sixteen themes, all with the same links inside</h2>
             <Link href="/themes" className="btn btn-ghost">Try them all live</Link>
           </div>
           <p className="mt-4 max-w-[60ch] text-ink-2">Switch themes whenever you like. Your links, icons and bio stay put, and every theme works with touch, a keyboard and a screen reader.</p>
@@ -39,22 +39,13 @@ export default function Home() {
       </section>
 
       <section id="pricing" className="lm-reveal mx-auto max-w-6xl px-5 py-20">
-        <h2 className="font-display text-4xl font-semibold tracking-[-0.03em]">One price, no tiers to decode</h2>
-        <div className="mt-10 grid gap-4 md:grid-cols-2">
-          <div className="card p-7">
-            <h3 className="font-display text-xl font-semibold">Free</h3>
-            <p className="mt-1 text-3xl font-semibold tabular">$0</p>
-            <ul className="mt-5 flex flex-col gap-2.5 text-ink-2">
-              {["Your own page and username", "Unlimited links and social icons", "The Classic theme", "A small \"Get your own\" badge"].map((f) => (
-                <li key={f} className="flex gap-2"><Check size={18} className="mt-0.5 shrink-0 text-ink-3" />{f}</li>
-              ))}
-            </ul>
-          </div>
+        <h2 className="font-display text-4xl font-semibold tracking-[-0.03em]">One plan. Try all of it free.</h2>
+        <div className="mt-10 max-w-xl">
           <div className="card relative overflow-hidden bg-ink p-7 text-paper">
             <h3 className="font-display text-xl font-semibold">Pro</h3>
             <p className="mt-1 text-3xl font-semibold tabular">{PRICE_LABEL}</p>
             <ul className="mt-5 flex flex-col gap-2.5 text-paper/80">
-              {["Every interactive theme", "No badge", `${TRIAL_DAYS}-day free trial, no card`, "Cancel any time. Your page stays up on Free."].map((f) => (
+              {[`Every theme free for ${TRIAL_DAYS} days`, "No credit card to start", "Your own page, unlimited links and socials", "No badge once you subscribe", "Cancel any time"].map((f) => (
                 <li key={f} className="flex gap-2"><Check size={18} className="mt-0.5 shrink-0 text-accent" />{f}</li>
               ))}
             </ul>

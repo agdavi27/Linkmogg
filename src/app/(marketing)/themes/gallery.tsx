@@ -15,7 +15,7 @@ export function Gallery({ initial }: { initial: string }) {
     <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-5 pb-20 lg:grid-cols-[320px_minmax(0,1fr)]">
       <div>
         <h1 className="font-display text-4xl font-semibold tracking-[-0.03em]">Try every theme</h1>
-        <p className="mt-3 text-ink-2">Same links, eighteen ways to show them. Tap, spin, drag and tune. Everything here works.</p>
+        <p className="mt-3 text-ink-2">Same links, sixteen ways to show them. Every theme is free for 14 days, no card needed.</p>
         <label htmlFor="demo-name" className="label mt-6">See it with your name</label>
         <input id="demo-name" className="field" placeholder="Juno Park" value={name} onChange={(e) => setName(e.target.value)} maxLength={40} />
         <div className="mt-6 flex flex-col gap-5">
@@ -29,7 +29,6 @@ export function Gallery({ initial }: { initial: string }) {
                       className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors ${id === x.id ? "bg-ink text-paper" : "hover:bg-black/5"}`}>
                       <span aria-hidden className="size-7 shrink-0 rounded-lg ring-1 ring-black/10" style={{ background: `linear-gradient(135deg, ${x.swatch[0]} 55%, ${x.swatch[1]} 55%)` }} />
                       <span className="min-w-0 flex-1 font-semibold">{x.name}</span>
-                      {x.pro ? <span className={`text-[10px] font-bold tracking-wider ${id === x.id ? "text-paper/60" : "text-ink-3"}`}>PRO</span> : <span className="text-[10px] font-bold tracking-wider text-forest">FREE</span>}
                     </button>
                   </li>
                 ))}

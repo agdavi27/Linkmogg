@@ -134,7 +134,7 @@ export function Editor(props: Props) {
             {status.kind === "saving" ? "Saving…" : status.kind === "saved" ? "Saved" : status.kind === "error" ? status.msg : ""}
           </span>
           <Link href="/settings/billing" className="rounded-full bg-paper-2 px-2.5 py-1 text-xs font-semibold text-ink-2 hover:bg-black/5">
-            {props.plan.reason === "subscription" ? "Pro" : props.plan.reason === "trial" ? `Trial · ${props.plan.trialDaysLeft}d left` : "Free · Upgrade"}
+            {props.plan.reason === "subscription" ? "Pro" : props.plan.reason === "trial" ? `Trial · ${props.plan.trialDaysLeft}d left` : "Trial ended · Upgrade"}
           </Link>
           {props.isAdmin ? <Link href="/admin" className="text-sm font-medium text-ink-2 hover:text-ink">Admin</Link> : null}
           <a href={props.pageUrl} target="_blank" rel="noopener" className="btn btn-primary btn-sm"><span className="hidden sm:inline">View page</span><ExternalLink size={14} /></a>
@@ -242,7 +242,7 @@ export function Editor(props: Props) {
             {previewLocked ? (
               <div className="lm-pop mx-auto mt-3 flex max-w-[380px] items-center gap-3 rounded-2xl bg-ink p-3 text-sm text-paper">
                 <Lock size={16} className="shrink-0" />
-                <span className="flex-1">{getTheme(previewTheme).name} is a Pro theme. You&apos;re previewing it.</span>
+                <span className="flex-1">Your trial has ended. You&apos;re previewing {getTheme(previewTheme).name}.</span>
                 <Link href="/settings/billing" className="btn btn-accent btn-sm">Upgrade</Link>
               </div>
             ) : null}

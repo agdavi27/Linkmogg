@@ -82,15 +82,15 @@ export default function Garden({ data, mode }: ThemeProps) {
           <div className="flex min-w-0 flex-col items-start gap-1">
             {top[0] ? <SocialTag s={top[0]} mode={mode} /> : null}
           </div>
-          <p className="lm-gd-sig text-center font-marker text-[clamp(18px,6cqw,34px)] leading-none">@{data.username}</p>
+          <p className="lm-gd-sig text-center font-display text-[clamp(15px,4.4cqw,22px)] font-semibold leading-none tracking-[-0.02em]">@{data.username}</p>
           <div className="flex min-w-0 flex-col items-end gap-1">
             {top[1] ? <SocialTag s={top[1]} mode={mode} align="end" /> : null}
           </div>
         </header>
 
         <div className="relative z-10 shrink-0 px-[5%] pt-[clamp(10px,3.5cqh,36px)] text-center">
-          {data.bio ? <p className="lm-gd-red lm-gd-bio mx-auto line-clamp-1 max-w-[40ch] text-[clamp(11px,3.2cqw,17px)] font-semibold uppercase tracking-[0.02em]">{data.bio}</p> : null}
-          <h1 className="lm-gd-red lm-gd-title mt-1 truncate font-marker uppercase leading-[0.95]" style={{ fontSize: `clamp(34px, ${Math.min(15, 105 / Math.max(6, name.length))}cqw, 120px)` }}>{name}</h1>
+          {data.bio ? <p className="lm-gd-bio mx-auto line-clamp-1 max-w-[40ch] text-[clamp(11px,3.2cqw,16px)] font-medium uppercase tracking-[0.08em] text-white/90 tracking-[0.02em]">{data.bio}</p> : null}
+          <h1 className="lm-gd-title mt-1 truncate font-display font-bold leading-[0.9] tracking-[-0.055em] text-white" style={{ fontSize: `clamp(34px, ${Math.min(17, 120 / Math.max(6, name.length))}cqw, 120px)` }}>{name}</h1>
         </div>
 
         {/* the flowers, planted on the hill */}
@@ -113,11 +113,11 @@ export default function Garden({ data, mode }: ThemeProps) {
         <div className="relative z-10 flex h-[clamp(90px,22cqh,200px)] shrink-0 flex-col items-center justify-center px-[5%] text-center" aria-live="polite">
           {current ? (
             <a ref={openRef} key={current.id} href={current.url} {...linkTarget(mode, current.url)} className="lm-pop group block max-w-full outline-none">
-              <span className="lm-gd-red block truncate font-marker uppercase leading-[0.95]" style={{ fontSize: `clamp(30px, ${Math.min(12, 95 / Math.max(6, current.title.length))}cqw, 104px)` }}>{current.title}</span>
-              <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-[12px] font-semibold text-[#d2231a] transition-transform group-active:scale-95">{hostOf(current.url)} ↗</span>
+              <span className="lm-gd-pick block truncate font-display font-bold leading-[0.95] tracking-[-0.05em] text-white" style={{ fontSize: `clamp(30px, ${Math.min(12, 100 / Math.max(6, current.title.length))}cqw, 104px)` }}>{current.title}</span>
+              <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-[12px] font-semibold text-[#1d4f1a] transition-transform group-active:scale-95">{hostOf(current.url)} ↗</span>
             </a>
           ) : (
-            <p className="lm-gd-red font-marker text-[clamp(26px,9cqw,72px)] uppercase leading-none">{n ? "Pick a flower" : ""}</p>
+            <p className="lm-gd-pick font-display text-[clamp(24px,8cqw,64px)] font-bold leading-none tracking-[-0.05em] text-white">{n ? "Pick a flower." : ""}</p>
           )}
         </div>
 

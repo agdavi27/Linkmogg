@@ -14,12 +14,12 @@ export default async function Billing({ searchParams }: PageProps<"/settings/bil
   const [plan, sp] = await Promise.all([getPlan(user), searchParams]);
   const days = daysLeft(plan.trialEndsAt) ?? 0;
   const subscribed = plan.reason === "subscription";
-  const headline = subscribed ? "You're on Pro" : plan.reason === "trial" ? `${days} ${days === 1 ? "day" : "days"} left in your trial` : "You're on Free";
+  const headline = subscribed ? "You're on Pro" : plan.reason === "trial" ? `${days} ${days === 1 ? "day" : "days"} left in your trial` : "Your free trial has ended";
   const sub = subscribed
     ? "Every theme is unlocked and the badge is off. Thanks for backing Linkmogg."
     : plan.reason === "trial"
-      ? `Every theme is unlocked until your trial ends. After that your page stays up on the Free plan with the Classic theme, unless you upgrade.`
-      : "Your page is live with the Classic theme and a small badge. Upgrade to unlock every theme and hide the badge.";
+      ? `Every theme is unlocked until your trial ends. After that, upgrade to keep your theme. Your page stays up in the Classic look until you do.`
+      : "Your page is still up in the Classic look with a small badge. Upgrade to bring back your theme and pick any other.";
   return (
     <main className="min-h-dvh">
       <header className="mx-auto flex max-w-3xl items-center gap-4 px-5 py-5">

@@ -22,7 +22,7 @@ export default function Gallery({ data, mode }: ThemeProps) {
   const { w, h } = useSize(stage);
 
   const S = Math.max(170, Math.min(w * (w < 600 ? 0.74 : 0.8), h * 0.64, 640)); // floor size
-  const H = S * 0.62; // wall height
+  const H = S * 0.9; // wall height: tall, so the paintings can be big
   const rz = -45 + Math.max(-28, Math.min(28, spin + drag));
   const dragProps = useDragX((dx) => setDrag(dx / 6), (dx) => { setDrag(0); setSpin((s) => Math.max(-28, Math.min(28, s + dx / 6))); });
 
@@ -30,9 +30,9 @@ export default function Gallery({ data, mode }: ThemeProps) {
   const leftLinks = data.links.slice(0, Math.ceil(n / 2));
   const rightLinks = data.links.slice(Math.ceil(n / 2));
   const sizeFor = (c: number) => {
-    const rows = c > 4 ? 2 : 1;
+    const rows = c > 2 ? 2 : 1;
     const cols = Math.ceil(c / rows);
-    return Math.min((S * 0.92) / cols - S * 0.035, (H * 0.8) / rows - H * 0.09);
+    return Math.min((S * 0.97) / cols - S * 0.022, (H * 0.88) / rows - H * 0.075);
   };
 
   const pick = (i: number) => {
@@ -47,7 +47,7 @@ export default function Gallery({ data, mode }: ThemeProps) {
   const wall = (links: ThemeLink[]) => {
     const size = sizeFor(links.length);
     return (
-      <div className="flex size-full flex-wrap content-center items-center justify-center gap-x-[3.5%] gap-y-[9%] px-[3%] pb-[7%] pt-[8%]">
+      <div className="flex size-full flex-wrap content-center items-center justify-center gap-x-[2.2%] gap-y-[7.5%] px-[1.5%] pb-[6%] pt-[5%]">
         {links.map((l) => {
           const i = data.links.indexOf(l);
           return (
@@ -90,9 +90,7 @@ export default function Gallery({ data, mode }: ThemeProps) {
                 </div>
               </div>
 
-              {/* a statue on a plinth in the middle, benches either side */}
-              <Box x={S * 0.43} y={S * 0.43} w={S * 0.14} d={S * 0.14} h={S * 0.1} top="#fbfaf8" side="#dedbd6" />
-              <Sprite x={S * 0.5} y={S * 0.5} z={S * 0.1} w={S * 0.14} h={S * 0.34}><Statue /></Sprite>
+              {/* benches either side */}
               <Box x={S * 0.2} y={S * 0.68} w={S * 0.2} d={S * 0.07} h={S * 0.04} top="#3b3633" side="#28231f" />
               <Box x={S * 0.68} y={S * 0.24} w={S * 0.07} d={S * 0.2} h={S * 0.04} top="#3b3633" side="#28231f" />
               <Sprite x={S * 0.9} y={S * 0.9} w={S * 0.1} h={S * 0.18}><Fern /></Sprite>
@@ -251,16 +249,3 @@ function Visitors({ s, rz }: { s: number; rz: number }) {
   );
 }
 
-/** A marble figure, drawn as a soft silhouette. */
-function Statue() {
-  return (
-    <svg viewBox="0 0 40 100" className="absolute inset-0 size-full drop-shadow-[0_4px_6px_rgba(0,0,0,.25)]" aria-hidden>
-      <defs>
-        <linearGradient id="lm-gm-marble" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#d9d5ce" /><stop offset=".45" stopColor="#ffffff" /><stop offset="1" stopColor="#bdb8af" />
-        </linearGradient>
-      </defs>
-      <path fill="url(#lm-gm-marble)" d="M20 2c4 0 6.5 3 6.5 7s-2.5 7-6.5 7-6.5-3-6.5-7S16 2 20 2zm-6 16c4-1.5 8-1.5 12 0 4 1.5 6 5 6.5 10l2 16c.4 2.5-3 3.4-3.8 1L29 31l-.5 17 2 24 1.5 22c.2 3-5 3.5-5.5.5L23 72h-6l-3.5 22.5c-.5 3-5.7 2.5-5.5-.5L9.5 72l2-24-.5-17-1.7 14c-.8 2.4-4.2 1.5-3.8-1l2-16c.5-5 2.5-8.5 6.5-10z" />
-    </svg>
-  );
-}

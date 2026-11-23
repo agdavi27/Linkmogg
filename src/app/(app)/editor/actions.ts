@@ -58,7 +58,7 @@ export async function setTheme(themeId: string): Promise<Result> {
   const theme = getTheme(themeId);
   if (theme.id !== themeId) return { ok: false, error: "Unknown theme." };
   if (theme.pro && !(await getPlan(user)).isPro) {
-    return { ok: false, error: `${theme.name} is a Pro theme. Upgrade to use it on your page.` };
+    return { ok: false, error: `Your free trial has ended. Upgrade to use ${theme.name} on your page.` };
   }
   await db.update(pages).set({ themeId }).where(eq(pages.id, page.id));
   await touch(page.id, page.username);

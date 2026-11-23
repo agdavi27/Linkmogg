@@ -108,7 +108,9 @@ export function Badge({ data, tone = "dark" }: { data: PageData; tone?: "dark" |
       className={`lm-badge inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium backdrop-blur transition-transform duration-150 ease-out active:scale-95 ${
         tone === "dark" ? "bg-black/70 text-white" : "bg-white/85 text-black"
       }`}>
-      Get your own <span aria-hidden>→</span>
+      <span>Build with <span className="font-semibold">Linkmogg</span></span>
+      <span aria-hidden className="opacity-40">·</span>
+      <span className="underline decoration-current/30 underline-offset-2">Learn more</span>
     </a>
   );
 }
@@ -128,7 +130,7 @@ export function ThemeRoot({
         {children}
       </div>
       {data.showBadge ? (
-        <div className="relative z-40 flex shrink-0 justify-center pb-3 pt-1.5">
+        <div className="relative z-40 flex shrink-0 justify-end px-3 pb-2.5 pt-1.5">
           <Badge data={data} tone={badgeTone} />
         </div>
       ) : null}
