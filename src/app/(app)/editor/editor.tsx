@@ -14,7 +14,7 @@ import { Logo } from "@/components/logo";
 import { SocialIcon } from "@/lib/socials/icons";
 import { platformLabel } from "@/lib/socials/platforms";
 import { detectPlatform } from "@/lib/socials/detect";
-import { THEMES, getTheme } from "@/themes/registry";
+import { CATEGORIES, getTheme, themesIn } from "@/themes/registry";
 import { ThemeRenderer } from "@/themes/render";
 import type { PageData } from "@/themes/types";
 import * as A from "./actions";
@@ -205,8 +205,11 @@ export function Editor(props: Props) {
               <h2 id="theme-h" className="font-display text-lg font-semibold">Theme</h2>
               <Link href="/themes" className="text-sm text-ink-2 underline-offset-4 hover:underline">See them all</Link>
             </div>
-            <ul className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-              {THEMES.map((t) => {
+            {CATEGORIES.map((c) => (
+            <div key={c.id} className="mt-4">
+            <h3 className="text-sm font-semibold">{c.name}</h3>
+            <ul className="mt-2 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+              {themesIn(c.id).map((t) => {
                 const locked = t.pro && !props.plan.isPro;
                 const selected = previewTheme === t.id;
                 return (
@@ -224,6 +227,8 @@ export function Editor(props: Props) {
                 );
               })}
             </ul>
+            </div>
+            ))}
           </section>
         </div>
 

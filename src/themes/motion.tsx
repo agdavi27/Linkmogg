@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 
 /** Strong ease-out used across every theme (Emil Kowalski's UI curve). */
 export const EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
@@ -198,3 +198,51 @@ export function LiveCanvas({ draw, className = "" }: { draw: RefObject<DrawFn>; 
   }, [draw]);
   return <canvas ref={ref} aria-hidden className={`pointer-events-none absolute inset-0 h-full w-full ${className}`} />;
 }
+
+/** Live size of an element, measured with ResizeObserver. 0x0 until mounted. */
+export function useSize(ref: RefObject<HTMLElement | null>) {
+  const [size, setSize] = useState({ w: 0, h: 0 });
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => {
+      const { width, height } = e.contentRect;
+      setSize((s) => (Math.abs(s.w - width) < 0.5 && Math.abs(s.h - height) < 0.5 ? s : { w: width, h: height }));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ref]);
+  return size;
+}
+
+/** Horizontal drag that reports how far the pointer moved, then whether it was a tap or a drag. */
+export function useDragX(onMove: (dx: number) => void, onEnd: (dx: number, vx: number) => void) {
+  const st = useRef<{ x: number; last: number; t: number; vx: number; id: number; moved: boolean } | null>(null);
+  const cbs = useRef({ onMove, onEnd });
+  useEffect(() => { cbs.current = { onMove, onEnd }; });
+  return {
+    onPointerDown: (e: React.PointerEvent) => {
+      if (e.button !== 0) return;
+      st.current = { x: e.clientX, last: e.clientX, t: e.timeStamp, vx: 0, id: e.pointerId, moved: false };
+    },
+    onPointerMove: (e: React.PointerEvent) => {
+      const s = st.current;
+      if (!s || s.id !== e.pointerId) return;
+      const dx = e.clientX - s.x;
+      if (!s.moved && Math.abs(dx) < 6) return;
+      if (!s.moved) { s.moved = true; (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); }
+      const dt = Math.max(1, e.timeStamp - s.t);
+      s.vx = (e.clientX - s.last) / dt;
+      s.last = e.clientX; s.t = e.timeStamp;
+      cbs.current.onMove(dx);
+    },
+    onPointerUp: (e: React.PointerEvent) => {
+      const s = st.current;
+      st.current = null;
+      if (s?.moved) { cbs.current.onEnd(e.clientX - s.x, s.vx); suppressClick.until = e.timeStamp + 50; }
+    },
+    onPointerCancel: () => { const s = st.current; st.current = null; if (s?.moved) cbs.current.onEnd(s.last - s.x, 0); },
+    onClickCapture: (e: React.MouseEvent) => { if (e.timeStamp < suppressClick.until) { e.preventDefault(); e.stopPropagation(); } },
+  };
+}
+const suppressClick = { until: 0 };

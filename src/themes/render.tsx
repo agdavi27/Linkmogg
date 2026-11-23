@@ -17,6 +17,12 @@ const COMPONENTS: Record<string, ComponentType<ThemeProps>> = {
   corkboard: dynamic(() => import("./list/corkboard")),
   prism: dynamic(() => import("./list/prism")),
   desktop: dynamic(() => import("./list/desktop")),
+  wheel: dynamic(() => import("./list/wheel")),
+  halo: dynamic(() => import("./list/halo")),
+  portrait: dynamic(() => import("./list/portrait")),
+  strata: dynamic(() => import("./list/strata")),
+  museum: dynamic(() => import("./list/museum")),
+  folders: dynamic(() => import("./list/folders")),
   field: dynamic(() => import("./list/field")),
 };
 
