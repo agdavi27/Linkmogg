@@ -78,7 +78,7 @@ export default function Garden({ data, mode }: ThemeProps) {
         <div aria-hidden className="lm-gd-grain" />
 
         {/* top corners: socials; middle: handle as a signature */}
-        <header className="relative z-10 grid shrink-0 grid-cols-[1fr_auto_1fr] items-start gap-2 px-[6%] pt-[clamp(14px,4cqh,40px)]">
+        <header className="relative z-10 grid shrink-0 grid-cols-[1fr_auto_1fr] items-start gap-2 px-[6%] pt-[max(54px,clamp(14px,4cqh,40px))]">
           <div className="flex min-w-0 flex-col items-start gap-1">
             {top[0] ? <SocialTag s={top[0]} mode={mode} /> : null}
           </div>

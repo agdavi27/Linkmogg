@@ -115,6 +115,30 @@ export function Badge({ data, tone = "dark" }: { data: PageData; tone?: "dark" |
   );
 }
 
+/** Top-right share button: the phone's share sheet where there is one, otherwise copy the link. */
+export function ShareButton({ data, tone = "dark" }: { data: PageData; tone?: "dark" | "light" }) {
+  const [copied, setCopied] = useState(false);
+  const share = async () => {
+    const url = `${window.location.origin}/${data.username}`;
+    const title = data.displayName || `@${data.username}`;
+    try {
+      if (navigator.share) { await navigator.share({ title, url }); return; }
+    } catch { return; } // they closed the share sheet
+    try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 1600); } catch { /* nothing to do */ }
+  };
+  return (
+    <button type="button" onClick={share} aria-label={copied ? "Link copied" : "Share this page"}
+      className={`lm-share absolute right-2.5 top-2.5 z-50 flex h-9 items-center gap-1.5 rounded-full px-2.5 text-xs font-semibold backdrop-blur transition-transform duration-150 ease-out active:scale-95 ${
+        tone === "dark" ? "bg-black/55 text-white" : "bg-white/80 text-black"
+      }`}>
+      <svg aria-hidden viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 3v12" /><path d="m7 8 5-5 5 5" /><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" />
+      </svg>
+      <span aria-live="polite">{copied ? "Copied" : "Share"}</span>
+    </button>
+  );
+}
+
 /** Root wrapper every theme uses: fills its container, adds the SR list and the badge. */
 export function ThemeRoot({
   data, mode, className = "", style, children, badgeTone = "dark", label,
@@ -129,6 +153,7 @@ export function ThemeRoot({
       <div className="relative flex min-h-0 flex-1 flex-col" role="region" aria-label={`${label} layout`}>
         {children}
       </div>
+      <ShareButton data={data} tone={badgeTone} />
       {data.showBadge ? (
         <div className="relative z-40 flex shrink-0 justify-end px-3 pb-2.5 pt-1.5">
           <Badge data={data} tone={badgeTone} />

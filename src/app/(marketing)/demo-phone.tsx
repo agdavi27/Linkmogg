@@ -6,7 +6,7 @@ import { ThemeRenderer } from "@/themes/render";
 import { DEMO } from "@/themes/demo";
 import { useParallax } from "@/themes/motion";
 
-const FEATURED = ["billboard", "wheel", "pocket", "halo", "portrait", "sunflower", "folders", "museum", "bookshelf", "spindle"];
+const FEATURED = ["billboard", "panorama", "pocket", "halo", "garden", "sunflower", "folders", "museum", "bookshelf", "discs"];
 const CYCLE_MS = 5200;
 
 export function DemoPhone() {

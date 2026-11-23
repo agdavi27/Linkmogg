@@ -30,18 +30,16 @@ export const THEMES: ThemeDef[] = [
   { id: "classic", name: "Classic", blurb: "Clean stacked links on warm paper.", pro: true, swatch: ["#f4efe6", "#1d1a16"], category: "minimal" },
   { id: "poster", name: "Poster", blurb: "Big stacked type on a backlit grid poster.", pro: true, swatch: ["#ece8df", "#151515"], category: "minimal" },
   // Spatial
-  { id: "wheel", name: "Wheel", blurb: "Your links ride a big turning wheel of cards.", pro: true, swatch: ["#f1f1ef", "#ff6a2b"], category: "spatial" },
   { id: "halo", name: "Halo", blurb: "An arch of tiles drifts over your name.", pro: true, swatch: ["#07080b", "#e9e9ee"], category: "spatial" },
-  { id: "portrait", name: "Portrait", blurb: "Your photo, with your links floating around it.", pro: true, swatch: ["#f2f2f2", "#2b2b2b"], category: "spatial" },
   { id: "strata", name: "Strata", blurb: "Links as a stack of folders, fanned out in 3D.", pro: true, swatch: ["#ffffff", "#2a46ff"], category: "spatial" },
-  { id: "spindle", name: "Spindle", blurb: "A stack of discs. Swipe and the one in focus opens up.", pro: true, swatch: ["#000000", "#f2f2f2"], category: "spatial" },
   { id: "billboard", name: "Billboard", blurb: "Your name on a roadside billboard, with links drifting by in bubbles.", pro: true, swatch: ["#1d3c7c", "#f4f3f1"], category: "spatial" },
   { id: "panorama", name: "Panorama", blurb: "Your links as screens on a curved band. Spin it to look around.", pro: true, swatch: ["#dcdcda", "#0e0e0e"], category: "spatial" },
-  { id: "dial", name: "Dial", blurb: "A huge dial in the dark. Turn it and each link comes round as a sticker.", pro: true, swatch: ["#000000", "#ff4b2b"], category: "spatial" },
+  { id: "window", name: "Window Seat", blurb: "A plane window with a flight readout. Swipe for the next link.", pro: true, swatch: ["#0c0e10", "#3f7f86"], category: "spatial" },
+  { id: "world", name: "World", blurb: "Your links as cards slowly circling your name.", pro: true, swatch: ["#f6f3ec", "#141414"], category: "spatial" },
   // Retro tech
   { id: "folders", name: "Folders", blurb: "Every link is a folder in its own material.", pro: true, swatch: ["#e4e4e2", "#3f7be0"], category: "retro" },
-  { id: "pass", name: "Pass", blurb: "A worn member card with your photo and your links typed in.", pro: true, swatch: ["#8fd3cf", "#6a3fd1"], category: "retro" },
   { id: "discs", name: "Discs", blurb: "A row of discs. The one in the middle gets circled in marker.", pro: true, swatch: ["#efeeeb", "#141414"], category: "retro" },
+  { id: "id", name: "ID Card", blurb: "An old turquoise ID card with your links typed into its fields.", pro: true, swatch: ["#5fa8a0", "#6a3d8f"], category: "retro" },
   // Cozy
   { id: "garden", name: "Garden", blurb: "A poster on a hillside. Every link is a pixel flower.", pro: true, swatch: ["#3b7be0", "#e3231b"], category: "cozy" },
   { id: "sunflower", name: "Sunflower", blurb: "Every link is a named petal. Tap one to bloom it.", pro: true, swatch: ["#bfe3f2", "#f2b632"], category: "cozy" },
@@ -53,9 +51,10 @@ export function themesIn(category: CategoryId) {
 
 /** Retired themes and the theme that replaced them, so saved pages keep a similar look. */
 const RETIRED: Record<string, string> = {
-  mixtape: "spindle", rolodex: "strata", vending: "halo", radio: "classic",
-  signal: "spindle", prism: "strata", orbit: "halo", field: "classic",
+  mixtape: "discs", rolodex: "strata", vending: "halo", radio: "classic",
+  signal: "discs", prism: "strata", orbit: "halo", field: "classic",
   gloss: "pocket", desktop: "folders",
+  wheel: "panorama", portrait: "classic", spindle: "discs", dial: "panorama", pass: "id",
 };
 
 export function getTheme(id: string | null | undefined): ThemeDef {

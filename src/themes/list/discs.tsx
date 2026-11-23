@@ -49,7 +49,7 @@ export default function Discs({ data, mode }: ThemeProps) {
           </dl>
         </div>
         <h1 className="hidden text-center text-[13px] font-bold uppercase tracking-[0.18em] @min-[700px]:block">{name}</h1>
-        <nav aria-label="Social profiles" className="flex flex-col items-end gap-0.5 text-right">
+        <nav aria-label="Social profiles" className="mt-11 flex flex-col items-end gap-0.5 text-right">
           {data.socials.slice(0, 4).map((s, i) => (
             <a key={i} href={s.url} {...linkTarget(mode, s.url)} className="text-[12px] text-black/65 hover:text-black hover:underline">{platformLabel(s.platform)}</a>
           ))}
