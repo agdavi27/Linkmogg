@@ -1,9 +1,7 @@
 "use client";
 
 import { useRef, useState, type CSSProperties } from "react";
-import { platformLabel } from "@/lib/socials/platforms";
-import { SocialIcon } from "@/lib/socials/icons";
-import { Empty, ThemeRoot, hash, hostOf, linkTarget } from "../shared";
+import { Empty, SocialRow, ThemeRoot, hash, hostOf, linkTarget } from "../shared";
 import { buzz, tick, useSize } from "../motion";
 import type { ThemeLink, ThemeProps } from "../types";
 
@@ -53,8 +51,6 @@ export default function Garden({ data, mode }: ThemeProps) {
     buzz(6);
   };
   const current = sel !== null ? data.links[sel] : null;
-  const top = data.socials.slice(0, 2);
-  const rest = data.socials.slice(2);
 
   return (
     <ThemeRoot data={data} mode={mode} label="Garden" badgeTone="light" className="lm-gd bg-[#3e7f2c] text-white">
@@ -77,15 +73,9 @@ export default function Garden({ data, mode }: ThemeProps) {
         </svg>
         <div aria-hidden className="lm-gd-grain" />
 
-        {/* top corners: socials; middle: handle as a signature */}
-        <header className="relative z-10 grid shrink-0 grid-cols-[1fr_auto_1fr] items-start gap-2 px-[6%] pt-[max(54px,clamp(14px,4cqh,40px))]">
-          <div className="flex min-w-0 flex-col items-start gap-1">
-            {top[0] ? <SocialTag s={top[0]} mode={mode} /> : null}
-          </div>
-          <p className="lm-gd-sig text-center font-display text-[clamp(15px,4.4cqw,22px)] font-semibold leading-none tracking-[-0.02em]">@{data.username}</p>
-          <div className="flex min-w-0 flex-col items-end gap-1">
-            {top[1] ? <SocialTag s={top[1]} mode={mode} align="end" /> : null}
-          </div>
+        {/* the handle, signed at the top */}
+        <header className="relative z-10 shrink-0 px-[6%] pt-[max(54px,clamp(14px,4cqh,40px))] text-center">
+          <p className="lm-gd-sig font-display text-[clamp(15px,4.4cqw,22px)] font-semibold leading-none tracking-[-0.02em]">@{data.username}</p>
         </header>
 
         <div className="relative z-10 shrink-0 px-[5%] pt-[clamp(10px,3.5cqh,36px)] text-center">
@@ -121,34 +111,12 @@ export default function Garden({ data, mode }: ThemeProps) {
           )}
         </div>
 
-        {/* bottom: the rest of the socials */}
-        <footer className="relative z-10 flex shrink-0 items-end justify-between gap-3 px-[6%] pb-[clamp(6px,2cqh,18px)]">
-          <div className="min-w-0">
-            <p className="text-[clamp(15px,4.6cqw,24px)] font-bold uppercase leading-none tracking-[-0.01em]">Follow <span className="text-[0.6em] align-top">({data.socials.length})</span></p>
-            <p className="mt-1 truncate text-[11px] text-white/85">@{data.username}</p>
-          </div>
-          {rest.length ? (
-            <ul className="flex flex-col items-end gap-1.5" aria-label="More social profiles">
-              {rest.map((s, i) => (
-                <li key={i}>
-                  <a href={s.url} {...linkTarget(mode, s.url)} className="flex items-center gap-1.5 font-serif text-[13px] uppercase tracking-[0.12em] text-white/95 hover:underline">
-                    <SocialIcon platform={s.platform} size={14} />{platformLabel(s.platform)}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </footer>
+        {/* bottom: a hint, then every social as a plain icon row */}
+        <div className="relative z-10 shrink-0 px-5 pb-1">
+          <p className="text-center text-[12px] text-white/70">{n ? "Tap a flower to look. Tap it again to open." : ""}</p>
+          {data.socials.length ? <SocialRow socials={data.socials} mode={mode} className="mt-0.5" iconClass="size-9! text-white/85 hover:bg-white/10" size={18} /> : null}
+        </div>
       </div>
     </ThemeRoot>
-  );
-}
-
-function SocialTag({ s, mode, align = "start" }: { s: { platform: string; url: string }; mode: ThemeProps["mode"]; align?: "start" | "end" }) {
-  return (
-    <a href={s.url} {...linkTarget(mode, s.url)} className={`flex flex-col leading-tight hover:underline ${align === "end" ? "items-end text-right" : ""}`}>
-      <span className="flex items-center gap-1 text-[clamp(13px,3.8cqw,18px)] font-bold"><SocialIcon platform={s.platform} size={15} />{platformLabel(s.platform)}</span>
-      <span className="text-[11px] text-white/85">Follow along</span>
-    </a>
   );
 }

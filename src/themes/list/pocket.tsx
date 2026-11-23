@@ -3,7 +3,11 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Avatar, SocialRow, ThemeRoot, hash, hostOf, linkTarget } from "../shared";
 import { buzz, tick, useParallax } from "../motion";
-import { LinkArt } from "../art";
+import Image from "next/image";
+import { detectPlatform } from "@/lib/socials/detect";
+import { SocialIcon } from "@/lib/socials/icons";
+import { photoOf } from "../art";
+import { photoUrl } from "../photos";
 import type { ThemeProps } from "../types";
 
 const STEP_DEG = 24;
@@ -117,25 +121,40 @@ export default function PocketPlayer({ data, mode }: ThemeProps) {
                     onPointerDown={(e) => { swipe.current = e.clientX; }}
                     onPointerUp={(e) => { if (swipe.current === null) return; const dx = e.clientX - swipe.current; swipe.current = null; if (Math.abs(dx) > 24) step(dx < 0 ? 1 : -1); }}
                     className="lm-pk-flow relative min-h-0 flex-1 touch-pan-y outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#2a7de1]">
-                    {/* full-screen cover art, one per link, sliding sideways */}
+                    {/* cover flow: the picked link faces you, the rest fan off to the sides */}
                     {data.links.map((l, i) => {
                       const d = i - idx;
-                      if (Math.abs(d) > 1) return null;
+                      const ad = Math.abs(d);
+                      if (ad > 4) return null;
+                      const [a, b] = ART[hash(l.id) % ART.length];
+                      const plat = detectPlatform(l.url)?.platform ?? "website";
+                      const transform = d === 0
+                        ? "translate(-50%, -50%) translateZ(30px)"
+                        : `translate(-50%, -50%) translateX(${Math.sign(d) * (58 + (ad - 1) * 22)}%) translateZ(-40px) rotateY(${-Math.sign(d) * 62}deg)`;
                       return (
                         <div key={l.id} id={`pk-${i}`} role="option" aria-selected={d === 0} aria-label={l.title}
                           onClick={() => (d === 0 ? play() : (setSel(i), tick(2200, 0.008, 0.05)))}
-                          className="lm-pk-full absolute inset-0 cursor-pointer" style={{ transform: `translateX(${d * 100}%)` }}>
-                          <LinkArt link={l} className="absolute inset-0" icon={44} blur={0.6} />
-                          <span aria-hidden className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/55 to-transparent" />
-                          <span className="absolute inset-x-2.5 bottom-2 text-left text-white">
-                            <span className="block truncate text-[13px] font-bold leading-tight drop-shadow">{l.title}</span>
-                            <span className="block truncate text-[10.5px] text-white/75">{hostOf(l.url)} · {i + 1} of {n}</span>
+                          className="lm-pk-cov absolute left-1/2 top-[47%] aspect-square w-[46%] cursor-pointer"
+                          style={{ transform, zIndex: 20 - ad, ["--a" as string]: a, ["--b" as string]: b, ["--g" as string]: `${(hash(l.title) % 70) + 20}%` } as CSSProperties}>
+                          <span aria-hidden className={`lm-pk-cov-art absolute inset-0 grid place-items-center overflow-hidden rounded-[3px] ${d === 0 ? "" : "brightness-[.78]"}`}>
+                            <Image src={photoUrl(photoOf(l))} alt="" fill sizes="160px" draggable={false} className="scale-110 object-cover opacity-90 mix-blend-luminosity blur-[2.5px]" />
+                            <span className="lm-pk-cov-rings" />
+                            {plat !== "website" && plat !== "email"
+                              ? <SocialIcon platform={plat} size={30} color="#fff" className="relative drop-shadow-[0_2px_4px_rgba(0,0,0,.3)]" />
+                              : <span className="relative text-[30px] font-black leading-none text-white drop-shadow-[0_2px_4px_rgba(0,0,0,.3)]">{l.title.trim()[0]?.toUpperCase()}</span>}
+                            <span className="absolute inset-x-1.5 bottom-1 truncate text-left text-[7.5px] font-black uppercase tracking-[0.08em] text-white/90">{l.title}</span>
                           </span>
                         </div>
                       );
                     })}
                     {n === 0 ? <p className="p-3 text-center text-xs text-white/70">No links yet.</p> : null}
                   </div>
+                  {current ? (
+                    <div key={current.id} className="lm-pk-cap shrink-0 px-2 pb-1.5 text-center">
+                      <p className="truncate text-[12.5px] font-bold leading-tight">{current.title}</p>
+                      <p className="truncate text-[10.5px] text-black/55">{hostOf(current.url)} · {idx + 1} of {n}</p>
+                    </div>
+                  ) : null}
                 </div>
 
                 {/* about */}
