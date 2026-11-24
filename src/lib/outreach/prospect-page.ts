@@ -18,5 +18,7 @@ export function prospectPageData(p: Prospect): PageData {
     socials: p.socials,
     showBadge: false,
     badgeUrl: "/",
+    // found through Instagram: their own reels play behind the Reels theme
+    instagram: p.platform === "instagram" ? { handle: p.handle, reels: p.igReels } : null,
   };
 }

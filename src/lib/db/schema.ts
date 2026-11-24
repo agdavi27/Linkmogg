@@ -99,6 +99,14 @@ export const prospects = pgTable("prospects", {
   lastError: text("last_error"),
   claimedUserId: uuid("claimed_user_id").references(() => users.id, { onDelete: "set null" }),
   importBatchId: uuid("import_batch_id").references(() => importBatches.id, { onDelete: "set null" }),
+  /** How we found them: import (a list), handle (typed in admin), snowball (mentioned by another creator), search. */
+  source: text("source").notNull().default("import"),
+  discoveredFrom: text("discovered_from"),
+  igFollowers: integer("ig_followers"),
+  igWebsite: text("ig_website"),
+  /** Our own stored copies of their recent reels (Blob URLs), for the Reels preview. */
+  igReels: jsonb("ig_reels").$type<string[]>().notNull().default([]),
+  igCheckedAt: timestamp("ig_checked_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [uniqueIndex("prospects_platform_handle").on(t.platform, t.handle)]);
@@ -159,8 +167,47 @@ export const adminSettings = pgTable("admin_settings", {
     "Hey {name}! Saw your link-in-bio, so I made you a more fun one: {preview_link} It's free for 14 days. Not into it? {remove_link}",
   ),
   paused: boolean("paused").notNull().default(false),
+  // Instagram (Business Discovery through Linkmogg's own connected account)
+  igUserId: text("ig_user_id"),
+  igUsername: text("ig_username"),
+  /** Long-lived token, encrypted with a key derived from META_APP_SECRET. */
+  igTokenEnc: text("ig_token_enc"),
+  igTokenExpiresAt: timestamp("ig_token_expires_at", { withTimezone: true }),
+  igCallsPerHour: integer("ig_calls_per_hour").notNull().default(150),
+  discoveryEnabled: boolean("discovery_enabled").notNull().default(false),
+  /** Starting accounts, one handle per line. */
+  discoverySeeds: text("discovery_seeds").notNull().default(""),
+  discoveryMinFollowers: integer("discovery_min_followers").notNull().default(1000),
+  discoveryMaxFollowers: integer("discovery_max_followers").notNull().default(500000),
+  discoveryMinReels: integer("discovery_min_reels").notNull().default(3),
+  discoveryMaxDepth: integer("discovery_max_depth").notNull().default(3),
+  discoveryLookupsPerRun: integer("discovery_lookups_per_run").notNull().default(40),
+  /** Which bio links count, one host per line. */
+  discoveryLinkHosts: text("discovery_link_hosts").notNull().default("linktr.ee"),
+  /** Optional web-search queries for finding more starting accounts, one per line. */
+  searchQueries: text("search_queries").notNull().default(""),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/** Instagram handles found by discovery, waiting for (or already given) a Business Discovery lookup. */
+export const igCandidateStatusEnum = pgEnum("ig_candidate_status", ["pending", "qualified", "rejected", "error"]);
+export const igCandidates = pgTable("ig_candidates", {
+  handle: text("handle").primaryKey(),
+  status: igCandidateStatusEnum("status").notNull().default("pending"),
+  reason: text("reason"),
+  source: text("source").notNull().default("snowball"),
+  discoveredFrom: text("discovered_from"),
+  /** Hops from a starting account: 0 for a seed, 1 for someone a seed mentioned, and so on. */
+  depth: integer("depth").notNull().default(0),
+  checkedAt: timestamp("checked_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [index("ig_candidates_status").on(t.status, t.createdAt)]);
+
+/** One row per Graph API call, so we stay under Meta's hourly limit. */
+export const igCalls = pgTable("ig_calls", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  at: timestamp("at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [index("ig_calls_at").on(t.at)]);
 
 export type User = typeof users.$inferSelect;
 export type Page = typeof pages.$inferSelect;
@@ -168,3 +215,4 @@ export type Link = typeof links.$inferSelect;
 export type SocialLink = typeof socialLinks.$inferSelect;
 export type Prospect = typeof prospects.$inferSelect;
 export type AdminSettings = typeof adminSettings.$inferSelect;
+export type IgCandidate = typeof igCandidates.$inferSelect;

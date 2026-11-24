@@ -73,7 +73,8 @@ export async function buildPreview(id: string, opts: { theme?: string } = {}) {
   const [p] = await db.select().from(prospects).where(eq(prospects.id, id)).limit(1);
   if (!p) return { ok: false as const, error: "Not found" };
   const settings = await getSettings();
-  const themeId = opts.theme ? pickTheme(opts.theme) : p.themeId ?? pickTheme(settings.defaultPreviewTheme);
+  // a preview built from Instagram keeps its Reels theme unless you pick another
+  const themeId = opts.theme ? pickTheme(opts.theme) : p.igReels.length ? "reels" : p.themeId ?? pickTheme(settings.defaultPreviewTheme);
   if (!p.sourceUrl) {
     // Manual prospect: build from whatever was entered by hand.
     await db.update(prospects).set({ themeId, updatedAt: new Date(), lastError: null }).where(eq(prospects.id, id));

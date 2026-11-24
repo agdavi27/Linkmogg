@@ -25,6 +25,8 @@ export async function GET(req: NextRequest, { params }: RouteContext<"/claim/[to
     [page] = await db.insert(pages).values({
       userId: user.id, username, displayName: p.displayName ?? p.handle, bio: (p.bio ?? "").slice(0, 160),
       avatarUrl: p.avatarUrl, themeId: p.themeId ?? DEFAULT_THEME,
+      // the reels from their preview come along, so the page they claim looks like the one they saw
+      themeOptions: p.platform === "instagram" ? { instagram: { handle: p.handle, reels: p.igReels } } : {},
     }).returning();
     if (p.links.length) await db.insert(links).values(p.links.map((l, i) => ({ pageId: page!.id, title: l.title.slice(0, 80), url: l.url, position: i })));
     if (p.socials.length) await db.insert(socialLinks).values(p.socials.map((s, i) => ({ pageId: page!.id, platform: s.platform, url: s.url, position: i })));

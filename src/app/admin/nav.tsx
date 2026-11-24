@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const ITEMS = [
-  ["/admin", "Overview"], ["/admin/prospects", "Prospects"], ["/admin/prospects/import", "Import & add"],
+  ["/admin", "Overview"], ["/admin/prospects", "Prospects"], ["/admin/prospects/import", "Import & add"], ["/admin/discovery", "Discovery"],
   ["/admin/dm-queue", "DM queue"], ["/admin/settings", "Settings"],
 ] as const;
 
